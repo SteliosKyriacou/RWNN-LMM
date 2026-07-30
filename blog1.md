@@ -10,93 +10,32 @@ This post outlines the architectural mapping, the experimental protocol, and a s
 
 Unlike standard sequential stacks of layers, our model compiles the Transformer block as a clean directed acyclic graph. Below are the structural diagrams representing this implementation.
 
-### A. Modular H-DAG Flowchart (Mermaid.js)
+### A. Coarse-Grained Macro-Level Block Graph
 
-```mermaid
-graph TD
-    %% Define Root and Embeddings
-    Node0[Node 0: Input Tokens]
-    Node1[Node 1: TokenEmbedding]
-    Node2[Node 2: PositionalEmbedding]
-    Node3[Node 3: Sum Embeddings]
-    
-    %% Edges for Embeddings
-    Node0 -->|Long Indices| Node1
-    Node0 -->|Long Positions| Node2
-    Node1 -->|Float Tensors| Node3
-    Node2 -->|Float Tensors| Node3
-    
-    %% Layer 0 Stack Block
-    subgraph Layer 0 (Block 1)
-        Node4[Node 4: LayerNorm 1]
-        Node5[Node 5: CausalAttention]
-        Node6[Node 6: Sum Attn Residual]
-        Node7[Node 7: LayerNorm 2]
-        Node8[Node 8: Linear Expansion 1536]
-        Node9[Node 9: GELU Activation]
-        Node10[Node 10: Linear Contraction 384]
-        Node11[Node 11: Sum MLP Residual]
-    end
-    
-    Node3 --> Node4
-    Node3 -->|Attention Residual Connection| Node6
-    Node4 --> Node5
-    Node5 --> Node6
-    
-    Node6 --> Node7
-    Node6 -->|MLP Residual Connection| Node11
-    Node7 --> Node8
-    Node8 --> Node9
-    Node9 --> Node10
-    Node10 --> Node11
-    
-    %% Terminal Nodes
-    Node11 -->|Stack Layers 1 to 5| Node64[Node 64: Final LayerNorm]
-    Node64 --> Node13[Node 13: LM Output Head]
-    
-    %% Styling
-    classDef input fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef embed fill:#bbf,stroke:#333,stroke-width:1px;
-    classDef math fill:#dfd,stroke:#333,stroke-width:1px;
-    classDef output fill:#f96,stroke:#333,stroke-width:2px;
-    
-    class Node0 input;
-    class Node1,Node2 embed;
-    class Node3,Node4,Node5,Node6,Node7,Node8,Node9,Node10,Node11,Node64 math;
-    class Node13 output;
-```
+At the macro-level, each block is represented as a stack of coarse-grained layers (LayerNorm, CausalAttention, and MLP Linear nodes):
 
-### B. ASCII Graph Compilation Layout
+![nanoGPT Macro-Level DAG Graph](assets/nanogpt_dag_graph.png)
 
-```text
-                  [Node 0: Input Token Indices]
-                        /               \
-         [Node 1: TokenEmbedding]   [Node 2: PositionalEmbedding]
-                        \               /
-                    [Node 3: Sum Node (WTE + WPE)]
-                       /                 \
-                      /             [Node 4: LayerNorm 1]
-                     /                        |
-                    /               [Node 5: CausalAttention]
-                   /                          |
-         [Node 6: Sum Attention Residual] <---/
-                   / \
-                  /   \             [Node 7: LayerNorm 2]
-                 /     \                      |
-                /           [Node 8: Linear MLP Expansion (4xD)]
-               /                              |
-              /                     [Node 9: GELU Activation]
-             /                                |
-            /               [Node 10: Linear MLP Contraction (D)]
-           /                                  |
-    [Node 11: Sum MLP Residual] <------------/
-           |
-   [Repeat Layers 1-5]
-           |
-    [Node 64: Final LayerNorm]
-           |
-    [Node 13: LM Output Head]
-```
+### B. Micro-Level Atomic Block Graph (Fully Deconstructed)
+
+When we uncouple and deconstruct our modules down to the **very bottom level**—using simple, primitive mathematical nodes—a single-layer Transformer block is represented as a clean, highly structured graph containing **52 atomic nodes**:
+
+*   **Embeddings**: Inputs are mapped to Token and Positional embeddings and summed element-wise.
+*   **Atomic LayerNorm**: Decomposed into 8 simple mathematical operators (MeanReduce, Subtract, Square, Sqrt, Divide, ScaleShift).
+*   **Atomic Causal Attention**: Projections ($Q, K, V$) are computed as separate `MatMulNode` and `AddBiasNode` channels. Multi-head splitting, transpose, causal matrix multiplication, softmax, merging, and output projections are all represented as individual node operators.
+*   **Atomic MLP**: Expansion and contraction linear layers are split into separate `MatMulNode` and `AddBiasNode` channels, separated by an element-wise GELU activation.
+
+Here is the exact compiled atomic topology generated using NetworkX:
+
+![nanoGPT Pure Atomic Block DAG Graph](assets/nanogpt_atomic_block_graph.png)
+
+### C. LayerNorm Deconstruction (Sub-Graph Zoom)
+
+As an illustrative sub-graph zoom of this atomic deconstruction, here is the exact graph layout of the compiled LayerNorm module:
+
+![Atomic LayerNorm Sub-Graph](assets/layernorm_atomic_graph.png)
+
+This atomic LayerNorm sub-graph was validated in `verify_atomic_layernorm.py` against PyTorch's native `nn.LayerNorm`, yielding an absolute numeric difference of only **$4.768 \times 10^{-7}$** and complete backward-pass autograd gradient matching.
 
 ---
 
