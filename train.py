@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import GPT2Tokenizer
 from rwnn.graph import RWNNGraph
-from rwnn.mutator import get_canonical_nano_gpt, get_gpt2_124m_dag
+from rwnn.mutator import get_canonical_nano_gpt, get_gpt2_dag
 
 # 1. Dataset Downloading
 DATA_URL = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
@@ -38,8 +38,8 @@ class CharTokenizer:
 def train_rwnn_nanogpt():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_type', type=str, default='toy', choices=['toy', 'gpt2'], 
-                        help="toy = 6-layer (nanoGPT style), gpt2 = 12-layer 124M GPT-2")
+    parser.add_argument('--model_type', type=str, default='toy', choices=['toy', 'gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'], 
+                        help="toy = 6-layer (nanoGPT style), gpt2 = 12-layer 124M GPT-2, gpt2-medium = 350M, gpt2-large = 774M, gpt2-xl = 1558M")
     parser.add_argument('--vocab_type', type=str, default='char', choices=['char', 'gpt2_bpe'],
                         help="char = character level tokenizer, gpt2_bpe = official GPT-2 tokenizer")
     parser.add_argument('--max_iters', type=int, default=1000, help="number of training iterations")
@@ -64,48 +64,49 @@ def train_rwnn_nanogpt():
         torch.backends.cudnn.allow_tf32 = True
 
     # 1. Data Preparation
-    download_data()
-    with open(DATA_FILE, 'r', encoding='utf-8') as f:
-        text = f.read()
-
-    # Configure Tokenizer
     if args.vocab_type == 'char':
+        download_data()
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            text = f.read()
         tokenizer = CharTokenizer(text)
         vocab_size = tokenizer.vocab_size
         print(f"Using Character-level Tokenizer. Vocab size: {vocab_size}")
         data = torch.tensor(tokenizer.encode(text), dtype=torch.long)
+        n = int(0.9 * len(data))
+        train_data = data[:n]
+        val_data = data[n:]
     else:
-        print("Loading official GPT-2 BPE Tokenizer from HuggingFace...")
+        import numpy as np
+        print("Using GPT-2 BPE Tokenizer (loading from train.bin and val.bin)...")
         bpe_tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
         vocab_size = bpe_tokenizer.vocab_size
         print(f"Using GPT-2 BPE Tokenizer. Vocab size: {vocab_size}")
-        data = torch.tensor(bpe_tokenizer.encode(text), dtype=torch.long)
-
-    # Train / Val Split
-    n = int(0.9 * len(data))
-    train_data = data[:n]
-    val_data = data[n:]
+        
+        train_data = np.memmap('train.bin', dtype=np.uint16, mode='r')
+        val_data = np.memmap('val.bin', dtype=np.uint16, mode='r')
 
     def get_batch(split):
         d = train_data if split == 'train' else val_data
         ix = torch.randint(len(d) - args.block_size, (args.batch_size,))
-        x = torch.stack([d[i:i+args.block_size] for i in ix])
-        y = torch.stack([d[i+1:i+args.block_size+1] for i in ix])
+        if args.vocab_type == 'char':
+            x = torch.stack([d[i:i+args.block_size] for i in ix])
+            y = torch.stack([d[i+1:i+args.block_size+1] for i in ix])
+        else:
+            x = torch.stack([torch.from_numpy((d[i:i+args.block_size]).astype(np.int64)) for i in ix])
+            y = torch.stack([torch.from_numpy((d[i+1:i+args.block_size+1]).astype(np.int64)) for i in ix])
         return x.to(device), y.to(device)
 
     # 2. Model Architecture Definitions
-    if args.model_type == 'gpt2':
-        d_model = 768
-        n_layer = 12
-        print("Constructing 12-layer, 768-dim, 12-head GPT-2 (124M) equivalent DAG...")
-        nodes, edges = get_gpt2_124m_dag(vocab_size, args.block_size, d_model, n_layer, dropout=args.dropout)
-    else:
-        # toy: nanoGPT style toy model for fast training on character levels
-        d_model = 384
-        n_layer = 6
-        print("Constructing 6-layer, 384-dim, 6-head nanoGPT style Toy DAG...")
-        # Stack 6 canonical block structures
-        nodes, edges = get_gpt2_124m_dag(vocab_size, args.block_size, d_model, n_layer, dropout=args.dropout)
+    configs = {
+        'toy': 384,
+        'gpt2': 768,
+        'gpt2-medium': 1024,
+        'gpt2-large': 1280,
+        'gpt2-xl': 1600
+    }
+    d_model = configs[args.model_type]
+    print(f"Constructing {args.model_type} equivalent DAG...")
+    nodes, edges = get_gpt2_dag(args.model_type, vocab_size, args.block_size, dropout=args.dropout)
 
     # Compile H-DAG
     print("Compiling RWNNGraph...")

@@ -1,6 +1,6 @@
 import torch
 from rwnn.graph import RWNNGraph
-from rwnn.mutator import get_gpt2_124m_dag
+from rwnn.mutator import get_gpt2_dag
 
 def verify_gpt2_124m():
     print("=== Phase 4: GPT-2 (124M) Verification ===")
@@ -9,12 +9,11 @@ def verify_gpt2_124m():
     vocab_size = 50257
     max_seq_len = 1024
     d_model = 768
-    n_layer = 12
     batch_size = 2
     seq_len = 256 # Reduced sequence length just for fast forward-pass testing
 
     # 2. Get exact GPT-2 DAG
-    nodes, edges = get_gpt2_124m_dag(vocab_size, max_seq_len, d_model, n_layer)
+    nodes, edges = get_gpt2_dag('gpt2', vocab_size, max_seq_len)
     print(f"Constructed 12-layer GPT-2 DAG config with {len(nodes)} nodes and {len(edges)} edges.")
 
     # 3. Compile under RWNNGraph

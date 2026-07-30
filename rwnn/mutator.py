@@ -293,10 +293,29 @@ class GraphMutator:
         return nodes_a, edges_a
 
 
-def get_gpt2_124m_dag(vocab_size=50257, max_seq_len=1024, d_model=768, n_layer=12, dropout=0.0):
+def get_gpt2_dag(model_type='gpt2', vocab_size=50257, max_seq_len=1024, dropout=0.0):
     """
-    Constructs the exact DAG configuration for a GPT-2 (124M) equivalent model.
+    Constructs the H-DAG configuration for any of OpenAI's GPT-2 models:
+    - 'gpt2' (124M): 12 layers, 12 heads, 768 channels
+    - 'gpt2-medium' (350M): 24 layers, 16 heads, 1024 channels
+    - 'gpt2-large' (774M): 36 layers, 20 heads, 1280 channels
+    - 'gpt2-xl' (1558M): 48 layers, 25 heads, 1600 channels
     """
+    configs = {
+        'toy': {'n_layer': 6, 'n_head': 6, 'd_model': 384},
+        'gpt2': {'n_layer': 12, 'n_head': 12, 'd_model': 768},
+        'gpt2-medium': {'n_layer': 24, 'n_head': 16, 'd_model': 1024},
+        'gpt2-large': {'n_layer': 36, 'n_head': 20, 'd_model': 1280},
+        'gpt2-xl': {'n_layer': 48, 'n_head': 25, 'd_model': 1600}
+    }
+    if model_type not in configs:
+        raise ValueError(f"Unknown GPT-2 model type: {model_type}")
+        
+    conf = configs[model_type]
+    n_layer = conf['n_layer']
+    n_head = conf['n_head']
+    d_model = conf['d_model']
+    
     nodes = [
         {'id': 0, 'type': 'input', 'kwargs': {}},
         {'id': 1, 'type': 'token_embedding', 'kwargs': {'vocab_size': vocab_size, 'd_model': d_model}},
@@ -324,7 +343,7 @@ def get_gpt2_124m_dag(vocab_size=50257, max_seq_len=1024, d_model=768, n_layer=1
         
         # Add nodes
         nodes.append({'id': ln1_id, 'type': 'layer_norm', 'kwargs': {'d_model': d_model}})
-        nodes.append({'id': attn_id, 'type': 'causal_attention', 'kwargs': {'n_head': 12, 'd_model': d_model, 'dropout': dropout}})
+        nodes.append({'id': attn_id, 'type': 'causal_attention', 'kwargs': {'n_head': n_head, 'd_model': d_model, 'dropout': dropout}})
         nodes.append({'id': sum_attn_id, 'type': 'sum', 'kwargs': {}})
         nodes.append({'id': ln2_id, 'type': 'layer_norm', 'kwargs': {'d_model': d_model}})
         nodes.append({'id': mlp_up_id, 'type': 'linear', 'kwargs': {'d_in': d_model, 'd_out': 4 * d_model}})
