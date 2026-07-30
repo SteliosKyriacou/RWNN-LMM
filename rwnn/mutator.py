@@ -293,7 +293,7 @@ class GraphMutator:
         return nodes_a, edges_a
 
 
-def get_gpt2_124m_dag(vocab_size=50257, max_seq_len=1024, d_model=768, n_layer=12):
+def get_gpt2_124m_dag(vocab_size=50257, max_seq_len=1024, d_model=768, n_layer=12, dropout=0.0):
     """
     Constructs the exact DAG configuration for a GPT-2 (124M) equivalent model.
     """
@@ -324,7 +324,7 @@ def get_gpt2_124m_dag(vocab_size=50257, max_seq_len=1024, d_model=768, n_layer=1
         
         # Add nodes
         nodes.append({'id': ln1_id, 'type': 'layer_norm', 'kwargs': {'d_model': d_model}})
-        nodes.append({'id': attn_id, 'type': 'causal_attention', 'kwargs': {'n_head': 12, 'd_model': d_model}})
+        nodes.append({'id': attn_id, 'type': 'causal_attention', 'kwargs': {'n_head': 12, 'd_model': d_model, 'dropout': dropout}})
         nodes.append({'id': sum_attn_id, 'type': 'sum', 'kwargs': {}})
         nodes.append({'id': ln2_id, 'type': 'layer_norm', 'kwargs': {'d_model': d_model}})
         nodes.append({'id': mlp_up_id, 'type': 'linear', 'kwargs': {'d_in': d_model, 'd_out': 4 * d_model}})

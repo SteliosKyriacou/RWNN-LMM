@@ -51,6 +51,7 @@ def train_rwnn_nanogpt():
     parser.add_argument('--grad_clip', type=float, default=1.0, help="gradient clip threshold")
     parser.add_argument('--eval_interval', type=int, default=100, help="evaluate model every N steps")
     parser.add_argument('--sample_interval', type=int, default=200, help="sample generation every N steps")
+    parser.add_argument('--dropout', type=float, default=0.2, help="dropout rate")
     args = parser.parse_args()
 
     # Determine device
@@ -97,14 +98,14 @@ def train_rwnn_nanogpt():
         d_model = 768
         n_layer = 12
         print("Constructing 12-layer, 768-dim, 12-head GPT-2 (124M) equivalent DAG...")
-        nodes, edges = get_gpt2_124m_dag(vocab_size, args.block_size, d_model, n_layer)
+        nodes, edges = get_gpt2_124m_dag(vocab_size, args.block_size, d_model, n_layer, dropout=args.dropout)
     else:
         # toy: nanoGPT style toy model for fast training on character levels
         d_model = 384
         n_layer = 6
         print("Constructing 6-layer, 384-dim, 6-head nanoGPT style Toy DAG...")
         # Stack 6 canonical block structures
-        nodes, edges = get_gpt2_124m_dag(vocab_size, args.block_size, d_model, n_layer)
+        nodes, edges = get_gpt2_124m_dag(vocab_size, args.block_size, d_model, n_layer, dropout=args.dropout)
 
     # Compile H-DAG
     print("Compiling RWNNGraph...")
