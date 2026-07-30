@@ -1,3 +1,5 @@
 __pycache__/
 input.txt
 *.bin
+*.pt
+checkpoints/

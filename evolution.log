@@ -1,0 +1,44 @@
+=== BACKGROUND EVOLUTION KICKOFF ===
+
+--- Generation 1 / 3 ---
+Evaluating individual 1/4...
+Evaluating individual 2/4...
+Evaluating individual 3/4...
+Evaluating individual 4/4...
+
+🏆 Generation 1 Pareto Front:
+  Elite 1: Nodes=54, Edges=66, Params=49,393,489, Loss=5.7914
+  Elite 2: Nodes=102, Edges=126, Params=162,497,617, Loss=5.7546
+✓ Saved checkpoints/generation_1_report.json
+✓ Saved Pareto plot: checkpoints/generation_1_pareto.png
+
+Breeding next generation...
+
+--- Generation 2 / 3 ---
+Evaluating individual 3/4...
+Evaluation failed: mat1 and mat2 shapes cannot be multiplied (1024x128 and 384x1152)
+Evaluating individual 4/4...
+Evaluation failed: mat1 and mat2 shapes cannot be multiplied (1024x128 and 768x50257)
+
+🏆 Generation 2 Pareto Front:
+  Elite 1: Nodes=54, Edges=66, Params=49,393,489, Loss=5.7914
+  Elite 2: Nodes=102, Edges=126, Params=162,497,617, Loss=5.7546
+✓ Saved checkpoints/generation_2_report.json
+✓ Saved Pareto plot: checkpoints/generation_2_pareto.png
+
+Breeding next generation...
+
+--- Generation 3 / 3 ---
+Evaluating individual 3/4...
+Evaluation failed: mat1 and mat2 shapes cannot be multiplied (1024x128 and 384x50257)
+Evaluating individual 4/4...
+Evaluation failed: Given normalized_shape=[768], expected input with shape [*, 768], but got input of size[16, 64, 128]
+
+🏆 Generation 3 Pareto Front:
+  Elite 1: Nodes=54, Edges=66, Params=49,393,489, Loss=5.7914
+  Elite 2: Nodes=102, Edges=126, Params=162,497,617, Loss=5.7546
+✓ Saved checkpoints/generation_3_report.json
+✓ Saved Pareto plot: checkpoints/generation_3_pareto.png
+
+=== BACKGROUND EVOLUTION LOOP COMPLETE ===
+
