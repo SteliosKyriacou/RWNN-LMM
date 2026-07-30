@@ -210,3 +210,120 @@ class DropoutNode(RWNNNode):
 
     def forward(self, inputs):
         return self.dropout(inputs[0])
+
+
+class MeanReduceNode(RWNNNode):
+    def __init__(self, node_id, dim=-1):
+        super().__init__(node_id, "mean_reduce")
+        self.dim = dim
+
+    def forward(self, inputs):
+        return inputs[0].mean(dim=self.dim, keepdim=True)
+
+
+class SquareNode(RWNNNode):
+    def __init__(self, node_id):
+        super().__init__(node_id, "square")
+
+    def forward(self, inputs):
+        return torch.square(inputs[0])
+
+
+class SubtractNode(RWNNNode):
+    def __init__(self, node_id):
+        super().__init__(node_id, "subtract")
+
+    def forward(self, inputs):
+        return inputs[0] - inputs[1]
+
+
+class DivideNode(RWNNNode):
+    def __init__(self, node_id):
+        super().__init__(node_id, "divide")
+
+    def forward(self, inputs):
+        return inputs[0] / inputs[1]
+
+
+class SqrtNode(RWNNNode):
+    def __init__(self, node_id, eps=1e-5):
+        super().__init__(node_id, "sqrt")
+        self.eps = eps
+
+    def forward(self, inputs):
+        return torch.sqrt(inputs[0] + self.eps)
+
+
+class ScaleShiftNode(RWNNNode):
+    def __init__(self, node_id, d_model):
+        super().__init__(node_id, "scale_shift")
+        self.d_model = d_model
+        self.gamma = nn.Parameter(torch.ones(d_model))
+        self.beta = nn.Parameter(torch.zeros(d_model))
+
+    def expected_input_dim(self, input_index=0):
+        return self.d_model
+
+    def forward(self, inputs):
+        return inputs[0] * self.gamma + self.beta
+
+
+class MatMulNode(RWNNNode):
+    def __init__(self, node_id, d_in, d_out):
+        super().__init__(node_id, "matmul")
+        self.d_in = d_in
+        self.d_out = d_out
+        self.weight = nn.Parameter(torch.randn(d_out, d_in) * (1.0 / (d_in ** 0.5)))
+
+    def expected_input_dim(self, input_index=0):
+        return self.d_in
+
+    def forward(self, inputs):
+        return F.linear(inputs[0], self.weight)
+
+
+class AddBiasNode(RWNNNode):
+    def __init__(self, node_id, d_model):
+        super().__init__(node_id, "add_bias")
+        self.d_model = d_model
+        self.bias = nn.Parameter(torch.zeros(d_model))
+
+    def expected_input_dim(self, input_index=0):
+        return self.d_model
+
+    def forward(self, inputs):
+        return inputs[0] + self.bias
+
+
+class TransposeNode(RWNNNode):
+    def __init__(self, node_id, dim1, dim2):
+        super().__init__(node_id, "transpose")
+        self.dim1 = dim1
+        self.dim2 = dim2
+
+    def forward(self, inputs):
+        return inputs[0].transpose(self.dim1, self.dim2)
+
+
+class ReshapeNode(RWNNNode):
+    def __init__(self, node_id, shape):
+        super().__init__(node_id, "reshape")
+        self.shape = shape
+
+    def forward(self, inputs):
+        return inputs[0].reshape(*self.shape)
+
+
+class CausalBatchMatMulNode(RWNNNode):
+    def __init__(self, node_id, scale=1.0):
+        super().__init__(node_id, "causal_batch_matmul")
+        self.scale = scale
+
+    def forward(self, inputs):
+        q = inputs[0]
+        k = inputs[1]
+        att = (q @ k.transpose(-2, -1)) * self.scale
+        T = q.size(-2)
+        mask = torch.tril(torch.ones(T, T, device=q.device)).view(1, 1, T, T)
+        att = att.masked_fill(mask == 0, float('-inf'))
+        return att

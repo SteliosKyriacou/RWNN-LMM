@@ -4,7 +4,10 @@ from collections import defaultdict, deque
 from rwnn.nodes import (
     TokenEmbeddingNode, PositionalEmbeddingNode, LayerNormNode,
     LinearNode, CausalAttentionNode, ActivationNode, SumNode,
-    ConcatNode, ElementMulNode, DropoutNode, RWNNNode
+    ConcatNode, ElementMulNode, DropoutNode, RWNNNode,
+    MeanReduceNode, SquareNode, SubtractNode, DivideNode,
+    SqrtNode, ScaleShiftNode, MatMulNode, AddBiasNode,
+    TransposeNode, ReshapeNode, CausalBatchMatMulNode
 )
 
 class EdgeConnection(nn.Module):
@@ -96,6 +99,28 @@ class RWNNGraph(nn.Module):
             return ElementMulNode(n_id)
         elif n_type == 'dropout':
             return DropoutNode(n_id, **kwargs)
+        elif n_type == 'mean_reduce':
+            return MeanReduceNode(n_id, **kwargs)
+        elif n_type == 'square':
+            return SquareNode(n_id)
+        elif n_type == 'subtract':
+            return SubtractNode(n_id)
+        elif n_type == 'divide':
+            return DivideNode(n_id)
+        elif n_type == 'sqrt':
+            return SqrtNode(n_id, **kwargs)
+        elif n_type == 'scale_shift':
+            return ScaleShiftNode(n_id, **kwargs)
+        elif n_type == 'matmul':
+            return MatMulNode(n_id, **kwargs)
+        elif n_type == 'add_bias':
+            return AddBiasNode(n_id, **kwargs)
+        elif n_type == 'transpose':
+            return TransposeNode(n_id, **kwargs)
+        elif n_type == 'reshape':
+            return ReshapeNode(n_id, **kwargs)
+        elif n_type == 'causal_batch_matmul':
+            return CausalBatchMatMulNode(n_id, **kwargs)
         else:
             raise ValueError(f"Unknown node type: {n_type}")
 
@@ -152,6 +177,14 @@ class RWNNGraph(nn.Module):
                     else:
                         d_tgt_i = d_tgt
 
+                    # Global atomic broadcasting bypass:
+                    # If the source node outputs 1, and the node does not explicitly require a fixed dimension != 1,
+                    # we let it broadcast by setting d_tgt_i = 1.
+                    if d_src == 1:
+                        explicit_dim = node.expected_input_dim(i) if hasattr(node, 'expected_input_dim') else None
+                        if explicit_dim is None:
+                            d_tgt_i = 1
+
                     edge_conn = EdgeConnection(d_src, d_tgt_i)
                     self.edges[f"{p}_{u}"] = edge_conn
 
@@ -182,6 +215,21 @@ class RWNNGraph(nn.Module):
             elif isinstance(node, DropoutNode):
                 pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model
                 self.node_out_dims[u] = pred_dim if pred_dim is not None else self.global_d_model
+            elif isinstance(node, MeanReduceNode):
+                pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model
+                self.node_out_dims[u] = 1 if node.dim == -1 else pred_dim
+            elif isinstance(node, (SquareNode, SubtractNode, DivideNode, SqrtNode)):
+                pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model
+                self.node_out_dims[u] = pred_dim
+            elif isinstance(node, ScaleShiftNode):
+                self.node_out_dims[u] = node.d_model
+            elif isinstance(node, MatMulNode):
+                self.node_out_dims[u] = node.d_out
+            elif isinstance(node, AddBiasNode):
+                self.node_out_dims[u] = node.d_model
+            elif isinstance(node, (TransposeNode, ReshapeNode, CausalBatchMatMulNode)):
+                pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model
+                self.node_out_dims[u] = pred_dim
             else:
                 self.node_out_dims[u] = d_tgt
 
