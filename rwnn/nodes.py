@@ -1,0 +1,212 @@
+import math
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class RWNNNode(nn.Module):
+    """Base class for all heterogeneous nodes in the RWNN Graph."""
+    def __init__(self, node_id, node_type):
+        super().__init__()
+        self.node_id = node_id
+        self.node_type = node_type
+
+    def expected_input_dim(self, input_index=0):
+        """
+        Returns the expected dimension (last axis) for the input at input_index.
+        Returns None if any dimension is accepted or handled dynamically.
+        """
+        return None
+
+    def forward(self, inputs):
+        """
+        inputs: list of torch.Tensor
+        Returns: torch.Tensor
+        """
+        raise NotImplementedError
+
+
+class TokenEmbeddingNode(RWNNNode):
+    def __init__(self, node_id, vocab_size, d_model):
+        super().__init__(node_id, "token_embedding")
+        self.vocab_size = vocab_size
+        self.d_model = d_model
+        self.wte = nn.Embedding(vocab_size, d_model)
+
+    def expected_input_dim(self, input_index=0):
+        return None # Expects integer token indices, not embedding vectors
+
+    def forward(self, inputs):
+        # Expects inputs[0] to be integer tensor of shape [B, T]
+        x = inputs[0]
+        return self.wte(x)
+
+
+class PositionalEmbeddingNode(RWNNNode):
+    def __init__(self, node_id, max_seq_len, d_model):
+        super().__init__(node_id, "positional_embedding")
+        self.max_seq_len = max_seq_len
+        self.d_model = d_model
+        self.wpe = nn.Embedding(max_seq_len, d_model)
+
+    def expected_input_dim(self, input_index=0):
+        return None # Can be generated from sequence length of any input
+
+    def forward(self, inputs):
+        # inputs[0] can be token indices [B, T] or hidden state [B, T, D]
+        # We just need its sequence length T to generate positions
+        x = inputs[0]
+        t = x.size(1)
+        device = x.device
+        pos = torch.arange(0, t, dtype=torch.long, device=device).unsqueeze(0) # [1, T]
+        return self.wpe(pos)
+
+
+class LayerNormNode(RWNNNode):
+    def __init__(self, node_id, d_model, eps=1e-5):
+        super().__init__(node_id, "layer_norm")
+        self.d_model = d_model
+        self.ln = nn.LayerNorm(d_model, eps=eps)
+
+    def expected_input_dim(self, input_index=0):
+        return self.d_model
+
+    def forward(self, inputs):
+        return self.ln(inputs[0])
+
+
+class LinearNode(RWNNNode):
+    def __init__(self, node_id, d_in, d_out, bias=True):
+        super().__init__(node_id, "linear")
+        self.d_in = d_in
+        self.d_out = d_out
+        self.linear = nn.Linear(d_in, d_out, bias=bias)
+
+    def expected_input_dim(self, input_index=0):
+        return self.d_in
+
+    def forward(self, inputs):
+        return self.linear(inputs[0])
+
+
+class CausalAttentionNode(RWNNNode):
+    def __init__(self, node_id, n_head, d_model, dropout=0.0):
+        super().__init__(node_id, "causal_attention")
+        self.n_head = n_head
+        self.d_model = d_model
+        self.dropout = dropout
+        assert d_model % n_head == 0, "d_model must be divisible by n_head"
+        self.head_dim = d_model // n_head
+
+        # Internal projections for standard self-contained mode (if 1 input is provided)
+        self.c_attn = nn.Linear(d_model, 3 * d_model, bias=True)
+        self.c_proj = nn.Linear(d_model, d_model, bias=True)
+        self.attn_dropout = nn.Dropout(dropout)
+        self.resid_dropout = nn.Dropout(dropout)
+
+    def expected_input_dim(self, input_index=0):
+        return self.d_model
+
+    def forward(self, inputs):
+        # Supports:
+        # 1. Self-contained: inputs[0] is the hidden state. Q, K, V computed internally.
+        # 2. Split inputs: inputs[0]=Q, inputs[1]=K, inputs[2]=V.
+        if len(inputs) == 1:
+            x = inputs[0]
+            B, T, C = x.size()
+            # Calculate query, key, values
+            q, k, v = self.c_attn(x).split(self.d_model, dim=2)
+        elif len(inputs) >= 3:
+            q, k, v = inputs[0], inputs[1], inputs[2]
+            B, T, C = q.size()
+        else:
+            # Fallback if 2 inputs: reuse first for Q, second for K and V
+            q = inputs[0]
+            k = v = inputs[1]
+            B, T, C = q.size()
+
+        # Reshape to [B, n_head, T, head_dim]
+        q = q.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
+        k = k.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
+        v = v.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
+
+        # Causal attention
+        att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
+        
+        # Apply causal mask
+        mask = torch.tril(torch.ones(T, T, device=q.device)).view(1, 1, T, T)
+        att = att.masked_fill(mask == 0, float('-inf'))
+        
+        att = F.softmax(att, dim=-1)
+        att = self.attn_dropout(att)
+        y = att @ v # [B, n_head, T, head_dim]
+        
+        # Re-assemble head outputs side-by-side
+        y = y.transpose(1, 2).contiguous().view(B, T, C)
+        
+        # Output projection
+        y = self.resid_dropout(self.c_proj(y))
+        return y
+
+
+class ActivationNode(RWNNNode):
+    def __init__(self, node_id, act_type="gelu"):
+        super().__init__(node_id, f"activation_{act_type}")
+        self.act_type = act_type
+
+    def forward(self, inputs):
+        x = inputs[0]
+        if self.act_type == "gelu":
+            return F.gelu(x)
+        elif self.act_type == "silu":
+            return F.silu(x)
+        elif self.act_type == "relu":
+            return F.relu(x)
+        else:
+            return x
+
+
+class SumNode(RWNNNode):
+    def __init__(self, node_id):
+        super().__init__(node_id, "sum")
+
+    def forward(self, inputs):
+        # Element-wise addition of all inputs
+        if len(inputs) == 0:
+            raise ValueError("SumNode requires at least one input.")
+        out = inputs[0]
+        for i in range(1, len(inputs)):
+            out = out + inputs[i]
+        return out
+
+
+class ConcatNode(RWNNNode):
+    def __init__(self, node_id, dim=-1):
+        super().__init__(node_id, "concat")
+        self.dim = dim
+
+    def forward(self, inputs):
+        if len(inputs) == 0:
+            raise ValueError("ConcatNode requires at least one input.")
+        return torch.cat(inputs, dim=self.dim)
+
+
+class ElementMulNode(RWNNNode):
+    def __init__(self, node_id):
+        super().__init__(node_id, "element_mul")
+
+    def forward(self, inputs):
+        if len(inputs) == 0:
+            raise ValueError("ElementMulNode requires at least one input.")
+        out = inputs[0]
+        for i in range(1, len(inputs)):
+            out = out * inputs[i]
+        return out
+
+
+class DropoutNode(RWNNNode):
+    def __init__(self, node_id, dropout=0.0):
+        super().__init__(node_id, "dropout")
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, inputs):
+        return self.dropout(inputs[0])
