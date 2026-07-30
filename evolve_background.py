@@ -259,4 +259,4 @@ def run_background_evolution(generations=3, pop_size=4, eval_steps=100):
 
 
 if __name__ == "__main__":
-    run_background_evolution(generations=3, pop_size=4, eval_steps=100)
+    run_background_evolution(generations=3, pop_size=10, eval_steps=1000)
