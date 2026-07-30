@@ -202,6 +202,9 @@ def train_rwnn_nanogpt():
                 'val_loss': losses['val'],
                 'lr': lr
             })
+            if args.vocab_type == 'gpt2_bpe' and losses['val'] <= 3.12:
+                print(f"Target validation loss of 3.12 reached (Current: {losses['val']:.4f})! Stopping early at step {it}.")
+                break
 
         # Sample generation periodically
         if it > 0 and it % args.sample_interval == 0:
