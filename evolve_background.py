@@ -2,6 +2,7 @@ import os
 import json
 import random
 import time
+import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,14 +10,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from rwnn.graph import RWNNGraph
 from rwnn.mutator import GraphMutator, get_gpt2_dag, is_valid_dag
-from train import CharTokenizer, DATA_FILE, download_data
 
-# Simple Pareto Frontier extraction helper
 def get_pareto_front(population):
-    """
-    Identifies the non-dominated individuals in a population.
-    population: list of dicts with keys 'nodes', 'edges', 'loss', 'params'
-    """
+    """Identifies the non-dominated individuals in a population."""
     pareto_front = []
     for i, ind in enumerate(population):
         dominated = False
@@ -34,7 +30,21 @@ def get_pareto_front(population):
     return pareto_front
 
 
-def train_and_eval_bpe_model(nodes, edges, d_model, max_iters=100, batch_size=16, block_size=128):
+def get_fitness(ind):
+    """Calculates scalar fitness (smaller is better). Combines loss and parameter count penalty."""
+    if ind['loss'] >= 90.0:
+        return 999.0 # Penalty for invalid/failed models
+    return ind['loss'] + 0.15 * math.log10(ind['params'])
+
+
+def select_parent(population, tournament_size=3):
+    """Selects a parent using Tournament Selection based on combined fitness."""
+    candidates = random.sample(population, tournament_size)
+    best_candidate = min(candidates, key=get_fitness)
+    return best_candidate
+
+
+def train_and_eval_bpe_model(nodes, edges, d_model, max_iters=1000, batch_size=16, block_size=128):
     """Trains a compiled H-DAG model on BPE tokens and returns validation loss."""
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
@@ -56,7 +66,7 @@ def train_and_eval_bpe_model(nodes, edges, d_model, max_iters=100, batch_size=16
     # 2. Optimization
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.1)
     
-    # 3. Fast Train
+    # 3. Training Loop
     model.train()
     for step in range(max_iters):
         xb, yb = get_batch('train')
@@ -82,40 +92,36 @@ def train_and_eval_bpe_model(nodes, edges, d_model, max_iters=100, batch_size=16
     return model, np.mean(val_losses)
 
 
-def run_background_evolution(generations=3, pop_size=4, eval_steps=100):
-    print("=== BACKGROUND EVOLUTION KICKOFF ===")
+def run_background_evolution(generations=100, pop_size=10, eval_steps=1000):
+    print("=== MULTI-GENERATIONAL BACKGROUND EVOLUTION STARTED ===")
     os.makedirs("checkpoints", exist_ok=True)
     
     vocab_size = 50257
     block_size = 256
-    d_model = 128 # Kept light to prevent memory leak and make background process very fast
+    d_model = 192 # Search space hidden dimension size kept consistent for comparative parity!
 
     mutator = GraphMutator(vocab_size, block_size, d_model)
 
-    # 1. Initialize population of GPT2 and nanoGPT variants
+    # 1. Initialize population with consistent search_d_model = 192
+    # This ensures larger and smaller layers are compared under fair, uncoupled parameters!
     population = []
     
-    # Core Seeds
-    toy_nodes, toy_edges = get_gpt2_dag('toy', vocab_size, block_size)
-    gpt2_nodes, gpt2_edges = get_gpt2_dag('gpt2', vocab_size, block_size)
+    toy_nodes, toy_edges = get_gpt2_dag('toy', vocab_size, block_size, override_d_model=d_model)
+    gpt2_nodes, gpt2_edges = get_gpt2_dag('gpt2', vocab_size, block_size, override_d_model=d_model)
 
     for idx in range(pop_size):
-        if idx == 0:
-            # Seed 1: nanoGPT Toy
-            nodes, edges, model_name = toy_nodes, toy_edges, 'nanoGPT_toy'
-        elif idx == 1:
-            # Seed 2: GPT-2
-            nodes, edges, model_name = gpt2_nodes, gpt2_edges, 'gpt2_124m'
-        elif idx == 2:
-            # Seed 3: Mutated nanoGPT
-            nodes, edges = mutator.mutate(toy_nodes, toy_edges)
-            model_name = 'mutated_nanoGPT_toy'
+        if idx % 2 == 0:
+            nodes, edges = toy_nodes, toy_edges
+            model_name = f"nanoGPT_toy_seed_{idx}"
         else:
-            # Seed 4: Mutated GPT-2
-            nodes, edges = mutator.mutate(gpt2_nodes, gpt2_edges)
-            model_name = 'mutated_gpt2'
+            nodes, edges = gpt2_nodes, gpt2_edges
+            model_name = f"gpt2_seed_{idx}"
 
-        # Get parameter count
+        # Apply random initial mutations to diversify the starting pool
+        if idx > 1:
+            for _ in range(idx % 3 + 1):
+                nodes, edges = mutator.mutate(nodes, edges)
+
         dummy_model = RWNNGraph(nodes, edges, global_d_model=d_model)
         params = sum(p.numel() for p in dummy_model.parameters())
 
@@ -155,13 +161,12 @@ def run_background_evolution(generations=3, pop_size=4, eval_steps=100):
         for i, elite in enumerate(pareto_front):
             print(f"  Elite {i+1}: Nodes={len(elite['nodes'])}, Edges={len(elite['edges'])}, Params={elite['params']:,}, Loss={elite['loss']:.4f}")
             
-            # Save PyTorch weight file (.pt) for the Pareto front model
-            # We save it safely inside checkpoints directory
+            # Save PyTorch weight file (.pt)
             weight_file = f"checkpoints/pareto_gen{gen+1}_ind{i+1}_loss{elite['loss']:.2f}.pt"
             if 'state_dict' in elite:
                 torch.save(elite['state_dict'], weight_file)
                 
-            # Create json configuration so we can completely rebuild the H-DAG
+            # Create json configuration
             config_file = f"checkpoints/pareto_gen{gen+1}_ind{i+1}_config.json"
             config_data = {
                 'nodes': elite['nodes'],
@@ -200,7 +205,6 @@ def run_background_evolution(generations=3, pop_size=4, eval_steps=100):
         plt.scatter(all_x, all_y, color='#555555', alpha=0.6, label='Evaluated Population')
         plt.scatter(elite_x, elite_y, color='#ff3333', s=100, marker='*', label='Pareto Frontier (Elites)')
         
-        # Draw Pareto frontier line (sorted by params)
         elites_sorted = sorted(pareto_front, key=lambda x: x['params'])
         elites_sorted = [e for e in elites_sorted if e['loss'] < 90.0]
         if len(elites_sorted) > 1:
@@ -225,19 +229,28 @@ def run_background_evolution(generations=3, pop_size=4, eval_steps=100):
         if gen == generations - 1:
             break
 
-        # Reproduce & Breed Next Gen
+        # Reproduce & Breed Next Gen using Tournament Selection and Probabilistic Operators
         print("\nBreeding next generation...")
         next_population = list(pareto_front) # Elitist preservation
         
         while len(next_population) < pop_size:
-            parent_a = random.choice(population)
-            parent_b = random.choice(population)
+            # 1. Parent Selection via Dominance-Aware Tournament Selection
+            parent_a = select_parent(population, tournament_size=3)
+            parent_b = select_parent(population, tournament_size=3)
             
-            child_nodes, child_edges = mutator.crossover(
-                (parent_a['nodes'], parent_a['edges']),
-                (parent_b['nodes'], parent_b['edges'])
-            )
-            child_nodes, child_edges = mutator.mutate(child_nodes, child_edges)
+            # 2. Crossover (80% probability)
+            if random.random() < 0.8:
+                child_nodes, child_edges = mutator.crossover(
+                    (parent_a['nodes'], parent_a['edges']),
+                    (parent_b['nodes'], parent_b['edges'])
+                )
+            else:
+                # Clone fittest parent directly
+                child_nodes, child_edges = [dict(n) for n in parent_a['nodes']], list(parent_a['edges'])
+                
+            # 3. Mutation (30% probability)
+            if random.random() < 0.3:
+                child_nodes, child_edges = mutator.mutate(child_nodes, child_edges)
             
             try:
                 dummy_model = RWNNGraph(child_nodes, child_edges, global_d_model=d_model)
@@ -259,4 +272,4 @@ def run_background_evolution(generations=3, pop_size=4, eval_steps=100):
 
 
 if __name__ == "__main__":
-    run_background_evolution(generations=3, pop_size=10, eval_steps=1000)
+    run_background_evolution(generations=100, pop_size=10, eval_steps=1000)

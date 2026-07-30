@@ -293,7 +293,7 @@ class GraphMutator:
         return nodes_a, edges_a
 
 
-def get_gpt2_dag(model_type='gpt2', vocab_size=50257, max_seq_len=1024, dropout=0.0):
+def get_gpt2_dag(model_type='gpt2', vocab_size=50257, max_seq_len=1024, dropout=0.0, override_d_model=None):
     """
     Constructs the H-DAG configuration for any of OpenAI's GPT-2 models:
     - 'gpt2' (124M): 12 layers, 12 heads, 768 channels
@@ -314,7 +314,7 @@ def get_gpt2_dag(model_type='gpt2', vocab_size=50257, max_seq_len=1024, dropout=
     conf = configs[model_type]
     n_layer = conf['n_layer']
     n_head = conf['n_head']
-    d_model = conf['d_model']
+    d_model = override_d_model if override_d_model is not None else conf['d_model']
     
     nodes = [
         {'id': 0, 'type': 'input', 'kwargs': {}},
