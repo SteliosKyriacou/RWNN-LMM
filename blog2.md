@@ -19,6 +19,30 @@ The H-DAG compiler automatically traces their channels topologically and compile
 | **`gpt2-large`** (774M) | 36 | 20 | 1280 | 5120 | 294 nodes / 366 edges | **838,409,297** |
 | **`gpt2-xl`** (1.5B) | 48 | 25 | 1600 | 6400 | 390 nodes / 486 edges | **1,638,072,657** |
 
+### Complete Architectural Layouts (Compiled with NetworkX)
+
+To demonstrate the structural scaling, we compiled and plotted the exact H-DAG structures for each level of GPT-2:
+
+#### A. Toy GPT-2 (6 Layers, 10.8M parameters)
+*Used for character-level fast training baselines.*
+
+![Toy 6L H-DAG Layout](assets/gpt2_toy_6l_layout.png)
+
+#### B. Standard GPT-2 (12 Layers, 124M parameters)
+*The default configuration trained on our BPE corpus.*
+
+![Standard GPT-2 12L H-DAG Layout](assets/gpt2_124m_12l_layout.png)
+
+#### C. GPT-2 Medium (24 Layers, 350M parameters)
+*Demonstrates multi-column block scaling.*
+
+![GPT-2 Medium 24L H-DAG Layout](assets/gpt2_medium_24l_layout.png)
+
+#### D. GPT-2 Large (36 Layers, 774M parameters)
+*Massive deep parallel pipeline block topology.*
+
+![GPT-2 Large 36L H-DAG Layout](assets/gpt2_large_36l_layout.png)
+
 ---
 
 ## 🧩 2. OpenAI BPE Preprocessing & Memory-Mapped Loading
@@ -87,8 +111,3 @@ Loss
 
 On September 25 , 1909 , Hamels pitched seven innings and finished with a 4 – 4 record and a 2.69 ERA in 71 strikeouts ( MLB ) , which wasising the 1964 average . He is rainfall 41.1200 for 144 strikeouts ( 75 ⁄ 3.76 ) , and three lights ( López counts ) . He is also a element neither the two DVD lower pitch with a purpleollywood Within 250 . In Cleveland , Wilhelm started to Bureau , becoming the third best pitcher in the first round of the chamber ...
 ```
-
----
-
-### Conclusion
-By implementing OpenAI's actual **BPE subwords**, memory-mapping token binaries, and compiling the largest models (up to **1.6B parameters**), we have proven that the H-DAG architecture is 100% scalable and ready for production-level Large Language Modeling.

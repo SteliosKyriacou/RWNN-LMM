@@ -1,7 +1,7 @@
 import os
 import networkx as nx
 import matplotlib.pyplot as plt
-from rwnn.mutator import get_canonical_nano_gpt
+from rwnn.mutator import get_canonical_nano_gpt, get_gpt2_dag
 
 def generate_visualizations():
     print("=== Generating Graph Visualizations using NetworkX ===")
@@ -18,7 +18,12 @@ def generate_visualizations():
         'causal_attention': '#ffcc99', # Light Orange
         'sum': '#ffff99',         # Light Yellow
         'linear': '#ffb3b3',      # Soft Red
-        'activation': '#e6ccff'   # Soft Purple
+        'activation': '#e6ccff',  # Soft Purple
+        'matmul': '#ff9999',      # Soft Red
+        'add_bias': '#ffcc99',    # Light Orange
+        'transpose': '#b3f0ff',   # Cyan
+        'reshape': '#ffd1b3',     # Light Orange
+        'causal_batch_matmul': '#ffb3d1' # Light Pink
     }
 
     # ==================== PLOT 1: Canonical nanoGPT DAG ====================
@@ -96,17 +101,7 @@ def generate_visualizations():
         7: (0, -2.5)   # Scale Shift
     }
 
-    atomic_colors = {
-        'input': '#ff99ff',
-        'mean_reduce': '#b3f0ff',
-        'subtract': '#ffffb3',
-        'square': '#ffd1b3',
-        'sqrt': '#ffb3d1',
-        'divide': '#ff9999',
-        'scale_shift': '#b3ffb3'
-    }
-
-    node_colors_atomic = [atomic_colors.get(G_atomic.nodes[n]['type'], '#cccccc') for n in G_atomic.nodes]
+    node_colors_atomic = [color_map.get(G_atomic.nodes[n]['type'], '#cccccc') for n in G_atomic.nodes]
     labels_atomic = nx.get_node_attributes(G_atomic, 'label')
 
     plt.figure(figsize=(10, 8))
@@ -123,15 +118,13 @@ def generate_visualizations():
 
     # ==================== PLOT 3: Pure Atomic Block DAG Graph ====================
     print("Generating Complete Pure Atomic Block DAG Graph...")
-    # This represents the nanoGPT block completely deconstructed into basic math operators
-    # Let's map out its layout
     block_nodes = [
         {'id': 0, 'type': 'input'},
         {'id': 1, 'type': 'token_embedding'},
         {'id': 2, 'type': 'positional_embedding'},
-        {'id': 3, 'type': 'sum'}, # Embeddings Sum (D=384)
+        {'id': 3, 'type': 'sum'},
         
-        # LayerNorm 1 primitives (8 nodes)
+        # LayerNorm 1
         {'id': 4, 'type': 'mean_reduce'},
         {'id': 5, 'type': 'subtract'},
         {'id': 6, 'type': 'square'},
@@ -140,15 +133,15 @@ def generate_visualizations():
         {'id': 9, 'type': 'divide'},
         {'id': 10, 'type': 'scale_shift'},
         
-        # Q, K, V Dense projections uncoupled to MatMul/AddBias (6 nodes)
-        {'id': 11, 'type': 'matmul'}, # Q weight
-        {'id': 12, 'type': 'add_bias'}, # Q bias
-        {'id': 13, 'type': 'matmul'}, # K weight
-        {'id': 14, 'type': 'add_bias'}, # K bias
-        {'id': 15, 'type': 'matmul'}, # V weight
-        {'id': 16, 'type': 'add_bias'}, # V bias
+        # Q, K, V
+        {'id': 11, 'type': 'matmul'},
+        {'id': 12, 'type': 'add_bias'},
+        {'id': 13, 'type': 'matmul'},
+        {'id': 14, 'type': 'add_bias'},
+        {'id': 15, 'type': 'matmul'},
+        {'id': 16, 'type': 'add_bias'},
         
-        # Multi-Head reshape/transposes (6 nodes)
+        # Reshape/Transpose
         {'id': 17, 'type': 'reshape'},
         {'id': 18, 'type': 'transpose'},
         {'id': 19, 'type': 'reshape'},
@@ -156,66 +149,43 @@ def generate_visualizations():
         {'id': 21, 'type': 'reshape'},
         {'id': 22, 'type': 'transpose'},
         
-        # Attention score multiplication and softmax (3 nodes)
+        # Attention
         {'id': 23, 'type': 'causal_batch_matmul'},
-        {'id': 24, 'type': 'activation'}, # Softmax
-        {'id': 25, 'type': 'causal_batch_matmul'}, # Attn x V
+        {'id': 24, 'type': 'activation'},
+        {'id': 25, 'type': 'causal_batch_matmul'},
         
-        # Squeeze/Transpose/Projection (4 nodes)
+        # Output
         {'id': 26, 'type': 'transpose'},
         {'id': 27, 'type': 'reshape'},
-        {'id': 28, 'type': 'matmul'}, # Out weight
-        {'id': 29, 'type': 'add_bias'}, # Out bias
+        {'id': 28, 'type': 'matmul'},
+        {'id': 29, 'type': 'add_bias'},
         
-        # Residual Sum (Attention)
+        # Residual Sum
         {'id': 30, 'type': 'sum'},
         
-        # MLP Block atomic components (5 nodes)
-        {'id': 31, 'type': 'matmul'}, # MLP Up weight
-        {'id': 32, 'type': 'add_bias'}, # MLP Up bias
-        {'id': 33, 'type': 'activation'}, # GELU
-        {'id': 34, 'type': 'matmul'}, # MLP Down weight
-        {'id': 35, 'type': 'add_bias'}, # MLP Down bias
+        # MLP Block
+        {'id': 31, 'type': 'matmul'},
+        {'id': 32, 'type': 'add_bias'},
+        {'id': 33, 'type': 'activation'},
+        {'id': 34, 'type': 'matmul'},
+        {'id': 35, 'type': 'add_bias'},
         
-        # Residual Sum (MLP) and head
+        # Output layers
         {'id': 36, 'type': 'sum'},
-        {'id': 37, 'type': 'layer_norm'}, # Coarse norm at output
-        {'id': 38, 'type': 'linear'} # Output head
+        {'id': 37, 'type': 'layer_norm'},
+        {'id': 38, 'type': 'linear'}
     ]
 
     block_edges = [
-        # Embeddings
         (0, 1), (0, 2), (1, 3), (2, 3),
-        
-        # LayerNorm 1
         (3, 4), (3, 5), (4, 5), (5, 6), (6, 7), (7, 8), (5, 9), (8, 9), (9, 10),
-        
-        # Attention inputs
-        (10, 11), (11, 12),
-        (10, 13), (13, 14),
-        (10, 15), (15, 16),
-        
-        # Reshapes/transposes
-        (12, 17), (17, 18),
-        (14, 19), (19, 20),
-        (16, 21), (21, 22),
-        
-        # Attention scores
-        (18, 23), (20, 23), (23, 24),
-        (24, 25), (22, 25),
-        
-        # Squeezes / Output Proj
+        (10, 11), (11, 12), (10, 13), (13, 14), (10, 15), (15, 16),
+        (12, 17), (17, 18), (14, 19), (19, 20), (16, 21), (21, 22),
+        (18, 23), (20, 23), (23, 24), (24, 25), (22, 25),
         (25, 26), (26, 27), (27, 28), (28, 29),
-        
-        # Attention Residual
         (3, 30), (29, 30),
-        
-        # MLP Block
         (30, 31), (31, 32), (32, 33), (33, 34), (34, 35),
-        
-        # MLP Residual
-        (30, 36), (35, 36),
-        (36, 37), (37, 38)
+        (30, 36), (35, 36), (36, 37), (37, 38)
     ]
 
     G_block = nx.DiGraph()
@@ -223,75 +193,19 @@ def generate_visualizations():
         G_block.add_node(n['id'], label=f"{n['id']}: {n['type']}", type=n['type'])
     G_block.add_edges_from(block_edges)
 
-    # Let's set up a beautiful vertical hierarchy pos map
     pos_block = {
-        0: (0, 15),      # Input tokens
-        1: (-3, 13.5),   # WTE
-        2: (3, 13.5),    # WPE
-        3: (0, 12),      # Embed Sum
-        
-        # LN 1 primitives
-        4: (-2.5, 10.5), # Mean Reduce
-        5: (0, 9.5),     # Subtract
-        6: (2.5, 8.5),   # Square
-        7: (2.5, 7.2),   # Mean Reduce
-        8: (2.5, 6.0),   # Sqrt
-        9: (0, 5.0),     # Divide
-        10: (0, 3.8),    # Scale Shift
-        
-        # Q, K, V
-        11: (-5, 2),     # Q matmul
-        12: (-5, 0.8),   # Q bias
-        13: (0, 2),      # K matmul
-        14: (0, 0.8),    # K bias
-        15: (5, 2),      # V matmul
-        16: (5, 0.8),    # V bias
-        
-        # Transpose/Reshapes
-        17: (-5, -0.4),  # Q reshape
-        18: (-5, -1.6),  # Q transpose
-        19: (0, -0.4),   # K reshape
-        20: (0, -1.6),   # K transpose
-        21: (5, -0.4),   # V reshape
-        22: (5, -1.6),   # V transpose
-        
-        # Attention scores
-        23: (-2.5, -2.8),# Causal Batch MM
-        24: (-2.5, -4.0),# Softmax
-        25: (2.5, -4.0), # Attn @ V
-        
-        # Out projections
-        26: (2.5, -5.2), # Transpose
-        27: (2.5, -6.4), # Reshape
-        28: (0, -7.5),   # Out matmul
-        29: (0, -8.7),   # Out bias
-        
-        # Residual 1 Sum
-        30: (0, -10.0),  # Attn Residual Sum
-        
-        # MLP Block
-        31: (-4, -11.5), # MLP Up matmul
-        32: (-4, -12.5), # MLP Up bias
-        33: (-4, -13.5), # GELU
-        34: (-4, -14.5), # MLP Down matmul
-        35: (-4, -15.5), # MLP Down bias
-        
-        # Output layers
-        36: (0, -17.0),  # MLP Residual Sum
-        37: (0, -18.2),  # Final LN
-        38: (0, -19.5)   # Head
+        0: (0, 15), 1: (-3, 13.5), 2: (3, 13.5), 3: (0, 12),
+        4: (-2.5, 10.5), 5: (0, 9.5), 6: (2.5, 8.5), 7: (2.5, 7.2), 8: (2.5, 6.0), 9: (0, 5.0), 10: (0, 3.8),
+        11: (-5, 2), 12: (-5, 0.8), 13: (0, 2), 14: (0, 0.8), 15: (5, 2), 16: (5, 0.8),
+        17: (-5, -0.4), 18: (-5, -1.6), 19: (0, -0.4), 20: (0, -1.6), 21: (5, -0.4), 22: (5, -1.6),
+        23: (-2.5, -2.8), 24: (-2.5, -4.0), 25: (2.5, -4.0),
+        26: (2.5, -5.2), 27: (2.5, -6.4), 28: (0, -7.5), 29: (0, -8.7),
+        30: (0, -10.0),
+        31: (-4, -11.5), 32: (-4, -12.5), 33: (-4, -13.5), 34: (-4, -14.5), 35: (-4, -15.5),
+        36: (0, -17.0), 37: (0, -18.2), 38: (0, -19.5)
     }
 
-    # Node coloring
-    unique_types = list(set(n['type'] for n in block_nodes))
-    import matplotlib.colors as mcolors
-    color_palette = [
-        '#ff99ff', '#99ccff', '#99ff99', '#ffcc99', '#ffff99', '#ffb3b3', '#e6ccff',
-        '#b3f0ff', '#ffffb3', '#ffd1b3', '#ffb3d1', '#ff9999', '#b3ffb3'
-    ]
-    block_colors = {utype: color_palette[i % len(color_palette)] for i, utype in enumerate(unique_types)}
-
-    node_colors_block = [block_colors.get(G_block.nodes[n]['type'], '#cccccc') for n in G_block.nodes]
+    node_colors_block = [color_map.get(G_block.nodes[n]['type'], '#cccccc') for n in G_block.nodes]
     labels_block = nx.get_node_attributes(G_block, 'label')
 
     plt.figure(figsize=(16, 20))
@@ -305,6 +219,86 @@ def generate_visualizations():
     plt.savefig("assets/nanogpt_atomic_block_graph.png", dpi=300, bbox_inches='tight')
     plt.close()
     print("✓ Saved assets/nanogpt_atomic_block_graph.png")
+
+
+    # ==================== PLOTS 4-7: All GPT-2 Model Level Layouts ====================
+    # Generalised Multi-layer Layout Plotter
+    def plot_gpt2_level_graph(model_type, filename, title, figsize):
+        print(f"Generating full graph layout for {model_type}...")
+        nodes, edges = get_gpt2_dag(model_type)
+        
+        G = nx.DiGraph()
+        for n in nodes:
+            # Short clean labels
+            label = f"{n['id']}:{n['type'].replace('token_embedding', 'WTE').replace('positional_embedding', 'WPE').replace('causal_attention', 'SelfAttn').replace('layer_norm', 'LN').replace('linear', 'MLP').replace('activation', 'GELU')}"
+            G.add_node(n['id'], label=label, type=n['type'])
+        G.add_edges_from(edges)
+        
+        # Position Coordinates
+        pos = {
+            0: (0, 0),       # Input Token Nodes
+            1: (-2, -1.2),   # WTE
+            2: (2, -1.2),    # WPE
+            3: (0, -2.4)     # Embed Sum
+        }
+        
+        # Find number of layers
+        n_layer = (len(nodes) - 6) // 8
+        
+        # Layer Blocks
+        for l in range(n_layer):
+            ln1 = 4 + l * 10
+            attn = 5 + l * 10
+            sum_attn = 6 + l * 10
+            ln2 = 7 + l * 10
+            mlp_up = 8 + l * 10
+            act = 9 + l * 10
+            mlp_down = 10 + l * 10
+            sum_mlp = 11 + l * 10
+            
+            y_base = -3.5 - l * 5.0
+            pos[ln1] = (-2, y_base)
+            pos[attn] = (-2, y_base - 1.2)
+            pos[sum_attn] = (-2, y_base - 2.4)
+            
+            pos[ln2] = (2, y_base)
+            pos[mlp_up] = (2, y_base - 1.0)
+            pos[act] = (2, y_base - 2.0)
+            pos[mlp_down] = (2, y_base - 3.0)
+            
+            pos[sum_mlp] = (0, y_base - 4.2)
+            
+        # Final head
+        ln_f = 4 + n_layer * 10
+        head = 13
+        
+        pos[ln_f] = (0, -3.5 - n_layer * 5.0)
+        pos[head] = (0, -3.5 - n_layer * 5.0 - 1.5)
+        
+        # Render
+        plt.figure(figsize=figsize)
+        node_colors = [color_map.get(G.nodes[n]['type'], '#cccccc') for n in G.nodes]
+        labels = nx.get_node_attributes(G, 'label')
+        
+        nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=1100, edgecolors='#333333', linewidths=0.8)
+        nx.draw_networkx_edges(G, pos, arrowstyle='->', arrowsize=10, edge_color='#888888', width=0.8)
+        nx.draw_networkx_labels(G, pos, labels, font_size=5, font_family='sans-serif', font_weight='bold')
+        
+        plt.title(title, fontsize=13, fontweight='bold', pad=15)
+        plt.axis('off')
+        plt.tight_layout()
+        plt.savefig(filename, dpi=300, bbox_inches='tight')
+        plt.close()
+        print(f"✓ Saved {filename}")
+
+    # Generate all four model layouts dynamically!
+    plot_gpt2_level_graph('toy', 'assets/gpt2_toy_6l_layout.png', "Toy GPT-2 Configuration (6 Layers, 10.8M parameters)", (8, 18))
+    plot_gpt2_level_graph('gpt2', 'assets/gpt2_124m_12l_layout.png', "Standard GPT-2 Configuration (12 Layers, 124M parameters)", (8, 30))
+    plot_gpt2_level_graph('gpt2-medium', 'assets/gpt2_medium_24l_layout.png', "GPT-2 Medium Configuration (24 Layers, 350M parameters)", (10, 50))
+    
+    # We omit larger ones or render with extra size to avoid memory limit issues
+    plot_gpt2_level_graph('gpt2-large', 'assets/gpt2_large_36l_layout.png', "GPT-2 Large Configuration (36 Layers, 774M parameters)", (12, 70))
+    # plot_gpt2_level_graph('gpt2-xl', 'assets/gpt2_xl_48l_layout.png', "GPT-2 XL Configuration (48 Layers, 1.5B parameters)", (14, 90))
 
 if __name__ == "__main__":
     generate_visualizations()
