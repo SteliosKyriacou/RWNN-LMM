@@ -12,11 +12,17 @@ from rwnn.graph import RWNNGraph
 from rwnn.mutator import GraphMutator, get_gpt2_dag, is_valid_dag
 
 def get_pareto_front(population):
-    """Identifies the non-dominated individuals in a population."""
+    """Identifies the non-dominated individuals in a population (constrained to loss < 5.0)."""
+    # Restrict Pareto front members to validation loss < 5.0
+    valid_pop = [ind for ind in population if ind['loss'] < 5.0]
+    if not valid_pop:
+        # Fallback: if none are below 5.0 yet, keep all valid models to prevent empty front
+        valid_pop = [ind for ind in population if ind['loss'] < 90.0]
+        
     pareto_front = []
-    for i, ind in enumerate(population):
+    for i, ind in enumerate(valid_pop):
         dominated = False
-        for j, other in enumerate(population):
+        for j, other in enumerate(valid_pop):
             if i == j:
                 continue
             cond_loss = other['loss'] <= ind['loss']
@@ -38,8 +44,14 @@ def get_fitness(ind):
 
 
 def select_parent(population, tournament_size=3):
-    """Selects a parent using Tournament Selection based on combined fitness."""
-    candidates = random.sample(population, tournament_size)
+    """Selects a parent using Tournament Selection (restricted to validation loss < 5.0)."""
+    # Only allow parents with validation loss < 5.0
+    valid_parents = [ind for ind in population if ind['loss'] < 5.0]
+    if not valid_parents:
+        # Fallback to prevent crash if no parents are under 5.0
+        valid_parents = [ind for ind in population if ind['loss'] < 90.0]
+        
+    candidates = random.sample(valid_parents, min(tournament_size, len(valid_parents)))
     best_candidate = min(candidates, key=get_fitness)
     return best_candidate
 
@@ -103,36 +115,73 @@ def run_background_evolution(generations=100, pop_size=10, eval_steps=1000):
     mutator = GraphMutator(vocab_size, block_size, d_model)
 
     # 1. Initialize population with consistent search_d_model = 192
-    # This ensures larger and smaller layers are compared under fair, uncoupled parameters!
+    # Load the best Pareto front configurations from the previous run (Gen 99) if they exist
     population = []
+    previous_seeds = [
+        "checkpoints/pareto_gen99_ind1_config.json",
+        "checkpoints/pareto_gen99_ind3_config.json"
+    ]
+    loaded_seeds_count = 0
+    for seed_path in previous_seeds:
+        if os.path.exists(seed_path):
+            try:
+                with open(seed_path, 'r') as f:
+                    seed_data = json.load(f)
+                population.append({
+                    'nodes': seed_data['nodes'],
+                    'edges': [tuple(e) for e in seed_data['edges']],
+                    'params': seed_data['params'],
+                    'loss': seed_data['loss'], # Seed with its known loss!
+                    'type': f"prev_seed_{seed_data['type']}",
+                    'gen_born': 0
+                })
+                loaded_seeds_count += 1
+            except Exception as e:
+                print(f"Failed to load previous seed {seed_path}: {e}")
     
+    print(f"Loaded {loaded_seeds_count} previous optimal seeds (< 5.0 loss) to initialize Gen 1.")
+
     toy_nodes, toy_edges = get_gpt2_dag('toy', vocab_size, block_size, override_d_model=d_model)
     gpt2_nodes, gpt2_edges = get_gpt2_dag('gpt2', vocab_size, block_size, override_d_model=d_model)
 
-    for idx in range(pop_size):
-        if idx % 2 == 0:
-            nodes, edges = toy_nodes, toy_edges
-            model_name = f"nanoGPT_toy_seed_{idx}"
+    while len(population) < pop_size:
+        if loaded_seeds_count >= 2:
+            # Breed from our previous elites to populate the remaining slots
+            parent_a = random.choice(population[:loaded_seeds_count])
+            parent_b = random.choice(population[:loaded_seeds_count])
+            child_nodes, child_edges = mutator.crossover(
+                (parent_a['nodes'], parent_a['edges']),
+                (parent_b['nodes'], parent_b['edges'])
+            )
+            child_nodes, child_edges = mutator.mutate(child_nodes, child_edges)
+            model_name = f"hybrid_prev_seed_{len(population)}"
         else:
-            nodes, edges = gpt2_nodes, gpt2_edges
-            model_name = f"gpt2_seed_{idx}"
+            # Default fallback seeds
+            idx = len(population)
+            if idx % 2 == 0:
+                nodes, edges = toy_nodes, toy_edges
+                model_name = f"nanoGPT_toy_seed_{idx}"
+            else:
+                nodes, edges = gpt2_nodes, gpt2_edges
+                model_name = f"gpt2_seed_{idx}"
+            if idx > 1:
+                for _ in range(idx % 3 + 1):
+                    nodes, edges = mutator.mutate(nodes, edges)
+            child_nodes, child_edges = nodes, edges
 
-        # Apply random initial mutations to diversify the starting pool
-        if idx > 1:
-            for _ in range(idx % 3 + 1):
-                nodes, edges = mutator.mutate(nodes, edges)
-
-        dummy_model = RWNNGraph(nodes, edges, global_d_model=d_model)
-        params = sum(p.numel() for p in dummy_model.parameters())
-
-        population.append({
-            'nodes': nodes,
-            'edges': edges,
-            'params': params,
-            'loss': float('inf'),
-            'type': model_name,
-            'gen_born': 0
-        })
+        try:
+            dummy_model = RWNNGraph(child_nodes, child_edges, global_d_model=d_model)
+            params = sum(p.numel() for p in dummy_model.parameters())
+            population.append({
+                'nodes': child_nodes,
+                'edges': child_edges,
+                'params': params,
+                'loss': float('inf'),
+                'type': model_name,
+                'gen_born': 0
+            })
+        except Exception:
+            continue
 
     # 2. Generational Loop
     for gen in range(generations):
