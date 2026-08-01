@@ -130,7 +130,7 @@ def vector_to_multilayer_graph(x, vocab_size=50257, block_size=256, d_model=192)
     return nodes, edges
 
 
-def train_and_eval_bpe_model(nodes, edges, d_model=192, max_iters=1000, batch_size=16, block_size=128):
+def train_and_eval_bpe_model(nodes, edges, d_model=192, max_iters=1000, batch_size=32, block_size=256):
     """Trains a compiled H-DAG model on BPE tokens and returns validation loss."""
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
@@ -266,7 +266,7 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
             print(f"Evaluating candidate {idx+1}/{pop_size} (Params: {params:,})...")
             try:
                 trained_model, val_loss = train_and_eval_bpe_model(
-                    nodes, edges, d_model=d_model, max_iters=eval_steps, block_size=64
+                    nodes, edges, d_model=d_model, max_iters=eval_steps, block_size=block_size
                 )
                 if val_loss >= 5.0:
                     # Enforce strict validation loss constraint < 5.0
