@@ -370,6 +370,17 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
         plt.close()
         print(f"✓ Saved Pareto plot: {plot_file}")
 
+        # Save Agent learnings and history to disk for blog3 documentation
+        if agent._strategy_log:
+            last_entry = agent._strategy_log[-1]
+            learnings_file = "checkpoints/agentic-optim/agent_learnings_history.txt"
+            with open(learnings_file, "a") as f:
+                f.write(f"\n======================================== GENERATION {gen+1} ========================================\n")
+                f.write(f"Hypervolume: {last_entry['hv']:.4f} (Delta: {last_entry['hv_delta'] if last_entry['hv_delta'] is not None else 0.0:+.4f})\n")
+                f.write(f"Strategy: {last_entry['code_summary']}\n")
+                f.write(f"Learnings:\n{last_entry['learnings']}\n")
+            print(f"✓ Saved Agent learnings to: {learnings_file}")
+
     print("\n=== AGENTIC OPTIMIZATION LOOP COMPLETE ===")
 
 
