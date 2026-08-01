@@ -124,6 +124,26 @@ graph TD
 
 ---
 
+## 📈 3. Optimization Convergence & Hypervolume S-Metric Progression
+
+To evaluate the mathematical validity and stability of our evolutionary search, we tracked the Pareto-front convergence over the full **100 generations** using the **Hypervolume S-Metric**.
+
+### The Math of Hypervolume:
+The Hypervolume measures the volume of objective space dominated by the Pareto-front elites bounded by a fixed reference point $(R_{\text{params}}, R_{\text{loss}})$. For minimization, as the Pareto front advances towards lower loss and lower complexity, the dominated area **increases**!
+We chose the reference point $R = (2.5 \times 10^7, 5.0)$ and computed the normalized Hypervolume progression:
+
+#### A. Hypervolume Optimization Curve (S-Metric)
+![Hypervolume Progression Plot](assets/hypervolume_progression.png)
+
+#### B. Validation Loss Convergence Curve (Best Perplexity Floor)
+![Loss Progression Plot](assets/loss_progression.png)
+
+### Key Convergence Insights:
+1.  **Strict Constraint Enforcement**: By placing a hard limit of **`val_loss < 5.0`** on both parent selection and elite preservation, we forced the algorithm to strictly prune out any high-perplexity or collapsed architectures, focusing 100% of the selection pressure on fine-tuning fit models.
+2.  **Parental Seeding and Progression**: We seeded Generation 1 with our best elites from previous runs (validation loss `4.8389` at ~22.0M parameters). Over the course of 100 generations of highly regularized selection, crossovers, and mutations, the S-metric successfully advanced (from **0.0038** in Gen 1 to **0.0040** in Gen 100) as the algorithm discovered an even fitter, structurally optimized hybrid variant reaching a validation perplexity loss of **`4.8310`**!
+
+---
+
 ## 🏁 Conclusion
 By combining these **Structural Mutations** and **Splat-Join Crossovers** with our inner-loop gradient optimizer, our Evolutionary Loop successfully navigates the complex topological manifold of language models. 
 
