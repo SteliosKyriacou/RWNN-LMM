@@ -1,6 +1,5 @@
 === AGENTIC OPTIMIZATION LOOP STARTED ===
 Loaded 2 previous optimal elites to seed Gen 0.
-Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
 
 --- Agentic Generation 1 / 100 ---
 ✓ Saved generated sampling code: checkpoints/agentic-optim/generation_1_code.py
