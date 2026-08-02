@@ -14,6 +14,8 @@ We introduce a continuous-to-discrete projection framework that maps an 86-dimen
 
 Crucially, to accelerate search and achieve deep parameter convergence without institutional compute, we introduce **Lamarckian Weight Inheritance via continuous Nearest-Neighbor Ancestry Mapping**. This allows offspring graphs to instantly inherit matching pre-trained weight tensors from their closest non-dominated parents, accumulating a cumulative training horizon equivalent to **100,000 steps** over 100 generations of search. 
 
+Following the completion of our 100-generation search, we intend to conduct a rigorous, side-by-side empirical evaluation comparing our evolved optimal H-DAG architectures against standard, hand-designed baseline architectures prominent in literature and utilized by foundational AI labs. This comparative analysis will assess validation perplexity, downstream zero-shot accuracy, and parameter-efficiency boundaries against traditional sequential Transformers, Gated Linear Unit (GLU) variants, and dense-skip residual layouts, offering a definitive proof of the generalization capacity of autonomous neuroevolutionary graph design.
+
 This paper outlines the mathematical formulations, compiler specifications, and genetic operators of this framework.
 
 ---
