@@ -134,7 +134,7 @@ def vector_to_multilayer_graph(x, vocab_size=50257, block_size=256, d_model=192)
     return nodes, edges
 
 
-def train_and_eval_bpe_model(nodes, edges, d_model=192, max_iters=1000, batch_size=32, block_size=256):
+def train_and_eval_bpe_model(nodes, edges, d_model=192, max_iters=1000, batch_size=32, block_size=256, parent_state_dict=None):
     """Trains a compiled H-DAG model on BPE tokens and returns validation loss."""
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
@@ -143,6 +143,18 @@ def train_and_eval_bpe_model(nodes, edges, d_model=192, max_iters=1000, batch_si
     val_data = np.memmap('val.bin', dtype=np.uint16, mode='r')
 
     model = RWNNGraph(nodes, edges, global_d_model=d_model)
+    
+    # Lamarckian Weight Inheritance from Parents
+    if parent_state_dict is not None:
+        copied_keys_count = 0
+        child_state = model.state_dict()
+        for k, v in parent_state_dict.items():
+            if k in child_state and child_state[k].shape == v.shape:
+                child_state[k].copy_(v)
+                copied_keys_count += 1
+        if copied_keys_count > 0:
+            print(f" -> Inherited {copied_keys_count} parameter tensors from parent weights.")
+            
     model.to(device)
 
     def get_batch(split):
@@ -318,7 +330,19 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
         agent._all_X = pf_X_list
         agent._all_F = pf_F_list
 
-    # 4. Agentic Optimization Loop
+    # 4. Restore state dicts memory map from previous weight files if resuming
+    X_hash_to_state = {}
+    if highest_gen > 0:
+        for i, elite in enumerate(pf_X_list):
+            loss_val = pf_F_list[i][0]
+            weight_file = f"checkpoints/agentic-optim/pareto_gen{highest_gen}_ind{i+1}_loss{loss_val:.2f}.pt"
+            if os.path.exists(weight_file):
+                try:
+                    X_hash_to_state[tuple(elite)] = torch.load(weight_file, map_location='cpu')
+                except Exception as ex:
+                    print(f"Failed to load weight file {weight_file} into memory: {ex}")
+
+    # 5. Agentic Optimization Loop
     for gen in range(highest_gen, generations):
         print(f"\n--- Agentic Generation {gen + 1} / {generations} ---")
         
@@ -342,11 +366,23 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
             dummy_model = RWNNGraph(nodes, edges, global_d_model=d_model)
             params = sum(p.numel() for p in dummy_model.parameters())
             
+            # Distance-Based Ancestry Matching for Lamarckian Weight Inheritance
+            parent_state = None
+            if len(agent.pf_X) > 0:
+                Xp_arr = np.array(agent.pf_X)
+                dists = np.linalg.norm(Xp_arr - x, axis=1)
+                best_idx = np.argmin(dists)
+                min_dist = dists[best_idx]
+                if min_dist < 0.6:  # Candidate is in the evolutionary neighborhood of parent
+                    p_best = agent.pf_X[best_idx]
+                    parent_state = X_hash_to_state.get(tuple(p_best))
+            
             # Train and evaluate on GPU
             print(f"Evaluating candidate {idx+1}/{pop_size} (Params: {params:,})...")
             try:
                 trained_model, val_loss = train_and_eval_bpe_model(
-                    nodes, edges, d_model=d_model, max_iters=eval_steps, block_size=block_size
+                    nodes, edges, d_model=d_model, max_iters=eval_steps, block_size=block_size,
+                    parent_state_dict=parent_state # Inherit parent weights!
                 )
                 if val_loss >= 5.0:
                     # Enforce strict validation loss constraint < 5.0
@@ -364,6 +400,11 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
             
         F_arr = np.array(F)
         
+        # Cache newly evaluated state-dicts
+        for k in range(pop_size):
+            if state_dicts[k] is not None:
+                X_hash_to_state[tuple(X[k])] = state_dicts[k]
+                
         # Report results back to MetisAgent
         agent.tell(X, F_arr)
 
@@ -374,6 +415,10 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
         valid_idx = [i for i, f in enumerate(Fp) if f[0] < 5.0]
         Xp = Xp[valid_idx] if len(valid_idx) > 0 else Xp
         Fp = Fp[valid_idx] if len(valid_idx) > 0 else Fp
+
+        # Prune X_hash_to_state to keep only active Pareto front members' state dicts (Prevents memory bloat!)
+        active_keys = set(tuple(x) for x in Xp)
+        X_hash_to_state = {k: v for k, v in X_hash_to_state.items() if k in active_keys}
 
         print(f"\n🏆 Generation {gen + 1} Agentic Pareto Front:")
         
