@@ -1,5 +1,9 @@
 import os
 import sys
+
+# Load model variables. API Key is read dynamically from env or local .env
+os.environ["GEMINI_MODEL"] = "gemini-3.5-flash"
+
 import json
 import time
 import math

@@ -3,3 +3,4 @@ input.txt
 *.bin
 *.pt
 checkpoints/
+.env
