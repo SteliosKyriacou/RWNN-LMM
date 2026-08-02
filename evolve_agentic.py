@@ -127,6 +127,10 @@ def vector_to_multilayer_graph(x, vocab_size=50257, block_size=256, d_model=192)
     edges.append((current_x, ln_f_id))
     edges.append((ln_f_id, head_id))
     
+    # Global Defensive Edge Filtering: Ensure both endpoints u and v exist in the nodes set
+    node_ids = {n['id'] for n in nodes}
+    edges = [(u, v) for u, v in edges if u in node_ids and v in node_ids]
+    
     return nodes, edges
 
 
@@ -185,23 +189,72 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
     block_size = 256
     d_model = 192
 
-    # 1. Initialize population with standard Toy and GPT-2 seeds (using the same channel parity d_model=192)
+    # Find highest completed generation on disk for automatic resume capability
+    highest_gen = 0
+    for gen in range(1, 101):
+        if os.path.exists(f"checkpoints/agentic-optim/generation_{gen}_report.json"):
+            highest_gen = gen
+
     initial_population = []
+    loaded_seeds_count = 0
     
-    # Load 6-layer toy and 12-layer gpt2 seeds encoded as continuous 65D vectors!
+    if highest_gen > 0:
+        print(f"Resuming from completed Generation {highest_gen}...")
+        report_file = f"checkpoints/agentic-optim/generation_{highest_gen}_report.json"
+        with open(report_file, 'r') as f:
+            elites = json.load(f)
+        for e in elites:
+            config_file = e['saved_config']
+            if os.path.exists(config_file):
+                try:
+                    with open(config_file, 'r') as f:
+                        c_data = json.load(f)
+                    initial_population.append(np.array(c_data['vector']))
+                    loaded_seeds_count += 1
+                except Exception as ex:
+                    print(f"Failed to load config {config_file}: {ex}")
+    else:
+        # Load standard initial seeds from previous vanilla run
+        previous_seeds = [
+            "checkpoints/vanila evolutionary algorithm/pareto_gen99_ind1_config.json",
+            "checkpoints/vanila evolutionary algorithm/pareto_gen99_ind3_config.json"
+        ]
+        for seed_path in previous_seeds:
+            if os.path.exists(seed_path):
+                try:
+                    with open(seed_path, 'r') as f:
+                        seed_data = json.load(f)
+                    # Use standard Multilayer vector layout
+                    # Let's seed with toy and gpt2 templates directly
+                    toy_vec = multilayer_graph_to_vector('toy')
+                    gpt2_vec = multilayer_graph_to_vector('gpt2')
+                    initial_population.append(toy_vec)
+                    initial_population.append(gpt2_vec)
+                    loaded_seeds_count += 2
+                    break # Loaded both templates in one go
+                except Exception as e:
+                    print(f"Failed to load previous seed {seed_path}: {e}")
+                    
+    print(f"Loaded {loaded_seeds_count} previous optimal elites to seed Gen 0.")
+    
+    # Fill up the rest of the initial population
     toy_vec = multilayer_graph_to_vector('toy')
     gpt2_vec = multilayer_graph_to_vector('gpt2')
-    
-    initial_population.append(toy_vec)
-    initial_population.append(gpt2_vec)
-    
-    # Diversify the remaining Gen 0 population with randomized vector configs
     while len(initial_population) < pop_size:
-        # Base vector randomly chosen from parents
-        base_v = toy_vec.copy() if random.random() < 0.5 else gpt2_vec.copy()
-        # Add soft mutations to explore different layers, heads, or skips
-        noise = np.random.randn(65) * 0.15
-        initial_population.append(np.clip(base_v + noise, 0.0, 1.0))
+        if loaded_seeds_count >= 2:
+            # Breed from our previous elites to populate the remaining slots
+            parent_a = random.choice(initial_population[:loaded_seeds_count])
+            parent_b = random.choice(initial_population[:loaded_seeds_count])
+            # Linear blend mutation for vectors
+            blend = np.random.uniform(0.0, 1.0, 65)
+            child = blend * parent_a + (1.0 - blend) * parent_b
+            if random.random() < 0.3:
+                child += np.random.randn(65) * 0.1
+            initial_population.append(np.clip(child, 0.0, 1.0))
+        else:
+            base_v = toy_vec.copy() if random.random() < 0.5 else gpt2_vec.copy()
+            noise = np.random.randn(65) * 0.15
+            initial_population.append(np.clip(base_v + noise, 0.0, 1.0))
         
     initial_pop_arr = np.array(initial_population)
 
@@ -237,9 +290,36 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
     )
     # Reference point for Hypervolume (Rx = 2.5e7 parameters, Ry = 5.0 validation loss)
     agent.ref = [2.5e7, 5.0]
+    
+    # Adjust starting generation and restore Agent's internal state memory if resuming
+    if highest_gen > 0:
+        agent.generation = highest_gen
+        
+        # Populate agent's Pareto front and evaluated memory so context builders and diagnostics run smoothly
+        pf_X_list = []
+        pf_F_list = []
+        report_file = f"checkpoints/agentic-optim/generation_{highest_gen}_report.json"
+        if os.path.exists(report_file):
+            try:
+                with open(report_file, 'r') as f:
+                    elites = json.load(f)
+                for e in elites:
+                    config_file = e['saved_config']
+                    if os.path.exists(config_file):
+                        with open(config_file, 'r') as f:
+                            c_data = json.load(f)
+                        pf_X_list.append(np.array(c_data['vector']))
+                        pf_F_list.append(np.array([c_data['loss'], c_data['params']]))
+            except Exception as ex:
+                print(f"Failed to restore agent memory from reports: {ex}")
+                
+        agent.pf_X = pf_X_list
+        agent.pf_F = pf_F_list
+        agent._all_X = pf_X_list
+        agent._all_F = pf_F_list
 
     # 4. Agentic Optimization Loop
-    for gen in range(generations):
+    for gen in range(highest_gen, generations):
         print(f"\n--- Agentic Generation {gen + 1} / {generations} ---")
         
         # Agent writes Python code and proposes candidates

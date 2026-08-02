@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/home/stelios/repos/RWNN-LMM/evolve_agentic.py", line 445, in <module>
+    run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000)
+  File "/home/stelios/repos/RWNN-LMM/evolve_agentic.py", line 303, in run_agentic_optimization
+    X = agent.ask()
+  File "/home/stelios/repos/agentic-optimizer/agentic_optimizer/metis_agent.py", line 596, in ask
+    context = self._build_context()
+  File "/home/stelios/repos/agentic-optimizer/agentic_optimizer/metis_agent.py", line 356, in _build_context
+    sort_idx = np.argsort(pf_F[:, 0])
+IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed
+
+ERROR conda.cli.main_run:execute(47): `conda run python -u evolve_agentic.py` failed. (See above for error)
+=== AGENTIC OPTIMIZATION LOOP STARTED ===
+Resuming from completed Generation 3...
+Loaded 7 previous optimal elites to seed Gen 0.
+
+--- Agentic Generation 4 / 100 ---
+
