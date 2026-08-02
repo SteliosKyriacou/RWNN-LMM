@@ -121,6 +121,30 @@ Over 100 generations of search with `eval_steps = 1000` steps per generation, th
 
 ---
 
+## 5. Autonomous Agentic Search & Auxiliary Prompt Engineering
+
+Unlike traditional mathematical optimizers (such as CMA-ES or NSGA-II) which apply rigid, hardcoded perturbation operators, our search is governed entirely by an autonomous, stateful **Agentic Optimizer** (Metis-Agent; Kyriacou, 2026) powered by Google's Gemini-3.5-Flash. The agent operates as a learning entity across generations, maintaining a persistent multi-turn conversation history. 
+
+### A. The Self-Diagnosing Code Loop
+Each generation, the agent receives an analytical summary of the current optimization state:
+*   Objective values and decision vectors of the elite Pareto front.
+*   Objective ranges, hypervolume (HV) history, and delta convergence trends.
+*   Gaps in the Pareto front (largest objective spacings) and most influential variables.
+
+Rather than relying on fixed math, the agent is instructed to **actively write Python diagnostic code** (e.g. SVD on `pf_X` or computing excess correlation matrices to compare average couplings against overall evaluations). It executes this code inside its sandboxed namespace, analyzes the results, and dynamically writes a custom, highly optimized NumPy sampling algorithm for that specific generation (e.g., rotating between localized coordinate-wise refinement, PCA-guided mutations, or training a surrogate-inverse Ridge regression model to target gaps).
+
+### B. Auxiliary Prompt Analysis: Injecting Domain-Specific Physics
+To bridge the gap between blind mathematical search and physical intuition, we inject a highly structured **Auxiliary Prompt (Problem Context)** directly into the agent's system instruction. This prompt serves as the "physical/structural intuition" of the model:
+
+1.  **Symmetric Flow and Depth**: We instruct the agent that variables closer to index 0 control model depth (layers), and that larger depth increases parameter count but dramatically accelerates validation loss convergence.
+2.  **Residual Stream Physics**: We explain that establishing cross-layer connections directly establishes deep residual highways. This guides the agent to selectively activate skip variables ($x_{49} \dots x_{64}$) to maintain stable gradient backpropagation.
+3.  **Co-dependence of Normalization & Attention**: The prompt informs the agent that attention layers must always be preceded by normalization (LayerNorm) to prevent high-dimensional variance drift, guiding it to preserve $(LN \to Attention \to Sum)$ structures.
+4.  **Sparsity & Dimensional Bottlenecks**: It explains that setting connection variables to $\le 0.5$ effectively prunes those edges, reducing complexity.
+
+By providing this plain-text engineering context, the agent is capable of making informed structural decisions rather than random permutations. It can reason about the trade-offs of the architecture, actively pivot its search strategies when the hypervolume stagnates, and safely guide the model toward the most efficient regions of the Pareto front.
+
+---
+
 ## References
 1.  **Vaswani, A., et al.** (2017). *Attention is all you need.* Advances in Neural Information Processing Systems (NeurIPS 2017).
 2.  **Xie, S., et al.** (2019). *Exploring randomly wired neural networks for image recognition.* Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV 2019).
