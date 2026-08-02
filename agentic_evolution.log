@@ -3331,3 +3331,1127 @@ Evaluating candidate 2/10 (Params: 19,398,481)...
 Evaluating candidate 3/10 (Params: 19,398,481)...
 Evaluating candidate 4/10 (Params: 19,398,481)...
 Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 70 Agentic Pareto Front:
+  Elite 1: Params=24,736,849, Loss=4.4157
+  Elite 2: Params=19,694,737, Loss=4.8970
+  Elite 3: Params=21,622,801, Loss=4.5088
+  Elite 4: Params=19,843,345, Loss=4.7827
+  Elite 5: Params=23,402,257, Loss=4.4609
+  Elite 6: Params=23,847,121, Loss=4.4489
+  Elite 7: Params=20,585,425, Loss=4.5781
+  Elite 8: Params=22,957,393, Loss=4.4824
+  Elite 9: Params=19,991,953, Loss=4.7267
+  Elite 10: Params=20,288,209, Loss=4.6439
+  Elite 11: Params=19,547,089, Loss=4.9265
+  Elite 12: Params=23,550,865, Loss=4.4608
+  Elite 13: Params=23,699,473, Loss=4.4527
+  Elite 14: Params=24,291,025, Loss=4.4326
+  Elite 15: Params=22,809,745, Loss=4.4971
+✓ Saved checkpoints/agentic-optim/generation_70_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_70_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 71 / 100 ---
+  Agent error: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_71_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,547,089)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,694,737)...
+Evaluating candidate 9/10 (Params: 20,140,561)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 71 Agentic Pareto Front:
+  Elite 1: Params=24,736,849, Loss=4.4157
+  Elite 2: Params=19,694,737, Loss=4.8970
+  Elite 3: Params=21,622,801, Loss=4.5088
+  Elite 4: Params=19,843,345, Loss=4.7827
+  Elite 5: Params=23,402,257, Loss=4.4609
+  Elite 6: Params=23,847,121, Loss=4.4489
+  Elite 7: Params=20,585,425, Loss=4.5781
+  Elite 8: Params=22,957,393, Loss=4.4824
+  Elite 9: Params=19,991,953, Loss=4.7267
+  Elite 10: Params=20,288,209, Loss=4.6439
+  Elite 11: Params=19,547,089, Loss=4.9265
+  Elite 12: Params=23,550,865, Loss=4.4608
+  Elite 13: Params=23,699,473, Loss=4.4527
+  Elite 14: Params=24,291,025, Loss=4.4326
+  Elite 15: Params=22,809,745, Loss=4.4971
+✓ Saved checkpoints/agentic-optim/generation_71_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_71_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 72 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 34.528151272s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '34s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_72_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 24,291,985)...
+Evaluating candidate 6/10 (Params: 22,067,665)...
+Evaluating candidate 7/10 (Params: 20,288,209)...
+Evaluating candidate 8/10 (Params: 22,067,665)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 72 Agentic Pareto Front:
+  Elite 1: Params=24,736,849, Loss=4.4157
+  Elite 2: Params=19,694,737, Loss=4.8970
+  Elite 3: Params=21,622,801, Loss=4.5088
+  Elite 4: Params=19,843,345, Loss=4.7827
+  Elite 5: Params=23,402,257, Loss=4.4609
+  Elite 6: Params=23,847,121, Loss=4.4489
+  Elite 7: Params=20,585,425, Loss=4.5781
+  Elite 8: Params=22,957,393, Loss=4.4824
+  Elite 9: Params=19,991,953, Loss=4.7267
+  Elite 10: Params=20,288,209, Loss=4.6439
+  Elite 11: Params=19,547,089, Loss=4.9265
+  Elite 12: Params=23,550,865, Loss=4.4608
+  Elite 13: Params=23,699,473, Loss=4.4527
+  Elite 14: Params=24,291,025, Loss=4.4326
+  Elite 15: Params=22,809,745, Loss=4.4971
+✓ Saved checkpoints/agentic-optim/generation_72_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_72_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 73 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 34.348162196s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '34s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_73_code.py
+Evaluating candidate 1/10 (Params: 19,694,737)...
+Evaluating candidate 2/10 (Params: 23,254,609)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,843,345)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 73 Agentic Pareto Front:
+  Elite 1: Params=24,736,849, Loss=4.4157
+  Elite 2: Params=19,694,737, Loss=4.8970
+  Elite 3: Params=21,622,801, Loss=4.5088
+  Elite 4: Params=19,843,345, Loss=4.7827
+  Elite 5: Params=23,402,257, Loss=4.4609
+  Elite 6: Params=23,847,121, Loss=4.4489
+  Elite 7: Params=20,585,425, Loss=4.5781
+  Elite 8: Params=22,957,393, Loss=4.4824
+  Elite 9: Params=19,991,953, Loss=4.7267
+  Elite 10: Params=20,288,209, Loss=4.6439
+  Elite 11: Params=19,547,089, Loss=4.9265
+  Elite 12: Params=23,550,865, Loss=4.4608
+  Elite 13: Params=23,699,473, Loss=4.4527
+  Elite 14: Params=24,291,025, Loss=4.4326
+  Elite 15: Params=22,809,745, Loss=4.4971
+✓ Saved checkpoints/agentic-optim/generation_73_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_73_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 74 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 18.291400012s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '18s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_74_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 25,181,713)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 74 Agentic Pareto Front:
+  Elite 1: Params=24,736,849, Loss=4.4157
+  Elite 2: Params=19,694,737, Loss=4.8970
+  Elite 3: Params=21,622,801, Loss=4.5088
+  Elite 4: Params=19,843,345, Loss=4.7827
+  Elite 5: Params=23,402,257, Loss=4.4609
+  Elite 6: Params=23,847,121, Loss=4.4489
+  Elite 7: Params=20,585,425, Loss=4.5781
+  Elite 8: Params=22,957,393, Loss=4.4824
+  Elite 9: Params=19,991,953, Loss=4.7267
+  Elite 10: Params=20,288,209, Loss=4.6439
+  Elite 11: Params=19,547,089, Loss=4.9265
+  Elite 12: Params=23,550,865, Loss=4.4608
+  Elite 13: Params=23,699,473, Loss=4.4527
+  Elite 14: Params=24,291,025, Loss=4.4326
+  Elite 15: Params=22,809,745, Loss=4.4971
+✓ Saved checkpoints/agentic-optim/generation_74_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_74_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 75 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 46.799262538s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '46s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_75_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,547,089)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,843,345)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 75 Agentic Pareto Front:
+  Elite 1: Params=24,736,849, Loss=4.4157
+  Elite 2: Params=19,694,737, Loss=4.8970
+  Elite 3: Params=21,622,801, Loss=4.5088
+  Elite 4: Params=19,843,345, Loss=4.7827
+  Elite 5: Params=23,402,257, Loss=4.4609
+  Elite 6: Params=23,847,121, Loss=4.4489
+  Elite 7: Params=20,585,425, Loss=4.5781
+  Elite 8: Params=22,957,393, Loss=4.4824
+  Elite 9: Params=19,991,953, Loss=4.7267
+  Elite 10: Params=20,288,209, Loss=4.6439
+  Elite 11: Params=23,550,865, Loss=4.4608
+  Elite 12: Params=23,699,473, Loss=4.4527
+  Elite 13: Params=24,291,025, Loss=4.4326
+  Elite 14: Params=22,809,745, Loss=4.4971
+  Elite 15: Params=19,547,089, Loss=4.9262
+✓ Saved checkpoints/agentic-optim/generation_75_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_75_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 76 / 100 ---
+
+  [32m[THINKING] **My Optimization Strategy: Valid Pareto Front Focus**
+
+Okay, here's the game plan. We're in a multi-objective optimization problem, trying to minimize both loss ($f_1$) and parameter count ($f_2$). We have 65 variables to play with, spanning depth, block configurations (attention and MLP), activations, and skip connections. The Pareto Front (PF) currently has 100 solutions, but the Hypervolume (HV) is stuck at 0.0. I suspect this is because of some extreme outliers where $f_1$ hits a ridiculous 99.9, and we need to ignore those.
+
+The key is to focus on *valid* solutions, meaning those with $f_1 < 5.0$. Parameter count wise, we have a "stability cliff" where things go sideways around 19.4M - 19.6M parameters. Inverse models (like Ridge regression) have shown promise in filling gaps, but the fallback perturbation loop is suggesting resource limits or stagnation.
+
+The search space seems non-separable, with significant coupling between the structural variables. The valid basin appears unimodal, but this "failure" region on the loss side skews things. The HV stagnation is directly tied to the presence of those extreme loss values. This indicates a poor reference point or that solutions dominate the space so heavily that their normalized volume shrinks to near zero. I need to get rid of these bad apples in the data.
+
+My approach will be a multi-pronged attack:
+
+1.  **Filter and Refine**: First, I'll filter the current PF to keep only valid solutions ($f_1 < 5.0$).
+2.  **Inverse Model**: Use Ridge regression on these filtered solutions (`pf_F_valid -> pf_X_valid`) to predict configurations (`X_gen`).
+3.  **Target Gaps**: Identify and target gaps in the parameter count ($f_2$), sorted by parameter count. I'll use midpoints of consecutive $f_2$ values as the targets.
+4.  **Boundary Pushing**: Attempt to push the boundary of the valid region, targeting slightly *below* the current minimum parameter count for a valid model. I know there's a cliff around 19.5, so I will probe this region with coordinate-wise refinement.
+5.  **Activation Tuning**: Swap activations on the best valid solutions to squeeze out any additional loss reduction.
+
+My specific variables and calculations will involve:
+*   `vX`, `vF`: Filtered valid solutions.
+*   `W`: Ridge regression weights.
+*   `targets`: Desired $[f_1, f_2]$ points for generation.
+*   `X_gen`: Predicted variable configurations.
+
+This strategy will encompass:
+*   10 candidates generated.
+*   4 gap-filling attempts.
+*   3 boundary-pushing (cliff) attempts.
+*   3 local refinement (activation) attempts.
+
+I have to ensure that I handle depth correctly and reinforce the significance of the skips (49-64) for overall stability. I need to clip generated values to the $[0, 1]$ range. Compact code is always a goal, and I want to ensure my code is readable and concise.
+
+I'm aware that:
+*   $f_2$ sorted indices are `f2_s`.
+*   Gap 7-8 is between `vF[f2_s[7]]` and `vF[f2_s[8]]`.
+*   Smallest valid is `vF[f2_s[0]]` (~19.5M).
+*   Cliff probing will be done by nudging `best_small_x` through block disabling.
+
+I will also make sure to check for potential division by zero errors or empty arrays. Using the `rng` for randomness is good practice. In summary, I think the space is Non-Separable (from the Excess corr 0.14 evidence) and that Inverse Ridge Refinement + Skip Reinforcement is the best plan. The inverse Ridge is working well (+11 solutions in the last few generations).
+
+
+[0m
+Excess corr: 0.1334
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_76_code.py
+Evaluating candidate 1/10 (Params: 23,402,257)...
+Evaluating candidate 2/10 (Params: 23,847,121)...
+Evaluating candidate 3/10 (Params: 20,288,209)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 20,139,601)...
+Evaluating candidate 6/10 (Params: 20,139,601)...
+Evaluating candidate 7/10 (Params: 20,139,601)...
+Evaluating candidate 8/10 (Params: 24,736,849)...
+Evaluating candidate 9/10 (Params: 24,291,985)...
+Evaluating candidate 10/10 (Params: 24,291,985)...
+
+🏆 Generation 76 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=19,843,345, Loss=4.7827
+  Elite 4: Params=23,402,257, Loss=4.4609
+  Elite 5: Params=23,847,121, Loss=4.4489
+  Elite 6: Params=20,585,425, Loss=4.5781
+  Elite 7: Params=22,957,393, Loss=4.4824
+  Elite 8: Params=19,991,953, Loss=4.7267
+  Elite 9: Params=20,288,209, Loss=4.6439
+  Elite 10: Params=23,550,865, Loss=4.4608
+  Elite 11: Params=23,699,473, Loss=4.4527
+  Elite 12: Params=24,291,025, Loss=4.4326
+  Elite 13: Params=22,809,745, Loss=4.4971
+  Elite 14: Params=19,547,089, Loss=4.9262
+  Elite 15: Params=24,291,985, Loss=4.4123
+✓ Saved checkpoints/agentic-optim/generation_76_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_76_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 77 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 1.609415185s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '1s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_77_code.py
+Evaluating candidate 1/10 (Params: 19,547,089)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 22,216,273)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 77 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=19,843,345, Loss=4.7827
+  Elite 4: Params=23,402,257, Loss=4.4609
+  Elite 5: Params=23,847,121, Loss=4.4489
+  Elite 6: Params=20,585,425, Loss=4.5781
+  Elite 7: Params=22,957,393, Loss=4.4824
+  Elite 8: Params=19,991,953, Loss=4.7267
+  Elite 9: Params=20,288,209, Loss=4.6439
+  Elite 10: Params=23,550,865, Loss=4.4608
+  Elite 11: Params=23,699,473, Loss=4.4527
+  Elite 12: Params=24,291,025, Loss=4.4326
+  Elite 13: Params=22,809,745, Loss=4.4971
+  Elite 14: Params=19,547,089, Loss=4.9262
+  Elite 15: Params=24,291,985, Loss=4.4123
+✓ Saved checkpoints/agentic-optim/generation_77_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_77_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 78 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 8.265331436s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '8s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_78_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 78 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=19,843,345, Loss=4.7827
+  Elite 4: Params=23,402,257, Loss=4.4609
+  Elite 5: Params=23,847,121, Loss=4.4489
+  Elite 6: Params=20,585,425, Loss=4.5781
+  Elite 7: Params=22,957,393, Loss=4.4824
+  Elite 8: Params=19,991,953, Loss=4.7267
+  Elite 9: Params=20,288,209, Loss=4.6439
+  Elite 10: Params=23,550,865, Loss=4.4608
+  Elite 11: Params=23,699,473, Loss=4.4527
+  Elite 12: Params=24,291,025, Loss=4.4326
+  Elite 13: Params=22,809,745, Loss=4.4971
+  Elite 14: Params=19,547,089, Loss=4.9262
+  Elite 15: Params=24,291,985, Loss=4.4123
+✓ Saved checkpoints/agentic-optim/generation_78_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_78_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 79 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 12.834070308s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '12s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_79_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,547,089)...
+Evaluating candidate 4/10 (Params: 19,547,089)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,843,345)...
+Evaluating candidate 10/10 (Params: 19,843,345)...
+
+🏆 Generation 79 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+✓ Saved checkpoints/agentic-optim/generation_79_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_79_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 80 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 48.942608452s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '48s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_80_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 80 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+✓ Saved checkpoints/agentic-optim/generation_80_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_80_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 81 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 53.435583746s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '53s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_81_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 81 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+✓ Saved checkpoints/agentic-optim/generation_81_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_81_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 82 / 100 ---
+  Agent error: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'Deadline expired before operation could complete.', 'status': 'UNAVAILABLE'}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_82_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,547,089)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,843,345)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 82 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+✓ Saved checkpoints/agentic-optim/generation_82_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_82_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 83 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 49.278465784s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '49s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_83_code.py
+Evaluating candidate 1/10 (Params: 19,694,737)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 23,698,513)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,843,345)...
+
+🏆 Generation 83 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+✓ Saved checkpoints/agentic-optim/generation_83_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_83_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 84 / 100 ---
+
+  [32m[THINKING] **Generation 83: A Focused Optimization Plan**
+
+Alright, let's take stock. We're at Generation 83 with 830 evaluations under our belt. The Hypervolume (HV) has been stagnant for a while, a likely artifact of that pesky $f_1=99.9$ outlier, or possibly a scaling issue. But the Pareto Front is solid with 100 solutions. We've got a new best $f_1$ of 4.4123 at a parameter count of 24.29M.
+
+Our key objectives are minimizing loss ($f_1$, target < 5.0) and minimizing parameters ($f_2$). We still have some noticeable gaps in the Pareto Front concerning parameter count, particularly around the 22.2M and 21.1M regions (e.g., Gap 7-8 has a 1.18M gap).
+
+The problem structure is shaping up. The system is non-separable – we see excess correlation of ~0.14 – and unimodal within the valid basin. There's a critical stability cliff around the 19.5M parameter mark; cross that threshold and the loss skyrockets to 99.9.
+
+The historical strategy has been Inverse Ridge models (MAIS, TIRS, ARIS), which have successfully filled gaps. Resource errors caused some fallback perturbations, but thankfully, some of those yielded useful solutions.
+
+My immediate goals are clear: refine that best loss ($f_1 = 4.4123$), fill those large $f_2$ gaps (22.2M, 21.1M), and cautiously probe the stability cliff below 19.5M. We need to keep those skip connections (variables 49-64) high to maintain stability.
+
+I'm implementing an Inverse Ridge Regression approach, solving for $x$ given $f$. My targets for this generation are:
+
+1.  Fill Gap 7-8 (target ~22.2M parameters).
+2.  Fill Gap 8-9 (target ~21.1M parameters).
+3.  Refine the best loss (aim for $f_1 < 4.41$).
+4.  Probe the cliff (target ~19.4M parameters).
+
+I’ll be using a Ridge Model. I'll filter the Pareto front by the loss threshold ($f_1 < 5.0$). I will generate 10 candidate solutions:
+
+*   4 for filling the $f_2$ gaps.
+*   3 for probing the cliff.
+*   3 for refining the loss extreme.
+
+I'm noting that variables 33-48 are activations, 49-64 are skips, variable 0 is depth, and variables 1-32 are blocks. The correlation evidence suggests that blocks 1-32 and depth 0 show significant correlation with loss.
+
+My plan is Inverse Manifold Targeted Search (IMTS) to tackle those $f_2$ gaps and venture near the 19.4M parameter boundary.
+
+I'm going to make sure that the objectives are non-redundant and force skips high on the candidates that are meant to probe the boundary. I will clip variables to \[0, 1]. I also need to make sure that the Ridge logic is robust to a small $n_{pf}$.
+
+**Final Plan for Generation 83:**
+
+*   4 candidates targeting $f_2$ gaps (22.2M, 21.1M, 20.4M, 23.5M).
+*   3 candidates targeting the 19.4M limit (low depth, high skips).
+*   3 candidates refining the $f_1$ extreme (perturbing activations).
+
+
+[0m
+Mean PF Coupling: 0.570 — non-sep
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_84_code.py
+Evaluating candidate 1/10 (Params: 22,067,665)...
+Evaluating candidate 2/10 (Params: 20,288,209)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 23,847,121)...
+Evaluating candidate 5/10 (Params: 20,139,601)...
+Evaluating candidate 6/10 (Params: 20,139,601)...
+Evaluating candidate 7/10 (Params: 20,139,601)...
+Evaluating candidate 8/10 (Params: 24,291,985)...
+Evaluating candidate 9/10 (Params: 24,291,985)...
+Evaluating candidate 10/10 (Params: 24,736,849)...
+
+🏆 Generation 84 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+✓ Saved checkpoints/agentic-optim/generation_84_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_84_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 85 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 1.730707094s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '1s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_85_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 85 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+✓ Saved checkpoints/agentic-optim/generation_85_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_85_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 86 / 100 ---
+Mean PF Coupling: 0.570
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_86_code.py
+Evaluating candidate 1/10 (Params: 22,067,665)...
+Evaluating candidate 2/10 (Params: 20,288,209)...
+Evaluating candidate 3/10 (Params: 23,847,121)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 20,139,601)...
+Evaluating candidate 6/10 (Params: 20,139,601)...
+Evaluating candidate 7/10 (Params: 20,139,601)...
+Evaluating candidate 8/10 (Params: 24,291,985)...
+Evaluating candidate 9/10 (Params: 24,291,985)...
+Evaluating candidate 10/10 (Params: 24,291,985)...
+
+🏆 Generation 86 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+✓ Saved checkpoints/agentic-optim/generation_86_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_86_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 87 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 15.474917ms.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '0s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_87_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 87 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+✓ Saved checkpoints/agentic-optim/generation_87_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_87_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 88 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 4.338148129s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '4s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_88_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,694,737)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 22,512,529)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,547,089)...
+Evaluating candidate 7/10 (Params: 19,694,737)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 88 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+✓ Saved checkpoints/agentic-optim/generation_88_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_88_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 89 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 8.875912799s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '8s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_89_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,695,697)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 22,809,745)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,694,737)...
+Evaluating candidate 8/10 (Params: 19,547,089)...
+Evaluating candidate 9/10 (Params: 20,288,209)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 89 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+  Elite 16: Params=19,695,697, Loss=4.8844
+✓ Saved checkpoints/agentic-optim/generation_89_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_89_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 90 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 32.09104785s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '32s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_90_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,547,089)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 22,512,529)...
+
+🏆 Generation 90 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+  Elite 16: Params=19,695,697, Loss=4.8844
+✓ Saved checkpoints/agentic-optim/generation_90_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_90_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 91 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 37.854160012s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '37s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_91_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,547,089)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 91 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+  Elite 16: Params=19,695,697, Loss=4.8844
+✓ Saved checkpoints/agentic-optim/generation_91_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_91_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 92 / 100 ---
+
+  [32m[THINKING] **My Current Optimization Strategy for this 65-Variable Black-Box Function**
+
+Okay, here's the deal. I'm tackling a multi-objective optimization problem, specifically generating a Pareto front for this 65-variable black-box function. My objectives? Minimize loss (below 5.0 ideally) and minimize the number of trainable parameters. We're on Generation 91, and I've already evaluated 910 solutions, yielding 100 Pareto-optimal points.
+
+Here's the landscape I'm navigating: Loss is between 4.4 and 99.9, parameter counts range from roughly 19.4M to 24.3M. There's a nasty "stability cliff" where loss jumps to 99.9 around 19.4M-19.5M parameters. I'm seeing significant gaps in the Pareto front – around 1.18M between 22.8M and 21.6M parameters (Gap 7-8) and another 1.03M between 21.6M and 20.5M parameters (Gap 8-9).
+
+The key variables are the last 16 (49-64), which appear to act as stabilizers and have a negative correlation with both objectives, and the first 32 (1-32), which control the loss/complexity trade-off. It's a non-separable problem, meaning structure and stability are coupled. On the bright side, the function seems unimodal, so I'm likely operating within a valid basin. Inverse models are the way to go here (IRR, MAIS, MRIP), and the goal is to keep things simple.
+
+My strategy boils down to:
+
+1.  **Gap Filling**: Target the f2 (parameter) values that are creating the biggest gaps on the Pareto front. Specifically, the targets will be 22.2M, 21.1M, 20.1M, and 19.5M.
+2.  **Boundary Extension**: Push the Pareto front slightly below the stability cliff at 19.3M.
+3.  **Refinement**: Improve loss at existing complexities by tweaking the activation types (variables 33-48).
+
+I'm using Ridge-Inverse (Inverse Ridge Regression) as my core algorithm. The code needs to be very concise to avoid issues; I've had `RESOURCE_EXHAUSTED` errors. I'm working with NumPy for simplicity, and I'll make sure all variable ranges are within 0.0 to 1.0.
+
+In terms of specifics: I'm making sure variables 49-64 (skips) are set to 1.0 to ensure stability, and variables 0 is clipped to 0-0.1 for boundary expansion. My refined Ridge Model is now incredibly compact:
+
+```python
+f_min, f_max = np.min(vF, 0), np.max(vF, 0)
+nf = (vF - f_min) / (f_max - f_min + 1e-9)
+W = np.linalg.pinv(nf.T @ nf + 1e-3 * np.eye(2)) @ nf.T @ vX
+```
+
+I had a MRIP failure because of error 429 which might trigger from a complexity problem, although 429 usually means a rate limit. I'm streamlining to avoid further issues. Ultimately, my plan focuses on efficiently filling gaps, extending the boundary, and refining losses within existing complexities.
+
+
+
+[0m
+Mean PF Coupling: 0.570 — non-sep
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_92_code.py
+Evaluating candidate 1/10 (Params: 22,512,529)...
+Evaluating candidate 2/10 (Params: 20,288,209)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 23,847,121)...
+Evaluating candidate 5/10 (Params: 20,288,209)...
+Evaluating candidate 6/10 (Params: 20,288,209)...
+Evaluating candidate 7/10 (Params: 20,288,209)...
+Evaluating candidate 8/10 (Params: 24,291,985)...
+Evaluating candidate 9/10 (Params: 24,291,985)...
+Evaluating candidate 10/10 (Params: 24,291,985)...
+
+🏆 Generation 92 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+  Elite 16: Params=19,695,697, Loss=4.8844
+✓ Saved checkpoints/agentic-optim/generation_92_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_92_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 93 / 100 ---
+
+  [32m[THINKING] **Generation 92: Refining the Pareto Front**
+
+Okay, so we're on Generation 92, and the goal remains the same: nail down that Pareto Front (PF) for this 65-variable function. We're dealing with depth, attention blocks, MLP blocks, activation functions, and skip connections, all trying to optimize for loss (f1, aiming for < 5.0) and parameter count (f2). Currently, we have a capped PF of 100 solutions, but the Hypervolume (HV) is stuck at 0.0, which is likely a reference point issue, or due to a long tail of very bad solutions (f1=99.9). The valid loss range on the PF is [4.412, 4.926] and parameter range is [19.39M, 24.29M], though those smaller models are mostly the failures. Specifically, looking at the PF, index [14] is f1=4.897, f2=19,694,737 and index [15] is f1=4.926, f2=19,547,089. Everything smaller is a failure point.
+
+Historically, inverse models like MAIS and IRR have been the most successful strategies, and RIMS failed last generation. Resource issues are still a problem, we need to focus on stability.
+
+Analysis shows the function is non-separable, with a mean coupling of around 0.14. Depth and the block variables are strongly correlated with loss, while the skip connections correlate with stability. It looks mostly unimodal, with a ratio of around 0.37. There's a noticeable stability cliff around 19.5M parameters. We've got some significant gaps in parameter space, particularly between 22.8M and 21.6M (Gap 7-8) and between 21.6M and 20.5M (Gap 8-9).
+
+My plan is to refine the cliff edge around 19.4M-19.5M, specifically with high skip support, fill these gaps in parameter space by targeting midpoints, and locally optimize activation variables on the high-performing models.
+
+The algorithm for this generation will be a Ridge-Inverse Manifold Local Search (RIM-LS). This involves filtering both the full population and the PF for solutions with acceptable loss, fitting a Ridge regression model to map the features to parameters, generating targets within the identified gaps, predicting candidate solutions, and post-processing to ensure stability by enforcing skip connections to be approximately 1.0, while maintaining architectural constraints (depth and bypasses).
+
+So, the key targets: Gap 7-8: 22.2M, Gap 8-9: 21.1M, and the 19.4M parameter cliff.
+We need to also refine activation variables (33-48).
+
+In essence, we are planning for:
+- Non-separable, excess correlation ~0.14 with variables 0-32 linked to Loss.
+- Unimodal, valid basin with a ratio 0.37. The Cliff at ~19.5M.
+- Historical success: Inverse Models.
+- The plan will implement Ridge-Inverse Manifold Search (RIMS) with Stability Lock.
+
+
+[0m
+Mean PF Coupling: 0.570
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_93_code.py
+Evaluating candidate 1/10 (Params: 22,512,529)...
+Evaluating candidate 2/10 (Params: 20,288,209)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 20,288,209)...
+Evaluating candidate 6/10 (Params: 20,288,209)...
+Evaluating candidate 7/10 (Params: 20,288,209)...
+Evaluating candidate 8/10 (Params: 24,736,849)...
+Evaluating candidate 9/10 (Params: 24,736,849)...
+Evaluating candidate 10/10 (Params: 24,291,985)...
+
+🏆 Generation 93 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+  Elite 16: Params=19,695,697, Loss=4.8844
+✓ Saved checkpoints/agentic-optim/generation_93_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_93_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 94 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 40.532946715s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '40s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_94_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 94 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+  Elite 16: Params=19,695,697, Loss=4.8844
+✓ Saved checkpoints/agentic-optim/generation_94_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_94_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 95 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 44.712790571s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '44s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_95_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 22,067,665)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,547,089)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 95 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+  Elite 16: Params=19,695,697, Loss=4.8844
+✓ Saved checkpoints/agentic-optim/generation_95_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_95_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 96 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 57.727254285s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '57s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_96_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 23,402,257)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,695,697)...
+
+🏆 Generation 96 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+  Elite 16: Params=19,695,697, Loss=4.8795
+✓ Saved checkpoints/agentic-optim/generation_96_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_96_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 97 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 41.911454758s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_97_code.py
+Evaluating candidate 1/10 (Params: 19,398,481)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,398,481)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,398,481)...
+Evaluating candidate 8/10 (Params: 19,398,481)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 21,622,801)...
+
+🏆 Generation 97 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+  Elite 16: Params=19,695,697, Loss=4.8795
+✓ Saved checkpoints/agentic-optim/generation_97_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_97_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 98 / 100 ---
+  Agent error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 9.063295708s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9s'}]}}
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_98_code.py
+Evaluating candidate 1/10 (Params: 19,991,953)...
+Evaluating candidate 2/10 (Params: 19,398,481)...
+Evaluating candidate 3/10 (Params: 19,694,737)...
+Evaluating candidate 4/10 (Params: 19,398,481)...
+Evaluating candidate 5/10 (Params: 19,398,481)...
+Evaluating candidate 6/10 (Params: 19,398,481)...
+Evaluating candidate 7/10 (Params: 19,843,345)...
+Evaluating candidate 8/10 (Params: 23,847,121)...
+Evaluating candidate 9/10 (Params: 19,398,481)...
+Evaluating candidate 10/10 (Params: 19,398,481)...
+
+🏆 Generation 98 Agentic Pareto Front:
+  Elite 1: Params=19,694,737, Loss=4.8970
+  Elite 2: Params=21,622,801, Loss=4.5088
+  Elite 3: Params=23,402,257, Loss=4.4609
+  Elite 4: Params=23,847,121, Loss=4.4489
+  Elite 5: Params=20,585,425, Loss=4.5781
+  Elite 6: Params=22,957,393, Loss=4.4824
+  Elite 7: Params=19,991,953, Loss=4.7267
+  Elite 8: Params=20,288,209, Loss=4.6439
+  Elite 9: Params=23,550,865, Loss=4.4608
+  Elite 10: Params=23,699,473, Loss=4.4527
+  Elite 11: Params=24,291,025, Loss=4.4326
+  Elite 12: Params=22,809,745, Loss=4.4971
+  Elite 13: Params=19,547,089, Loss=4.9262
+  Elite 14: Params=24,291,985, Loss=4.4123
+  Elite 15: Params=19,843,345, Loss=4.7816
+  Elite 16: Params=19,695,697, Loss=4.8795
+✓ Saved checkpoints/agentic-optim/generation_98_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_98_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 99 / 100 ---
