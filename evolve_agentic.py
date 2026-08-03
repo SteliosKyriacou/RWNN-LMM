@@ -1,8 +1,19 @@
 import os
 import sys
 
-# Load model variables. API Key is read dynamically from env or local .env
-os.environ["GEMINI_MODEL"] = "gemini-3.5-flash"
+# Load local .env file from project root if present to populate GOOGLE_API_KEY and model variables
+env_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(env_path):
+    with open(env_path) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                os.environ[k.strip()] = v.strip()
+
+# Default model variable fallback
+if "GEMINI_MODEL" not in os.environ:
+    os.environ["GEMINI_MODEL"] = "gemini-3.5-flash"
 
 import json
 import time
