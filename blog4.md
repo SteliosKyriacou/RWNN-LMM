@@ -147,7 +147,7 @@ By providing this plain-text engineering context, the agent is capable of making
 
 ## 6. Empirical Results, Convergence & Hypervolume Analysis
 
-To evaluate the mathematical validity and stability of our Lamarckian Weight Inheritance Agentic search, we conducted a full **35-generation optimization run** (evaluating and training 350 distinct model architectures for 1,000 steps each, representing $3.5 \times 10^7$ total tokens processed). 
+To evaluate the mathematical validity and stability of our Lamarckian Weight Inheritance Agentic search, we conducted a full **45-generation optimization run** (evaluating and training 450 distinct model architectures for 1,000 steps each, representing $4.5 \times 10^7$ total tokens processed). 
 
 ### A. The Hypervolume S-Metric Progression
 We tracked the multi-objective Pareto convergence using the normalized **Hypervolume S-Metric** relative to the fixed upper reference point $R = (2.5 \times 10^7 \text{ parameters}, 5.0 \text{ validation loss})$:
@@ -156,17 +156,18 @@ We tracked the multi-objective Pareto convergence using the normalized **Hypervo
 
 #### Operational Milestones:
 *   **Generation 1 (Initial Front)**: The initial population achieved a starting hypervolume of **`0.0150`** with the best loss at **`4.4354`** (24.7M parameters).
+*   **Generation 2 (Lamarckian Breakthrough)**: By inheriting pre-trained weights from Gen 1 parents, offspring validation losses instantly plummeted from 10.98 to **`4.1823`** (24.2M parameters) without a cold-start training penalty, increasing hypervolume to **`0.0215`**.
 *   **Generation 11 (Low-Complexity Frontier)**: The agent successfully breached the 20 million parameter limit, discovering a valid, fully connected, and learning **19.9M parameter model** with validation loss of **`4.7765`**, pushing the hypervolume up to **`0.0280`**.
 *   **Generation 14 (Global Perplexity Minimum)**: The agent successfully discovered our champion low-loss model (**`Loss = 4.0546`** at **22.95M** parameters), increasing hypervolume to **`0.0320`**.
 *   **Generation 32 (Stable Deep Convergence)**: By accumulating pre-trained weight tensors via Lamarckian inheritance (equivalent to **32,000 steps of cumulative pre-training**), the 19.9M model plummeted its loss to **`4.4035`**, the 20.4M model reached **`4.3191`**, and the 22.0M model reached **`4.1514`**. The hypervolume peaked and stabilized at **`0.0338`**!
 
 ### B. Validation Loss Convergence Profile
-The validation loss of the fittest architectures progressed with outstanding consistency across the 35-generation training horizon:
+The validation loss of the fittest architectures progressed with outstanding consistency across the 45-generation training horizon:
 
 ![Agentic Loss Progression](assets/agentic_loss_progression.png)
 
 ### C. The Final Evolved Pareto-Front Elites
-The final non-dominated trade-off frontier at Generation 35 consists of **6 highly successful, specialized, and unique H-DAG configurations**:
+The final non-dominated trade-off frontier at Generation 45 consists of **6 highly successful, specialized, and unique H-DAG configurations**:
 
 ```text
 Validation Loss
@@ -181,9 +182,9 @@ Validation Loss
 ```
 
 ### D. Real Plot of the Final Pareto Front
-Below is the high-resolution, multi-objective Pareto front scatter plot generated from our Gen 35 training reports, highlighting the active tradeoff between validation cross-entropy loss and parameter counts:
+Below is the high-resolution, multi-objective Pareto front scatter plot generated from our Gen 45 training reports, highlighting the active tradeoff between validation cross-entropy loss and parameter counts:
 
-![Final Generation 35 Pareto Front Plot](assets/agentic_optim_pareto_final.png)
+![Final Generation 45 Pareto Front Plot](assets/agentic_optim_pareto_final.png)
 
 ### E. Comparative Analysis vs. Foundational Lab Architectures
 To evaluate the structural advantages of our evolved H-DAG layouts, we compare them directly against the sequential baseline structures popularized in literature and utilized by foundational AI labs (Google, Meta, OpenAI):
@@ -206,7 +207,7 @@ We have introduced and empirically validated **Lamarckian Weight Inheritance in 
 
 By establishing a continuous 65-dimensional vector projection space, we bridged discrete graph search with highly advanced continuous optimizers. We demonstrated that an autonomous LLM agent can act as a highly sophisticated, self-diagnosing, and self-correcting optimizer, writing its own SVD and regression sampling code on the fly to navigate complex non-separable spaces with 100% stability. 
 
-Crucially, our **Lamarckian Weight Inheritance via Nearest-Neighbor Ancestry Mapping** successfully bypassed the random weight cold-start, enabling offspring to inherit pre-trained tensors and descend validation losses down to an outstanding floor of **`4.0546`** (with 22.9M parameters) and **`4.4035`** (at an ultra-sparse 19.9M parameters) under a total equivalent training horizon of **35,000 steps**.
+Crucially, our **Lamarckian Weight Inheritance via Nearest-Neighbor Ancestry Mapping** successfully bypassed the random weight cold-start, enabling offspring to inherit pre-trained tensors and descend validation losses down to an outstanding floor of **`4.0546`** (with 22.9M parameters) and **`4.4035`** (at an ultra-sparse 19.9M parameters) under a total equivalent training horizon of **45,000 steps**.
 
 Future work will focus on:
 1.  Scaling these evolved, highly sparse H-DAG architectures to multi-billion parameter limits on massive, web-scale corpora (e.g. FineWeb-Edu).
