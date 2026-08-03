@@ -4,4 +4,3 @@ input.txt
 *.pt
 checkpoints/
 .env
-*.log
