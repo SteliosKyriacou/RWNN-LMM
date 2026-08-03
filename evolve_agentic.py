@@ -282,10 +282,10 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
         "3. Cross-Layer Skips: Skip connections establish deep residual streams, enabling stable gradient backpropagation.\n"
         "4. Activations: Rotating between GELU, SiLU, and ReLU can dynamically reshape MLP representational capacity.\n\n"
         "## Objectives and Constraints:\n"
-        "- Minimizing Objective 1: Validation Cross-Entropy Loss (Perplexity). You must keep loss strictly < 5.0. Any loss >= 5.0 is a complete failure.\n"
+        "- Minimizing Objective 1: Validation Cross-Entropy Loss (Perplexity). You must keep loss strictly < 6.0. Any loss >= 6.0 is a complete failure.\n"
         "- Minimizing Objective 2: Trainable parameter count (Complexity).\n"
         "- Maintain a stable trade-off frontier. Deeper networks (with active residual bypasses) will have more parameters but achieve lower loss.\n"
-        "- Reference point for hypervolume calculation is (5.0e8 parameters, 5.0 loss)."
+        "- Reference point for hypervolume calculation is (5.0e8 parameters, 6.0 loss)."
     )
 
     # 3. Instantiate MetisAgent
@@ -298,8 +298,8 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
         max_elites=100,
         problem_context=problem_context
     )
-    # Reference point for Hypervolume (Rx = 5.0e8 parameters, Ry = 5.0 validation loss)
-    agent.ref = [500000000.0, 5.0]
+    # Reference point for Hypervolume (Rx = 5.0e8 parameters, Ry = 6.0 validation loss)
+    agent.ref = [500000000.0, 6.0]
     
     # Adjust starting generation and restore Agent's internal state memory if resuming
     if highest_gen > 0:
@@ -404,8 +404,8 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
                     nodes, edges, d_model=d_model, max_iters=eval_steps, batch_size=8, block_size=block_size,
                     parent_state_dict=parent_state # Inherit parent weights!
                 )
-                if val_loss >= 5.0:
-                    # Enforce strict validation loss constraint < 5.0
+                if val_loss >= 6.0:
+                    # Enforce strict validation loss constraint < 6.0
                     val_loss = 99.9
                     s_dict = None
                 else:
@@ -435,7 +435,7 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
         combined_F = []
         if len(all_historical_pareto_F) > 0:
             combined_F.extend(all_historical_pareto_F)
-        combined_F.extend([f for f in F_arr if f[0] < 5.0])
+        combined_F.extend([f for f in F_arr if f[0] < 6.0])
         
         if len(combined_F) > 0:
             combined_F_arr = np.array(combined_F)
@@ -448,11 +448,11 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
         # Report results back to MetisAgent
         agent.tell(X, F_arr)
 
-        # Get Pareto Front elites (restricted to loss < 5.0 and parents < 5.0)
+        # Get Pareto Front elites (restricted to loss < 6.0 and parents < 6.0)
         Xp, Fp = agent.result()
         
-        # We manually filter elites that have loss < 5.0 as per constraint!
-        valid_idx = [i for i, f in enumerate(Fp) if f[0] < 5.0]
+        # We manually filter elites that have loss < 6.0 as per constraint!
+        valid_idx = [i for i, f in enumerate(Fp) if f[0] < 6.0]
         Xp = Xp[valid_idx] if len(valid_idx) > 0 else Xp
         Fp = Fp[valid_idx] if len(valid_idx) > 0 else Fp
 
@@ -511,13 +511,13 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
 
         # Plot and save Pareto Front PNG
         plt.figure(figsize=(8, 6))
-        valid_F = F_arr[F_arr[:, 0] < 5.0]
+        valid_F = F_arr[F_arr[:, 0] < 6.0]
         if len(valid_F) > 0:
             all_x = valid_F[:, 1]
             all_y = valid_F[:, 0]
-            plt.scatter(all_x, all_y, color='#555555', alpha=0.6, label='Evaluated Population (< 5.0)')
+            plt.scatter(all_x, all_y, color='#555555', alpha=0.6, label='Evaluated Population (< 6.0)')
             
-        elite_valid = Fp[Fp[:, 0] < 5.0]
+        elite_valid = Fp[Fp[:, 0] < 6.0]
         if len(elite_valid) > 0:
             elite_x = elite_valid[:, 1]
             elite_y = elite_valid[:, 0]
@@ -529,7 +529,7 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
             
         plt.xlabel("Complexity (Trainable Parameter Count)")
         plt.ylabel("Validation Loss (Cross-Entropy)")
-        plt.title(f"Gen {gen+1} Agentic Optimization Pareto Front (< 5.0 Loss)")
+        plt.title(f"Gen {gen+1} Agentic Optimization Pareto Front (< 6.0 Loss)")
         plt.grid(True, linestyle=':', alpha=0.6)
         plt.legend()
         
@@ -553,4 +553,4 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
 
 
 if __name__ == "__main__":
-    run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000)
+    run_agentic_optimization(generations=100, pop_size=10, eval_steps=2000)

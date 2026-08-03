@@ -7,8 +7,8 @@ def calculate_agentic_hypervolume():
     print("=== Calculating Agentic Hypervolume Progression ===")
     
     # Reference point for normalization (matching our evolve_agentic.py ref point)
-    Rx = 2.5e7  # 25 Million parameters reference
-    Ry = 5.0    # 5.0 validation loss reference
+    Rx = 5.0e8  # 500 Million parameters reference
+    Ry = 6.0    # 6.0 validation loss reference
     
     total_ref_area = Rx * Ry
     
@@ -26,7 +26,7 @@ def calculate_agentic_hypervolume():
         with open(report_file, 'r') as f:
             elites = json.load(f)
             
-        # Filter out elites that don't satisfy Rx and Ry boundaries (only keep valid sub-5.0 models)
+        # Filter out elites that don't satisfy Rx and Ry boundaries (only keep valid sub-6.0 models)
         valid_elites = [e for e in elites if e['params'] < Rx and e['loss'] < Ry]
         if not valid_elites:
             continue
