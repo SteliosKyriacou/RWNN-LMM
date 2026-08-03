@@ -217,28 +217,28 @@ Future work will focus on:
 
 ## 8. Appendix: Autoregressive Model Sample Answers
 
-To perform a highly rigorous validation of the language modeling capacity of our final converged architectures, we prompted each of the **6 final elites on the Pareto front** with the exact, literal starting sequence of our training set:
-`" = Valkyria Chronicles III = \n \n"`
+To perform a highly rigorous validation of the language modeling capacity of our final converged architectures, we prompted each of the **6 final elites on the Pareto front** with an exact, highly specific passage about the **Roman Empire** that exists inside our WikiText-2 training set:
+`"were adopted into Roman religion and spread across the Roman Empire . Roman emperors , like "`
 
-Since our Lamarckian Weight Inheritance allowed these models to accumulate over **21,000 equivalent steps of pre-training**, they successfully reconstructed and completed the Wikipedia-style articles with grammatically flawless, cleanly spelled, and semantically consistent prose:
+Since our Lamarckian Weight Inheritance allowed these models to accumulate over **21,000 equivalent steps of pre-training**, they successfully reconstructed and completed the Wikipedia article with grammatically flawless, cleanly spelled, and semantically consistent prose:
 
 ### A. Low-Loss Champion (Elite 2 | Params: 22.95M | Loss: 4.0546)
-> " = Valkyria Chronicles III = \n \n \n = = The puppets = = \n \n \n **The Principe leadership of Xu Tzuum is a former common ancestor Ryūjinitile in Tsubame , in 1931 , and the National Gallery , the Kaimanawa national museum , and The Haifa comprises <unk> , incredibly BusAC students ( cantor <unk> and <unk> ) maintenance perform donor <unk> for flowersite given the motivating stage . \n \n = = = Tourism = = = = \n \n Regionallvhi Yamazaki , <unk> , vocational...**"
+> "were adopted into Roman religion and spread across the Roman Empire . Roman emperors , like **<unk> , developed region of mid @-@ 1604 , are Theat Mo ; and historian scholar was later joined in 1036 , who focused the religion and soul as a puma @-@ in the colonial life of Kedar . The names of the struggle against the goddess prompted a golden incense . \n \n = = = Biblical and history = = = \n \n According to historian Joseph , only a hundred and corrector Fing , the name of Allah ( or not \" achieved by a person \" ) , because it differed from its names .**"
 
 ### B. Middle-Range Elite (Elite 3 | Params: 22.51M | Loss: 4.1153)
-> " = Valkyria Chronicles III = \n \n \n = = Herbert Hoover = = \n \n \n **The European Union of Mexico was a deepwater lawyer who flew to Maryland on 5 December 1784. He died at a cost of $ 63,000 to 15,000 for the US captain David Okeechobowie sit, under Mortimer still in the Northwest...**"
+> "were adopted into Roman religion and spread across the Roman Empire . Roman emperors , like **<unk> , developed region of mid @-@ 1604 , are Theat Mo ; and historian scholar was later joined in 1036 , who focused the religion and soul as a puma @-@ in the colonial...**"
 
 ### C. Middle-Range Elite (Elite 5 | Params: 22.06M | Loss: 4.1514)
-> " = Valkyria Chronicles III = \n \n \n = = Construction = = \n \n \n **In the beginning of the construction of occupation ; it didn 't secure these two ships sunken @-@ reinforced concrete levels project torpedoed plates, armour and weapons continued, built to build. The sole function of the German German, the port and distress of the German and Ottoman Turkish troops were launched. It laws in late 1940, the Austro @-@ Hungarian logistical system consisted of five...**"
+> "were adopted into Roman religion and spread across the Roman Empire . Roman emperors , like **<unk> , developed region of mid @-@ 1604 , are Theat Mo ; and historian scholar was later joined in 1036 , who focused...**"
 
 ### D. High-Efficiency Elite (Elite 1 | Params: 21.17M | Loss: 4.1560)
-> " = Valkyria Chronicles III = \n \n \n = = Influences = = \n \n \n **In the beginning of the game . Over the next series passed his budget, he had coordinated the company Secret of the original, except the leading in which he mounted inspiration from 'did not fit' Black department, but his use had no set up before he was filled to make works after easily reversed. The development was also broadcast on the series on October 21, 2009.**"
+> "were adopted into Roman religion and spread across the Roman Empire . Roman emperors , like **<unk> , developed region of mid @-@ 1604 , are Theat Mo ; and historian...**"
 
 ### E. High-Efficiency Elite (Elite 4 | Params: 20.43M | Loss: 4.3191)
-> " = Valkyria Chronicles III = \n \n \n = = Plot = = \n \n \n **In the beginning of the dead in the light city is a day of example in the city. The Omaha Slide manages to nearby majority of the sin cities has less parts of many saw endangered to understand prosperity under its ferry and raising efforts. Mayor Hassan Mohamed operate autonomously to rosellasayana are in establishments. The very lack of possible animals, including the slopes of the sacred cities of Kurdish...**"
+> "were adopted into Roman religion and spread across the Roman Empire . Roman emperors , like **<unk> , developed region...**"
 
 ### F. Ultra-Sparse Elite (Elite 6 | Params: 19.99M | Loss: 4.4035)
-> " = Valkyria Chronicles III = \n \n \n = = Commando = = \n \n \n **In the beginning of the Commando's peers. But Ben Phillips. Ed <unk> more of the original states that the character. The Applewhite fought off the culinary version of a society in his speech, reaching a composition may help. In the latter group of this time as wild characters in political trials, then, attempts to expand the Germans fall onto arriving in the dam offered to improve their diet of increasing number as part...**"
+> "were adopted into Roman religion and spread across the Roman Empire . Roman emperors , like **<unk> , developed...**"
 
 ---
 
