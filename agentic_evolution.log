@@ -2377,3 +2377,29 @@ Evaluating candidate 8/10 (Params: 21,622,801)...
 Evaluating candidate 9/10 (Params: 21,622,801)...
 Evaluating candidate 10/10 (Params: 21,177,937)...
  -> Inherited 54 parameter tensors from parent weights.
+
+🏆 Generation 46 Agentic Pareto Front:
+  Elite 1: Params=21,177,937, Loss=4.1560
+  Elite 2: Params=22,957,393, Loss=4.0546
+  Elite 3: Params=22,512,529, Loss=4.1153
+  Elite 4: Params=20,436,817, Loss=4.3191
+  Elite 5: Params=22,067,665, Loss=4.1514
+  Elite 6: Params=19,991,953, Loss=4.4035
+✓ Saved checkpoints/agentic-optim/generation_46_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_46_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 47 / 100 ---
+
+  [32m[THINKING] Here's my attempt at summarizing the thought process, tailored for an expert audience:
+
+**Optimizing Candidate Generation: Gen 46**
+
+Okay, Gen 46. Time to refine and solidify the candidate set. We've iterated through enough generations at this point, so it's time to output. Now we're looking at a highly optimized selection. This particular collection of models and parameters should be quite good. Let's make sure it's the output.
+
+
+[0m
+Excess corr: 0.1917 - non-separable
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_47_code.py
+Evaluating candidate 1/10 (Params: 22,957,393)...
+ -> Inherited 102 parameter tensors from parent weights.
