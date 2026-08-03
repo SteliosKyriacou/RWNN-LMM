@@ -49,14 +49,12 @@ def calculate_agentic_hypervolume():
         hypervolumes.append(hv)
         best_losses.append(min(y))
         best_params.append(min(x))
+        
+        # Print hypervolume per generation live on screen
+        print(f"Gen {gen:3d} | Hypervolume: {hv:.4f} | Best Loss: {min(y):.4f} | Best Params: {min(x):,}")
 
     n_gens = len(generations)
-    print(f"Calculated hypervolume for {n_gens} completed generations.")
-    print(f"Gen 1 Hypervolume: {hypervolumes[0]:.4f} (Best Loss: {best_losses[0]:.4f})")
-    if n_gens >= 20:
-        print(f"Gen 20 Hypervolume: {hypervolumes[19]:.4f} (Best Loss: {best_losses[19]:.4f})")
-    if n_gens >= 45:
-        print(f"Gen 45 Hypervolume: {hypervolumes[44]:.4f} (Best Loss: {best_losses[44]:.4f})")
+    print(f"\nCalculated hypervolume for {n_gens} completed generations.")
 
     # 1. Plot Hypervolume progression
     plt.figure(figsize=(10, 5))
