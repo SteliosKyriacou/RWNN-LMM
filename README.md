@@ -1,157 +1,108 @@
-# Randomly Wired Neural Networks as Large Language Models (RWNN-LLM)
+# Lamarckian Weight Inheritance in Autonomous H-DAG Large Language Models
 
-## 🎯 Goal
-The goal of this project is to implement, train, and optimize **Randomly Wired Neural Networks (RWNNs)** in the domain of **Large Language Models (LLMs)**.
+This repository contains the official, publication-ready implementation and documentation for **Lamarckian Weight Inheritance in Autonomous H-DAG Large Language Models**, targeted for *Neural Information Processing Systems (NeurIPS 2026)*.
 
-Specifically, we design a framework where a decoder-only language model is modeled as a **Heterogeneous Directed Acyclic Graph (H-DAG)**. Within this graph:
-- **Nodes** represent primitive modular tensor operations.
-- **Edges** represent communication pathways where hidden states flow.
+We introduce a framework where decoder-only language models are modeled as **Heterogeneous Directed Acyclic Graphs (H-DAGs)**, mapping continuous Euclidean coordinates $x \in [0, 1]^{65}$ directly into topologically compiled, GPU-parallelized sequence-mixing networks. The optimization space is searched by a stateful, autonomous LLM agent (Metis-Agent) that writes its own self-diagnostic Python code (SVD, Ridge regression) to propose candidate vectors.
 
-By representing an LLM as a modular H-DAG, we can completely discard human-designed, homogeneous sequential architectures (like the standard stack of Transformer blocks in `nanoGPT`) and use a **Memetic Algorithm (Multi-Objective Evolutionary Algorithm + Gradient-Based Backpropagation)** to randomly or optimally wire the network. This allows us to search the structural frontier and find high-efficiency, low-complexity models.
+To bypass the cold-start training overhead, we introduce **Lamarckian Weight Inheritance via continuous Nearest-Neighbor Ancestry Mapping**, allowing offspring models to instantly copy pre-trained weight tensors from their closest Pareto-front parents.
 
 ---
 
-## 🏗️ Architectural Foundations
+## 📂 Project Structure
 
-### 1. Coarse-Grained Heterogeneous Graph Nodes (H-DAG)
-We define a library of coarse-grained, macro-level nodes operating on 3D sequence tensors of shape `[Batch, SeqLen, Channels]`:
-- **Embedding Nodes**: `TokenEmbeddingNode`, `PositionalEmbeddingNode`
-- **Parameterized Projections**: `LinearNode(d_in, d_out)`
-- **Attention Modules**: `CausalAttentionNode(n_heads, d_model)`
-- **Normalization & Non-linearities**: `LayerNormNode`, `ActivationNode(GELU/SiLU)`
-- **Combinators**: `SumNode` (Residual addition), `ConcatNode`, `ElementMulNode` (Gating)
-
-### 2. Micro-Level Atomic Mathematical Nodes
-To allow true evolutionary emergence where the algorithm can invent new normalization layers and attention variants from first principles, we also define a complete library of **atomic mathematical operations**:
-- **Reducers & Powers**: `MeanReduceNode(dim=-1)`, `SquareNode`
-- **Arithmetic**: `SubtractNode`, `DivideNode`, `SqrtNode(eps=1e-5)`
-- **Learnable Variables**: `ScaleShiftNode(d_model)` (learnable $\gamma, \beta$), `MatMulNode(d_in, d_out)`, `AddBiasNode(d_model)`
-- **Formatting**: `TransposeNode(dim1, dim2)`, `ReshapeNode(shape)`
-- **Sequence Mixers**: `CausalBatchMatMulNode(scale=1.0)` (batch matrix multiplication with causal triangular masking)
-
-### 3. Lazy Edge Projections (Dimension Alignment)
-In a randomly wired network, a mutation might add a connection between two nodes with mismatched channel dimensions. To make the architecture fully robust to arbitrary structural mutations, we wrap every edge in an `EdgeConnection` module:
-- It checks the source and target dimensions dynamically.
-- If dimensions match, it is a zero-cost pass-through (`Identity`).
-- If dimensions mismatch, it lazily instantiates a learnable `nn.Linear` projection without bias, ensuring shape consistency.
-
-### 4. GPU-Parallelized Topological Execution & Broadcasting Bypass
-To resolve the sequential bottleneck of arbitrary graphs, we compile the H-DAG into **topological levels**:
-- All nodes in a given level $L_r$ are computationally independent and evaluated in parallel.
-- **Broadcasting Bypass**: If a source node outputs a dimension of **1** (e.g., from an atomic `MeanReduceNode`), and the target node does not explicitly require a fixed dimension != 1, the compiler bypasses projection and assigns an `Identity()` mapping. This allows PyTorch's native, highly efficient **vectorized broadcasting** (e.g. `[B, T, 128] - [B, T, 1]`) at runtime without compiling redundant parameters.
-
----
-
-## 🧩 1. The Transformer Block as a Graph
-
-In our RWNN framework, a standard decoder-only Transformer block is represented as a specific self-contained subgraph. For any layer $l$, we generate **8 nodes and 10 edges** to construct the block:
-
-```text
-                  [Node 0: Input Token Indices]
-                        /               \
-         [Node 1: TokenEmbedding]   [Node 2: PositionalEmbedding]
-                        \               /
-                    [Node 3: Sum Node (WTE + WPE)]
-                       /                 \
-                      /             [Node 4: LayerNorm 1]
-                     /                        |
-                    /               [Node 5: CausalAttention]
-                   /                          |
-         [Node 6: Sum Attention Residual] <---/
-                   / \
-                  /   \             [Node 7: LayerNorm 2]
-                 /     \                      |
-                /           [Node 8: Linear MLP Expansion (4xD)]
-               /                              |
-              /                     [Node 9: GELU Activation]
-             /                                |
-            /               [Node 10: Linear MLP Contraction (D)]
-           /                                  |
-    [Node 11: Sum MLP Residual] <------------/
-           |
-   [Repeat Layers 1-5]
-           |
-    [Node 64: Final LayerNorm]
-           |
-    [Node 13: LM Output Head]
-```
-
-A complete visual representation compiled using NetworkX is available here:
-
-![nanoGPT Block DAG Graph](assets/nanogpt_dag_graph.png)
-
----
-
-## ⚛️ 2. Deconstructing Modules into Atomic Graphs
-
-To unlock full emergent architecture search, our compiler can deconstruct complex hand-designed modules like `LayerNormNode` into **atomic mathematical sub-graphs**:
-
-### LayerNorm Deconstruction (8 Atomic Nodes, 9 Edges)
-Standard LayerNorm is defined as:
-$$\text{LayerNorm}(x) = \frac{x - \text{mean}(x)}{\sqrt{\text{var}(x) + \epsilon}} \odot \gamma + \beta$$
-
-We compile it as the following DAG of atomic nodes:
-
-![Atomic LayerNorm Sub-Graph](assets/layernorm_atomic_graph.png)
-
-We validated this atomic deconstruction in `verify_atomic_layernorm.py` against PyTorch's native `nn.LayerNorm`:
-1.  **Forward Pass**: Maximum absolute numeric difference of **$4.768 \times 10^{-7}$** (100% precision matching).
-2.  **Backward Pass**: Maximum absolute numeric gradient difference of **$7.629 \times 10^{-6}$** (100% autograd matching).
-
----
-
-## 📈 3. Side-by-Side Convergence Comparison (Tiny Shakespeare 5k)
-
-We trained the RWNN H-DAG replica of the 6-layer `toy` configuration (10.8M parameters) on the character-level Tiny Shakespeare corpus for exactly **5,000 steps** on an **NVIDIA RTX 4070 Ti (12GB)**:
-
-```text
-Loss
-5.0 ┼  
-    │  T = Train Loss
-4.0 ┼  [T,V]  
-    │  
-3.0 ┼          [T,V]                                                   V  (Val Divergence/Overfitting)
-    │                                                              V
-2.0 ┼                  V       V       V                       V
-    │                                              V
-1.0 ┼                          T       T
-    │                                      T
-0.0 └─┼──────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬───► Iteration
-     0      500    1000   1500   2000   2500   3000   3500   4000   4500   5000
-                                                T
-                                                        T
-                                                                T      T      T  (Train converges to 0.10!)
-```
-
-### Convergence & Overfitting Analysis:
-*   **Validation Floor**: Reached a validation loss of **1.5557** at iteration 1000 (reproducing the official nanoGPT baseline floor of **1.4697**).
-*   **Overfitting Profile**: Due to the small size of the corpus, training loss plummeted to **0.1061** at iteration 5000 while validation loss diverged back to **4.5037**. This perfectly reproduces the exact overfitting trajectory of nanoGPT without heavy dropout.
-
----
-
-## ⚡ 4. Hardware Throughput
-
-Our parallelized topological compiler enables consumer GPUs to achieve near-datacenter throughput:
-*   **nanoGPT Baseline (Institutional A100)**: ~300,000 tokens/sec.
-*   **Our RWNN H-DAG (RTX 4070 Ti)**: **168,432 tokens/sec** at peak (97.3 ms/step at a batch size of 64 and block size of 256).
-
----
-
-## ⚙️ Project Structure
 ```text
 rwnn-llm/
-├── README.md               # This project documentation
-├── assets/                 # Generated Graph Visualizations (NetworkX)
-│   ├── nanogpt_dag_graph.png
-│   └── layernorm_atomic_graph.png
-├── rwnn/
+├── README.md                       # This experiment replication guide
+├── blog4.md                        # Formal NeurIPS-style academic paper draft
+├── evolve_agentic.py               # Main Autonomous Agentic Search & Lamarckian training loop
+├── calculate_agentic_hypervolume.py# Script to compute exact hypervolumes and plot convergence
+├── generate_graph_visualization.py # Script to compile and generate NetworkX layout PNGs of H-DAGs
+├── generate_all_elites_samples.py  # Script to run autoregressive generation/sampling of elite models
+├── rwnn/                           # Core modular H-DAG compiler
 │   ├── __init__.py
-│   ├── nodes.py            # Primitive H-DAG Nodes (Macro & Atomic primitives)
-│   ├── graph.py            # RWNNGraph compiler, dimension tracing & execution engine
-│   └── mutator.py          # Evolutionary operations (Mutation, Crossover, Cycle Checks)
-├── train.py                # Cosine-annealed mixed-precision training pipeline on Tiny Shakespeare
-├── evolve.py               # Multi-objective Memetic Optimization engine
-├── verify.py               # Autograd verification tests
-├── verify_gpt2.py          # 12-layer 163M parameter scaling test
-└── verify_atomic_layernorm.py # Numeric precision test for atomic-deconstruction graphs
+│   ├── nodes.py                    # Graph primitives (modular and atomic layers)
+│   ├── graph.py                    # JIT-topological compiler, dimension alignment, and executor
+│   └── mutator.py                  # Graph mutations and cycle checking
+├── train.bin                       # Preprocessed Salesforce WikiText-2 training tokens (BPE)
+├── val.bin                         # Preprocessed Salesforce WikiText-2 validation tokens (BPE)
+└── assets/                         # Folder containing generated plots and graph layouts
+```
+
+---
+
+## ⚡ Hardware & Memory Requirements
+
+This scaled-up configuration is heavily optimized to run on an **NVIDIA GeForce RTX 4070 Ti (12GB VRAM)** or similar consumer-grade GPU:
+- **`gpt2` (162.5M parameters)**: Peak VRAM: **`4.96 GB`**
+- **`gpt2-medium` (247.6M parameters)**: Peak VRAM: **`7.80 GB`**
+- **`gpt2-large` (290.1M parameters)**: Peak VRAM: **`9.32 GB`**
+
+All runs employ a batch size of `8`, sequence length of `256`, and are compiled using PyTorch's `BFloat16` mixed-precision tracking to guarantee stability under a 12GB memory budget.
+
+---
+
+## 🚀 Recreating the Experiment
+
+Follow these steps to reproduce the 45-generation scaled-up agentic search:
+
+### 1. Environment Setup
+Activate the dedicated conda environment loaded with pre-configured CUDA-12, PyTorch, tiktoken, and google-genai libraries:
+```bash
+conda activate RWNNLMM
+```
+
+Ensure your Google Gemini API key is configured inside a local `.env` file in the project root:
+```text
+GOOGLE_API_KEY=AIzaSy...
+```
+
+### 2. Run the Autonomous Agentic Search
+Start the main optimization script. This will automatically clear any legacy directories, compile the BPE-tokenized datasets, initialize the initial population (loaded with GPT-2, GPT-2 Medium, GPT-2 Large, and Gated Sparse configurations), and run the Metis-Agent loop:
+```bash
+python evolve_agentic.py
+```
+*Tip: To run this in the background as a headless persistent process, use:*
+```bash
+nohup python -u evolve_agentic.py > agentic_evolution.log 2>&1 &
+```
+
+During this search:
+- Candidates ranging from 100M to 500M parameters are trained on WikiText-2 for 1,000 steps.
+- Elites matched via continuous ancestry are promoted to subsequent generations to continue their training.
+- Offspring inherit parent parameters in-place via `.copy_()` if they match the continuous distance neighborhood ($<0.6$).
+
+### 3. Compute Hypervolume and Plot Convergence
+After several generations of search have completed, you can calculate the exact mathematical hypervolume (S-Metric) dominated by the Pareto-front elites and generate beautiful, publication-ready convergence plots:
+```bash
+python calculate_agentic_hypervolume.py
+```
+This script dynamically computes the bounding boxes of all historical and current Pareto-front members, outputs statistics on-screen, and saves two high-resolution plots under `assets/`:
+- `assets/agentic_hypervolume_progression.png`
+- `assets/agentic_loss_progression.png`
+
+### 4. Generate NetworkX Graph Visualizations
+To compile and visualize the exact topological wiring and multi-hop skip residuals of the non-dominated elite architectures:
+```bash
+python generate_graph_visualization.py
+```
+This will output high-resolution NetworkX graph layout maps under the `assets/` directory.
+
+### 5. Generate Autoregressive Appendix Samples
+To sample language completions from the pre-trained elite weights of the final Pareto front and replicate the Appendix of the paper:
+```bash
+python generate_all_elites_samples.py
+```
+This runs the autoregressive causal generator on the Roman Empire prompt, producing fluent completed passages and saving them in text files.
+
+---
+
+## 📄 Academic Citation
+If you utilize this H-DAG compiler, Lamarckian Weight Inheritance, or Agentic Optimizer framework in your research, please cite our draft:
+```bibtex
+@inproceedings{kyriacou2026lamarckian,
+  title={Lamarckian Weight Inheritance in Autonomous H-DAG Large Language Models},
+  author={Kyriacou, Stylianos},
+  booktitle={Neural Information Processing Systems (NeurIPS 2026)},
+  year={2026}
+}
 ```
