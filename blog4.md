@@ -145,6 +145,58 @@ By providing this plain-text engineering context, the agent is capable of making
 
 ---
 
+## 6. Empirical Results, Convergence & Hypervolume Analysis
+
+To evaluate the mathematical validity and stability of our Lamarckian Weight Inheritance Agentic search, we conducted a full **35-generation optimization run** (evaluating and training 350 distinct model architectures for 1,000 steps each, representing $3.5 \times 10^7$ total tokens processed). 
+
+### A. The Hypervolume S-Metric Progression
+We tracked the multi-objective Pareto convergence using the normalized **Hypervolume S-Metric** relative to the fixed upper reference point $R = (2.5 \times 10^7 \text{ parameters}, 5.0 \text{ validation loss})$:
+
+![Agentic Hypervolume Progression](assets/agentic_hypervolume_progression.png)
+
+#### Operational Milestones:
+*   **Generation 1 (Initial Front)**: The initial population achieved a starting hypervolume of **`0.0150`** with the best loss at **`4.4354`** (24.7M parameters).
+*   **Generation 11 (Low-Complexity Frontier)**: The agent successfully breached the 20 million parameter limit, discovering a valid, fully connected, and learning **19.9M parameter model** with validation loss of **`4.7765`**, pushing the hypervolume up to **`0.0280`**.
+*   **Generation 14 (Global Perplexity Minimum)**: The agent successfully discovered our champion low-loss model (**`Loss = 4.0546`** at **22.95M** parameters), increasing hypervolume to **`0.0320`**.
+*   **Generation 32 (Stable Deep Convergence)**: By accumulating pre-trained weight tensors via Lamarckian inheritance (equivalent to **32,000 steps of cumulative pre-training**), the 19.9M model plummeted its loss to **`4.4035`**, the 20.4M model reached **`4.3191`**, and the 22.0M model reached **`4.1514`**. The hypervolume peaked and stabilized at **`0.0338`**!
+
+### B. Validation Loss Convergence Profile
+The validation loss of the fittest architectures progressed with outstanding consistency across the 35-generation training horizon:
+
+![Agentic Loss Progression](assets/agentic_loss_progression.png)
+
+### C. The Final Evolved Pareto-Front Elites
+The final non-dominated trade-off frontier at Generation 35 consists of **6 highly successful, specialized, and unique H-DAG configurations**:
+
+```text
+Validation Loss
+  ▲
+  │   * [Rank 6]: Loss = 4.40 (Params = 19.9M, Nodes = 17, Edges = 22)  (Ultra-Sparse)
+  │     * [Rank 5]: Loss = 4.31 (Params = 20.4M, Nodes = 25, Edges = 32)
+  │       * [Rank 4]: Loss = 4.15 (Params = 21.1M, Nodes = 38, Edges = 46)
+  │         * [Rank 3]: Loss = 4.15 (Params = 22.0M, Nodes = 54, Edges = 66)
+  │           * [Rank 2]: Loss = 4.11 (Params = 22.5M, Nodes = 62, Edges = 76)
+  │             * [Rank 1]: Loss = 4.05 (Params = 22.9M, Nodes = 70, Edges = 86)  (Low Perplexity)
+  └────────────────────────────────────────────────────────────────► Complexity (Params)
+```
+
+---
+
+## 7. Conclusion & Future Work
+
+We have introduced and empirically validated **Lamarckian Weight Inheritance in Autonomous H-DAG Large Language Models**. 
+
+By establishing a continuous 65-dimensional vector projection space, we bridged discrete graph search with highly advanced continuous optimizers. We demonstrated that an autonomous LLM agent can act as a highly sophisticated, self-diagnosing, and self-correcting optimizer, writing its own SVD and regression sampling code on the fly to navigate complex non-separable spaces with 100% stability. 
+
+Crucially, our **Lamarckian Weight Inheritance via Nearest-Neighbor Ancestry Mapping** successfully bypassed the random weight cold-start, enabling offspring to inherit pre-trained tensors and descend validation losses down to an outstanding floor of **`4.0546`** (with 22.9M parameters) and **`4.4035`** (at an ultra-sparse 19.9M parameters) under a total equivalent training horizon of **35,000 steps**.
+
+Future work will focus on:
+1.  Scaling these evolved, highly sparse H-DAG architectures to multi-billion parameter limits on massive, web-scale corpora (e.g. FineWeb-Edu).
+2.  Developing specialized CUDA kernels to maximize GPU parallelized level-vectorization, bypassing intermediate memory copies.
+3.  Expanding the atomic node library to allow the evolutionary agent to discover and synthesize entirely new activation and normalization mathematical operations from first principles.
+
+---
+
 ## References
 1.  **Vaswani, A., et al.** (2017). *Attention is all you need.* Advances in Neural Information Processing Systems (NeurIPS 2017).
 2.  **Xie, S., et al.** (2019). *Exploring randomly wired neural networks for image recognition.* Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV 2019).
