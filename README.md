@@ -45,7 +45,7 @@ All runs employ a batch size of `8`, sequence length of `256`, and are compiled 
 
 Follow these steps to reproduce the 45-generation scaled-up agentic search:
 
-### 1. Environment Setup
+### 1. Environment Setup & Dataset Preparation
 Activate the dedicated conda environment loaded with pre-configured CUDA-12, PyTorch, tiktoken, and google-genai libraries:
 ```bash
 conda activate RWNNLMM
@@ -54,6 +54,11 @@ conda activate RWNNLMM
 Ensure your Google Gemini API key is configured inside a local `.env` file in the project root:
 ```text
 GOOGLE_API_KEY=AIzaSy...
+```
+
+Now, download and BPE-tokenize the full **WikiText-103** dataset (all 118.5 Million BPE tokens). This script will download the raw files, tokenize them, output `train.bin` and `val.bin`, and clean up temporary files automatically:
+```bash
+python prepare_wikitext103.py
 ```
 
 ### 2. Run the Autonomous Agentic Search
@@ -67,7 +72,7 @@ nohup python -u evolve_agentic.py > agentic_evolution.log 2>&1 &
 ```
 
 During this search:
-- Candidates ranging from 100M to 500M parameters are trained on WikiText-2 for 1,000 steps.
+- Candidates ranging from 100M to 500M parameters are trained on WikiText-103 for 6,000 steps.
 - Elites matched via continuous ancestry are promoted to subsequent generations to continue their training.
 - Offspring inherit parent parameters in-place via `.copy_()` if they match the continuous distance neighborhood ($<0.6$).
 
