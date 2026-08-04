@@ -222,7 +222,7 @@ def train_and_eval_bpe_model(nodes, edges, d_model=192, max_iters=1000, batch_si
     return model, np.mean(val_losses)
 
 
-def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
+def run_agentic_optimization(generations=100, pop_size=10, eval_steps=57860, use_lamarckian=True):
     print("=== AGENTIC OPTIMIZATION LOOP STARTED ===")
     
     # Forcefully clear old agentic-optim directory for a fresh big-model run
@@ -388,7 +388,7 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
                     print(f" -> Promoted elite exact match. Resuming from its previous checkpoint.")
                     p_best = agent.pf_X[best_idx]
                     parent_state = X_hash_to_state.get(tuple(p_best))
-                elif min_dist < 0.6:  # Candidate is in the evolutionary neighborhood of parent
+                elif use_lamarckian and min_dist < 0.6:  # Candidate is in the evolutionary neighborhood of parent
                     p_best = agent.pf_X[best_idx]
                     parent_state = X_hash_to_state.get(tuple(p_best))
             
@@ -556,4 +556,4 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
 
 
 if __name__ == "__main__":
-    run_agentic_optimization(generations=100, pop_size=10, eval_steps=57860)
+    run_agentic_optimization(generations=100, pop_size=10, eval_steps=57860, use_lamarckian=True)
