@@ -556,4 +556,4 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
 
 
 if __name__ == "__main__":
-    run_agentic_optimization(generations=100, pop_size=10, eval_steps=6000)
+    run_agentic_optimization(generations=100, pop_size=10, eval_steps=57860)
