@@ -404,6 +404,7 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=57860, use
                     nodes, edges, d_model=d_model, max_iters=eval_steps, batch_size=8, block_size=block_size,
                     parent_state_dict=parent_state # Inherit parent weights!
                 )
+                print(f" -> Success! Validation Loss: {val_loss:.4f}")
                 if val_loss >= 6.0:
                     # Enforce strict validation loss constraint < 6.0
                     val_loss = 99.9
