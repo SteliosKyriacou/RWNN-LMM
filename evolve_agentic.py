@@ -479,7 +479,10 @@ def run_agentic_optimization(generations=100, pop_size=10, eval_steps=1000):
             for k in range(pop_size):
                 if np.array_equal(X[k], x_elite) and state_dicts[k] is not None:
                     weight_file = f"checkpoints/agentic-optim/pareto_gen{gen+1}_ind{i+1}_loss{loss_val:.2f}.pt"
-                    torch.save(state_dicts[k], weight_file)
+                    try:
+                        torch.save(state_dicts[k], weight_file)
+                    except Exception as save_err:
+                        print(f" -> Warning: Skipped saving weights to disk ({save_err}). Continuing with in-memory caching.")
                     break
                     
             config_file = f"checkpoints/agentic-optim/pareto_gen{gen+1}_ind{i+1}_config.json"
