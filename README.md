@@ -1,108 +1,108 @@
 # Lamarckian Weight Inheritance in Autonomous H-DAG Large Language Models
 
-This repository contains the official, publication-ready implementation and documentation for **Lamarckian Weight Inheritance in Autonomous H-DAG Large Language Models**, targeted for *Neural Information Processing Systems (NeurIPS 2026)*.
-
-We introduce a framework where decoder-only language models are modeled as **Heterogeneous Directed Acyclic Graphs (H-DAGs)**, mapping continuous Euclidean coordinates $x \in [0, 1]^{65}$ directly into topologically compiled, GPU-parallelized sequence-mixing networks. The optimization space is searched by a stateful, autonomous LLM agent (Metis-Agent) that writes its own self-diagnostic Python code (SVD, Ridge regression) to propose candidate vectors.
-
-To bypass the cold-start training overhead, we introduce **Lamarckian Weight Inheritance via continuous Nearest-Neighbor Ancestry Mapping**, allowing offspring models to instantly copy pre-trained weight tensors from their closest Pareto-front parents.
-
----
-
-## 📂 Project Structure
-
-```text
-rwnn-llm/
-├── README.md                       # This experiment replication guide
-├── blog4.md                        # Formal NeurIPS-style academic paper draft
-├── evolve_agentic.py               # Main Autonomous Agentic Search & Lamarckian training loop
-├── calculate_agentic_hypervolume.py# Script to compute exact hypervolumes and plot convergence
-├── generate_graph_visualization.py # Script to compile and generate NetworkX layout PNGs of H-DAGs
-├── generate_all_elites_samples.py  # Script to run autoregressive generation/sampling of elite models
-├── rwnn/                           # Core modular H-DAG compiler
-│   ├── __init__.py
-│   ├── nodes.py                    # Graph primitives (modular and atomic layers)
-│   ├── graph.py                    # JIT-topological compiler, dimension alignment, and executor
-│   └── mutator.py                  # Graph mutations and cycle checking
-├── train.bin                       # Preprocessed Salesforce WikiText-2 training tokens (BPE)
-├── val.bin                         # Preprocessed Salesforce WikiText-2 validation tokens (BPE)
-└── assets/                         # Folder containing generated plots and graph layouts
-```
+Research codebase for **"Lamarckian Weight Inheritance in Autonomous H-DAG Large Language Models"**
+(NeurIPS 2026 draft). It performs multi-objective **neural architecture search (NAS)** for
+decoder-only language models, where each architecture is a **Heterogeneous Directed Acyclic Graph
+(H-DAG)** of primitive nodes that is compiled and trained on the fly.
 
 ---
 
-## ⚡ Hardware & Memory Requirements
+## What we are doing
 
-This scaled-up configuration is heavily optimized to run on an **NVIDIA GeForce RTX 4070 Ti (12GB VRAM)** or similar consumer-grade GPU:
-- **`gpt2` (162.5M parameters)**: Peak VRAM: **`4.96 GB`**
-- **`gpt2-medium` (247.6M parameters)**: Peak VRAM: **`7.80 GB`**
-- **`gpt2-large` (290.1M parameters)**: Peak VRAM: **`9.32 GB`**
+An LLM agent (Metis-Agent, Gemini-backed) drives an evolutionary search over a continuous encoding
+of language-model architectures. Every generation the agent **writes its own optimization code**
+(PCA-EA, CMA-ES, Ridge surrogate-inverse, gap-filling, …) to propose the next population of
+candidate vectors. Each candidate is decoded into a real H-DAG, compiled into a PyTorch module,
+trained for one epoch on WikiText-103, and scored. A **Pareto front** is maintained across two
+competing objectives.
 
-All runs employ a batch size of `8`, sequence length of `256`, and are compiled using PyTorch's `BFloat16` mixed-precision tracking to guarantee stability under a 12GB memory budget.
+To avoid cold-start cost, new candidates copy weight tensors in-place from their nearest
+Pareto-front ancestor (**Lamarckian Weight Inheritance via continuous nearest-neighbour ancestry**),
+so offspring resume rather than restart.
+
+### Objectives (both minimized)
+
+1. **Validation cross-entropy loss.**
+2. **Active-FLOPs per token** — the *used* compute of the transformer body (attention + only the
+   `top_k` active experts of each feed-forward block). Total parameter count is **not** an
+   objective; only compute that actually runs is charged.
+
+Using active-FLOPs (rather than parameter count) is deliberate: it is the objective under which
+**Mixture-of-Experts (MoE)** becomes attractive — extra experts add capacity, parameters, and
+memory but almost no active-FLOPs — so the search is free to discover sparse, high-capacity models.
+
+### Hard constraints (a violator is rejected by design, not given a fake loss)
+
+- **Peak training memory < 12 GB** (measured; OOM becomes a clean rejection). Large expert counts
+  inflate memory even at low FLOPs, so this is what *bounds* MoE size on a consumer GPU.
+- **Validation loss < 4.5** (rejects degenerate near-empty models).
+- **At least 3 active blocks** (no embeddings-only models).
+
+### The search space (97-D continuous encoding)
+
+`x ∈ [0,1]^97`, decoded per layer via a 16-slot control map:
+
+| Genes | Meaning |
+|-------|---------|
+| 0 | depth (6–30 layers) |
+| 1–16 | attention on/off per slot |
+| 17–32 | feed-forward on/off per slot |
+| 33–48 | activation type (GELU / SiLU / ReLU) |
+| 49–64 | genuine long-range residual **skip** (adds an earlier block's output into a later block's residual sum) |
+| 65–80 | **MoE `n_experts`** per FFN slot (1 = dense, else 2/4/8) |
+| 81–96 | **MoE `top_k`** per FFN slot (1 or 2 active experts) |
+
+Width is fixed (`d_model=768`, 12 heads, 4× FFN); an FFN slot with `n_experts>1` compiles to a fused
+**MoE block** (router → top-k sparse dispatch → gate-weighted combine, with a Switch-style
+load-balance loss). `n_experts=1` reduces exactly to a dense GPT-2 feed-forward block.
+
+### Initial population
+
+20 individuals: **5 GPT-2-family seeds** (including the two best elites from the previous run) plus
+**15 structurally-diverse explorers** deliberately seeded with skip connections, front-loaded
+attention, non-uniform FFN placement, mixed activations, varied depth, and — for about half of them —
+real MoE variance (so `n_experts`/`top_k` are not born collapsed to "dense"). A per-gene
+**saturation monitor** reports any variable that freezes across the whole population for two
+generations and injects diversity to escape the plateau.
 
 ---
 
-## 🚀 Recreating the Experiment
+## Layout
 
-Follow these steps to reproduce the 45-generation scaled-up agentic search:
+- `rwnn/nodes.py` — atomic node modules (embeddings, causal attention, linear, layernorm,
+  activation, sum, **MoE feed-forward**, …).
+- `rwnn/graph.py` — `RWNNGraph`: topologically compiles `(nodes, edges)`, auto-projects on dimension
+  mismatch, executes as an `nn.Module`, and collects MoE load-balance losses.
+- `rwnn/mutator.py` — DAG validity checks, structural mutations, `get_gpt2_dag()`.
+- `evolve_agentic.py` — **main script**: `vector_to_multilayer_graph()` (decode), MoE-aware
+  `active_flops_per_token()`, `train_and_eval_bpe_model()` (train + measure peak memory),
+  `build_initial_population()`, and `run_agentic_optimization()` (the generation loop).
+- `calculate_agentic_hypervolume.py` — hypervolume (S-metric) + convergence plots.
+- `generate_graph_visualization.py`, `generate_all_elites_samples.py` — layouts and samples.
+- `prepare_wikitext103.py` — BPE tokenize into `train.bin` / `val.bin`.
+- `checkpoints/agentic-optim/` — per-generation outputs: `pareto_gen{G}_ind{I}_config.json`
+  (real `nodes`/`edges`, `loss`, `active_flops`, `params`, MoE stats, `vector`), weights `.pt`,
+  `generation_{G}_report.json`, and cumulative Pareto PNGs (loss vs active-FLOPs).
 
-### 1. Environment Setup & Dataset Preparation
-Activate the dedicated conda environment loaded with pre-configured CUDA-12, PyTorch, tiktoken, and google-genai libraries:
+---
+
+## Running
+
 ```bash
 conda activate RWNNLMM
+python prepare_wikitext103.py     # once: produces train.bin / val.bin
+python evolve_agentic.py          # or: nohup python -u evolve_agentic.py > agentic_evolution.log 2>&1 &
 ```
 
-Ensure your Google Gemini API key is configured inside a local `.env` file in the project root:
-```text
-GOOGLE_API_KEY=AIzaSy...
-```
-
-Now, download and BPE-tokenize the full **WikiText-103** dataset (all 118.5 Million BPE tokens). This script will download the raw files, tokenize them, output `train.bin` and `val.bin`, and clean up temporary files automatically:
-```bash
-python prepare_wikitext103.py
-```
-
-### 2. Run the Autonomous Agentic Search
-Start the main optimization script. This will automatically clear any legacy directories, compile the BPE-tokenized datasets, initialize the initial population (loaded with GPT-2, GPT-2 Medium, GPT-2 Large, and Gated Sparse configurations), and run the Metis-Agent loop:
-```bash
-python evolve_agentic.py
-```
-*Tip: To run this in the background as a headless persistent process, use:*
-```bash
-nohup python -u evolve_agentic.py > agentic_evolution.log 2>&1 &
-```
-
-During this search:
-- Candidates ranging from 100M to 500M parameters are trained on WikiText-103 for 6,000 steps.
-- Elites matched via continuous ancestry are promoted to subsequent generations to continue their training.
-- Offspring inherit parent parameters in-place via `.copy_()` if they match the continuous distance neighborhood ($<0.6$).
-
-### 3. Compute Hypervolume and Plot Convergence
-After several generations of search have completed, you can calculate the exact mathematical hypervolume (S-Metric) dominated by the Pareto-front elites and generate beautiful, publication-ready convergence plots:
-```bash
-python calculate_agentic_hypervolume.py
-```
-This script dynamically computes the bounding boxes of all historical and current Pareto-front members, outputs statistics on-screen, and saves two high-resolution plots under `assets/`:
-- `assets/agentic_hypervolume_progression.png`
-- `assets/agentic_loss_progression.png`
-
-### 4. Generate NetworkX Graph Visualizations
-To compile and visualize the exact topological wiring and multi-hop skip residuals of the non-dominated elite architectures:
-```bash
-python generate_graph_visualization.py
-```
-This will output high-resolution NetworkX graph layout maps under the `assets/` directory.
-
-### 5. Generate Autoregressive Appendix Samples
-To sample language completions from the pre-trained elite weights of the final Pareto front and replicate the Appendix of the paper:
-```bash
-python generate_all_elites_samples.py
-```
-This runs the autoregressive causal generator on the Roman Empire prompt, producing fluent completed passages and saving them in text files.
+Requires a sibling repo at `/home/stelios/repos/agentic-optimizer` (provides `MetisAgent`), a `.env`
+with `GOOGLE_API_KEY`, and `train.bin` / `val.bin`. Set
+`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` before launching to reduce fragmentation on a
+12 GB card. Note: `run_agentic_optimization()` clears `checkpoints/agentic-optim/` on startup.
 
 ---
 
-## 📄 Academic Citation
-If you utilize this H-DAG compiler, Lamarckian Weight Inheritance, or Agentic Optimizer framework in your research, please cite our draft:
+## Citation
+
 ```bibtex
 @inproceedings{kyriacou2026lamarckian,
   title={Lamarckian Weight Inheritance in Autonomous H-DAG Large Language Models},
