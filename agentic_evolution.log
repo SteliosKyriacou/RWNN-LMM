@@ -1,36 +1,202 @@
 === AGENTIC OPTIMIZATION LOOP STARTED ===
 Clearing old agentic-optim directory: checkpoints/agentic-optim
+Initialized population of 20: 5 GPT-2 variants + 15 diverse explorers.
 Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
 
---- Agentic Generation 1 / 100 ---
+--- Agentic Generation 1 / 10 ---
 ✓ Saved generated sampling code: checkpoints/agentic-optim/generation_1_code.py
-Evaluating candidate 1/10 (Params: 162,497,617)...
-Evaluation failed: CUDA out of memory. Tried to allocate 1.54 GiB. GPU 0 has a total capacity of 11.63 GiB of which 393.62 MiB is free. Including non-PyTorch memory, this process has 11.21 GiB memory in use. Of the allocated memory 8.86 GiB is allocated by PyTorch, and 2.11 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 2/10 (Params: 247,552,081)...
-Evaluation failed: CUDA out of memory. Tried to allocate 24.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 23.62 MiB is free. Including non-PyTorch memory, this process has 11.57 GiB memory in use. Of the allocated memory 11.23 GiB is allocated by PyTorch, and 93.47 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 3/10 (Params: 290,079,313)...
-Evaluation failed: CUDA out of memory. Tried to allocate 96.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 23.62 MiB is free. Including non-PyTorch memory, this process has 11.57 GiB memory in use. Of the allocated memory 11.20 GiB is allocated by PyTorch, and 130.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 4/10 (Params: 153,057,361)...
-Evaluation failed: CUDA out of memory. Tried to allocate 1.54 GiB. GPU 0 has a total capacity of 11.63 GiB of which 345.62 MiB is free. Including non-PyTorch memory, this process has 11.25 GiB memory in use. Of the allocated memory 9.00 GiB is allocated by PyTorch, and 2.01 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 5/10 (Params: 282,991,441)...
-Evaluation failed: CUDA out of memory. Tried to allocate 48.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 31.62 MiB is free. Including non-PyTorch memory, this process has 11.56 GiB memory in use. Of the allocated memory 11.24 GiB is allocated by PyTorch, and 78.85 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 6/10 (Params: 171,949,393)...
-Evaluation failed: CUDA out of memory. Tried to allocate 1.54 GiB. GPU 0 has a total capacity of 11.63 GiB of which 273.62 MiB is free. Including non-PyTorch memory, this process has 11.32 GiB memory in use. Of the allocated memory 9.24 GiB is allocated by PyTorch, and 1.84 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 7/10 (Params: 226,288,465)...
-Evaluation failed: CUDA out of memory. Tried to allocate 786.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 271.62 MiB is free. Including non-PyTorch memory, this process has 11.32 GiB memory in use. Of the allocated memory 10.81 GiB is allocated by PyTorch, and 283.01 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 8/10 (Params: 233,376,337)...
-Evaluation failed: CUDA out of memory. Tried to allocate 74.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 31.62 MiB is free. Including non-PyTorch memory, this process has 11.56 GiB memory in use. Of the allocated memory 11.22 GiB is allocated by PyTorch, and 95.64 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 9/10 (Params: 169,585,489)...
-Evaluation failed: CUDA out of memory. Tried to allocate 1.54 GiB. GPU 0 has a total capacity of 11.63 GiB of which 261.62 MiB is free. Including non-PyTorch memory, this process has 11.33 GiB memory in use. Of the allocated memory 8.97 GiB is allocated by PyTorch, and 2.12 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 10/10 (Params: 290,079,313)...
-Evaluation failed: CUDA out of memory. Tried to allocate 96.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 91.62 MiB is free. Including non-PyTorch memory, this process has 11.50 GiB memory in use. Of the allocated memory 11.20 GiB is allocated by PyTorch, and 64.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Evaluating candidate 1/20 (Params: 247,552,081)...
+ -> Success! Validation Loss: 3.9781
+Evaluating candidate 2/20 (Params: 153,049,681)...
+ -> Success! Validation Loss: 3.9114
+Evaluating candidate 3/20 (Params: 162,497,617)...
+ -> Success! Validation Loss: 3.9838
+Evaluating candidate 4/20 (Params: 153,057,361)...
+ -> Success! Validation Loss: 3.9307
+Evaluating candidate 5/20 (Params: 205,024,849)...
+ -> Success! Validation Loss: 3.8849
+Evaluating candidate 6/20 (Params: 115,242,577)...
+ -> Success! Validation Loss: 3.8803
+Evaluating candidate 7/20 (Params: 122,330,449)...
+ -> Success! Validation Loss: 3.9953
+Evaluating candidate 8/20 (Params: 101,074,513)...
+ -> Success! Validation Loss: 4.0713
+Evaluating candidate 9/20 (Params: 110,518,609)...
+ -> Success! Validation Loss: 4.0995
+Evaluating candidate 10/20 (Params: 134,142,289)...
+ -> Success! Validation Loss: 4.0545
+Evaluating candidate 11/20 (Params: 160,129,873)...
+ -> Success! Validation Loss: 3.8994
+Evaluating candidate 12/20 (Params: 150,674,257)...
+ -> Success! Validation Loss: 3.8736
+Evaluating candidate 13/20 (Params: 136,502,353)...
+ -> Success! Validation Loss: 3.9145
+Evaluating candidate 14/20 (Params: 157,765,969)...
+Evaluation failed: CUDA out of memory. Tried to allocate 198.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 135.62 MiB is free. Including non-PyTorch memory, this process has 11.46 GiB memory in use. Of the allocated memory 11.18 GiB is allocated by PyTorch, and 37.12 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Evaluating candidate 15/20 (Params: 122,334,289)...
+ -> Success! Validation Loss: 3.8676
+Evaluating candidate 16/20 (Params: 183,745,873)...
+Evaluation failed: CUDA out of memory. Tried to allocate 148.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 95.62 MiB is free. Including non-PyTorch memory, this process has 11.50 GiB memory in use. Of the allocated memory 11.21 GiB is allocated by PyTorch, and 43.97 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Evaluating candidate 17/20 (Params: 202,649,425)...
+Evaluation failed: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 97.62 MiB is free. Including non-PyTorch memory, this process has 11.49 GiB memory in use. Of the allocated memory 10.93 GiB is allocated by PyTorch, and 336.40 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Evaluating candidate 18/20 (Params: 179,037,265)...
+Evaluation failed: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 217.62 MiB is free. Including non-PyTorch memory, this process has 11.38 GiB memory in use. Of the allocated memory 10.84 GiB is allocated by PyTorch, and 300.27 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Evaluating candidate 19/20 (Params: 186,121,297)...
+Evaluation failed: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 177.62 MiB is free. Including non-PyTorch memory, this process has 11.42 GiB memory in use. Of the allocated memory 10.88 GiB is allocated by PyTorch, and 298.29 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Evaluating candidate 20/20 (Params: 160,126,033)...
+Evaluation failed: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 15.62 MiB is free. Including non-PyTorch memory, this process has 11.57 GiB memory in use. Of the allocated memory 11.30 GiB is allocated by PyTorch, and 32.84 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ -> Dynamic Reference Point for HV calculation set to: Loss=4.5094, Params=272,307,289
 
 🏆 Generation 1 Agentic Pareto Front:
-  Elite 1: Params=153,057,361, Loss=99.9000
+  Elite 1: Params=115,242,577, Loss=3.8803
+  Elite 2: Params=101,074,513, Loss=4.0713
+  Elite 3: Params=122,334,289, Loss=3.8676
 ✓ Saved checkpoints/agentic-optim/generation_1_report.json
-/home/stelios/repos/RWNN-LMM/evolve_agentic.py:505: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
-  plt.legend()
 ✓ Saved Pareto plot: checkpoints/agentic-optim/generation_1_pareto.png
 ✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
 
---- Agentic Generation 2 / 100 ---
+--- Agentic Generation 2 / 10 ---
+
+  [32m[THINKING] **Generation 1 Candidate Solution Generation Plan**
+
+Okay, so Generation 0 is done. Time to craft 20 new candidate solutions for Generation 1. I'm dealing with a 65-variable optimization problem, each variable bounded between 0.0 and 1.0. The goal is to minimize two objectives: f1 (Loss/Perplexity) - aiming for < 6.0 - and f2 (Parameters/Complexity), where the reference point for the Hypervolume (HV) calculation is (5e8, 6.0). Our current f2 values are in the ballpark of 1e8 to 2.4e8. The current Pareto Front (PF) holds just 3 solutions: [3.8676, 122M], [3.8802, 115M], and [4.0712, 101M] (f1, f2).
+
+Considering our reference point of (5e8, 6.0), the f2 values are comfortably below 5e8, and the loss is around 3.8-4.0. If I crank up the model depth (Var 0) or activate more layers, the complexity (f2) will likely go up, but I'm expecting the loss (f1) to come down.
+
+The variables are: depth (Var 0), attention activation (Var 1-16), MLP activation (Var 17-32), activation functions (GELU, SiLU, ReLU; Var 33-48), and genuine long-range residual skips (Var 49-64).
+
+I have some domain knowledge to leverage: attention should be front-loaded, deeper models (larger Var 0) should drive down loss (validation), and I should use cross-layer skips to improve gradient flow at a minimal complexity cost. Heterogeneous activations should also help.
+
+Let's quickly run some diagnostics to assess the state of things. The prompt says to print them as a single line each, with a brief interpretation. So, I will do that:
+```python
+# Correlation matrix of all_X and pf_X
+# Since we only have 3 PF solutions, correlation matrix of pf_X might be unstable or have NaNs if std is 0.
+# We should handle NaNs safely.
+```
+
+The approach for Generation 1 will be a mix. Differential Evolution (DE) seems tricky since I only have 3 PF solutions, so I will have to adapt. I'll take a "Domain Guided Hybrid" approach:
+
+*   **3 candidates:** Perturb the existing PF solutions slightly.
+*   **5 candidates:** Focus on reducing loss (f1). I will try to make Var 0 high, activate early attention layers, make later layers MLP, use active skips, and combine activation functions.
+*   **5 candidates:** Focus on reducing parameters (f2). I will make Var 0 smaller, bypass some attention and MLP layers, but keep the skips active to keep loss low.
+*   **4 candidates:** I'll linearly interpolate (crossover) between the 3 PF solutions to fill the solution space.
+*   **3 candidates:** Random sampling, but guided by what I know: keep skips active and use mixed activations.
+
+Let's refine this strategy. I am thinking of the current solutions. In the current PF, the depth (Var 0) values are 0.6333, 0.1200, 0.1667. Var 0 = 0.1200 achieves f1=3.8802, f2=115M. Var 0 = 0.6333 achieves f1=3.8676, f2=122M. I bet that if I make Var 0 close to 0.9, I could push loss below 3.5 without crossing 1.5e8 parameters. Now, I have to make sure that any value I create is inside the [0, 1] bounds.
+
+Time to implement this in code. Keep it compact, robust, and error-free.
+
+
+[0m
+Excess corr: 0.2703 — partially coupled variables
+Multimodality ratio: 0.0000 — unimodal structure expected
+ -> Promoted 2 elites directly to the population to continue their fine-tuning.
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_2_code.py
+Evaluating candidate 1/20 (Params: 112,882,513)...
+ -> Inherited 58 parameter tensors from parent weights.
+ -> Success! Validation Loss: 3.9514
+Evaluating candidate 2/20 (Params: 108,162,385)...
+ -> Inherited 52 parameter tensors from parent weights.
+ -> Success! Validation Loss: 3.8146
+Evaluating candidate 3/20 (Params: 122,334,289)...
+ -> Inherited 84 parameter tensors from parent weights.
+ -> Success! Validation Loss: 3.8427
+Evaluating candidate 4/20 (Params: 122,330,449)...
+ -> Inherited 52 parameter tensors from parent weights.
+ -> Success! Validation Loss: 3.9531
+Evaluating candidate 5/20 (Params: 98,710,609)...
+ -> Inherited 34 parameter tensors from parent weights.
+ -> Success! Validation Loss: 4.1541
+Evaluating candidate 6/20 (Params: 115,246,417)...
+ -> Inherited 52 parameter tensors from parent weights.
+ -> Success! Validation Loss: 3.8467
+Evaluating candidate 7/20 (Params: 157,773,649)...
+ -> Success! Validation Loss: 4.0845
+Evaluating candidate 8/20 (Params: 179,037,265)...
+ -> Success! Validation Loss: 3.9424
+Evaluating candidate 9/20 (Params: 169,585,489)...
+ -> Success! Validation Loss: 3.9524
+Evaluating candidate 10/20 (Params: 164,861,521)...
+ -> Success! Validation Loss: 4.0218
+Evaluating candidate 11/20 (Params: 162,497,617)...
+ -> Success! Validation Loss: 4.0653
+Evaluating candidate 12/20 (Params: 77,443,153)...
+ -> Success! Validation Loss: 5.4263
+Evaluating candidate 13/20 (Params: 77,443,153)...
+ -> Success! Validation Loss: 5.3736
+Evaluating candidate 14/20 (Params: 77,443,153)...
+ -> Success! Validation Loss: 5.4128
+Evaluating candidate 15/20 (Params: 77,443,153)...
+ -> Success! Validation Loss: 5.4602
+Evaluating candidate 16/20 (Params: 77,443,153)...
+ -> Success! Validation Loss: 5.3791
+Evaluating candidate 17/20 (Params: 108,162,385)...
+ -> Inherited 52 parameter tensors from parent weights.
+Evaluation failed: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 191.62 MiB is free. Including non-PyTorch memory, this process has 11.40 GiB memory in use. Of the allocated memory 10.99 GiB is allocated by PyTorch, and 172.05 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Evaluating candidate 18/20 (Params: 134,142,289)...
+Evaluation failed: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 11.62 MiB is free. Including non-PyTorch memory, this process has 11.58 GiB memory in use. Of the allocated memory 11.31 GiB is allocated by PyTorch, and 26.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ -> Promoted elite exact match. Resuming from its previous checkpoint.
+Evaluating candidate 19/20 (Params: 115,242,577)...
+ -> Inherited 66 parameter tensors from parent weights.
+Evaluation failed: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 171.62 MiB is free. Including non-PyTorch memory, this process has 11.42 GiB memory in use. Of the allocated memory 11.06 GiB is allocated by PyTorch, and 129.20 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ -> Promoted elite exact match. Resuming from its previous checkpoint.
+Evaluating candidate 20/20 (Params: 122,334,289)...
+ -> Inherited 84 parameter tensors from parent weights.
+Evaluation failed: CUDA out of memory. Tried to allocate 198.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 11.62 MiB is free. Including non-PyTorch memory, this process has 11.58 GiB memory in use. Of the allocated memory 11.30 GiB is allocated by PyTorch, and 40.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ -> Dynamic Reference Point for HV calculation set to: Loss=6.0062, Params=196,940,991
+
+🏆 Generation 2 Agentic Pareto Front:
+  Elite 1: Params=101,074,513, Loss=4.0713
+  Elite 2: Params=108,162,385, Loss=3.8146
+  Elite 3: Params=98,710,609, Loss=4.1541
+  Elite 4: Params=77,443,153, Loss=5.3736
+✓ Saved checkpoints/agentic-optim/generation_2_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_2_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 3 / 10 ---
+
+  [32m[THINKING] **Surrogate-Inverse Model for Enhanced Pareto Front Exploration**
+
+Okay, let's take stock. HV is up significantly again, which is a good sign, and we've got a new Pareto front (PF) with four solutions now. Looking at the current front, the validation loss is in the 3.8 to 5.4 range, and parameter counts are between 77 million and 108 million. We didn't see any deep models on the PF this time, which is interesting.
+
+I'm remembering our guide's advice – deeper models should converge faster and achieve lower loss. We tried deep models in the first generation, but they didn't make it to the PF. It looks like the issue is that none of the generation 1 deep models, even though they had lower loss, had sufficiently lower loss to beat the shallow models in terms of Pareto dominance, especially when their higher parameter cost is considered. Even a model with a validation loss of 3.5 and 200M parameters, should have been on the PF. The minimum validation loss across all evaluations is 3.81, so we didn't find any models that achieved lower loss. We didn't see any deep models in the PF because we only did one generation with deep models. In Generation 1, we generated 5 deep models (Var 0 in [0.7, 1.0]).
+
+So, it's either convergence time or the configurations aren't right. We need to consider attention, MLPs, and skips for these deep models.
+
+Let's look at what's driving the PF. The most influential variables, by variance, are variables related to attention states. And all of those are active. Conversely, the long-range skips are mostly inactive or bypassed. Skips, however, don't cost much parameter-wise, so why aren't they more active?
+
+We need to explore the space further, and per instructions, we need to switch algorithms. Last time was a domain-guided hybrid; this time, it's either PCA-EA or Surrogate-Inverse Model. Given the data (40 evaluations), the Surrogate-Inverse Model seems like a good fit, or, PCA-EA might be a good choice. We need to map from objective space back to the decision space.
+
+We can fit the inverse model on all of the valid data points, or just the PF. Given we only have 4 PF solutions, we will have a very underdetermined model with just pf_F to pf_X. I think we will need to fit it from a set of top solutions, perhaps the top 15-20 based on Pareto rank or hypervolume, and then use a multi-output Ridge regression.
+
+We can use the Surrogate-Inverse Model for:
+a) gap filling,
+b) front pushing (scaling objectives of existing PF solutions), and
+c) extreme extension (targeting lower loss and lower parameters).
+
+The model's input will be the objectives, and the output will be the decisions (variables). We'll use Ridge regression in NumPy. We'll solve for the weights and use a regularization parameter of 0.1 or 1.0.
+
+Now, which data to train on? Fitting just on the 4 PF solutions would be a simple linear interpolation/extrapolation. It may actually work well, because the Pareto set is likely a 1D manifold in 65D space! I think we can fit a clean model on the PF and also incorporate more solutions for robustness. It's a valid choice to use both, and do some DE or PCA-guided perturbation to maintain diversity.
+
+Okay, let's break down the next 20 candidates:
+
+*   **Surrogate-Inverse Model (10 Candidates)**: We'll target extreme loss reduction, parameter reduction, gap filling, and front pushing via scaling, interpolation, and extrapolation.
+*   **PCA-EA/Covariance Mutation (6 Candidates)**: We'll compute PCA on the decision variables of the PF or the top solutions and mutate along the principal components.
+*   **Exploratory Candidates with Domain Knowledge (4 Candidates)**: We'll re-visit deeper models but this time with a moderate depth (Var 0 around 0.4 - 0.6) to see if we can find a sweet spot using front-loaded attention and active skips.
+
+Finally, we need to refine the diagnostics. We'll compute correlation, but need to account for potential zero variance, and then replace NaN values with zero. We need a robust function for this.
+
+Finally, let's double-check all the bounds and clipping and write the code to ensure all candidate solutions fall within the valid range of \[0.0, 1.0].
+
+
+[0m
+Excess corr: 0.4182 — partial coupling detected
+Multimodality ratio: 0.1347 — unimodal trajectory
+ -> Promoted 2 elites directly to the population to continue their fine-tuning.
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_3_code.py
+Evaluating candidate 1/20 (Params: 183,753,553)...
+ -> Success! Validation Loss: 3.8729
+Evaluating candidate 2/20 (Params: 205,021,009)...
+ -> Success! Validation Loss: 3.9178
+Evaluating candidate 3/20 (Params: 77,443,153)...

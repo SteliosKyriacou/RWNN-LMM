@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nvidia-smi --query-gpu=memory.used,memory.total,utilization.gpu --format=csv)",
+      "Bash(ps -o pid,lstart,etimes,%cpu,%mem,rss -p 834802)",
+      "Bash(cd *)",
+      "WebSearch",
+      "Skill(artifact-design)",
+      "Artifact",
+      "Bash(nvidia-smi --query-gpu=memory.used,memory.total,utilization.gpu --format=csv,noheader)",
+      "Bash(python3 -m py_compile evolve_agentic.py)",
+      "Bash(pkill -f evolve_agentic.py)",
+      "Bash(nvidia-smi --query-gpu=memory.used,utilization.gpu --format=csv,noheader)",
+      "Bash(ps -p 2409939 -o pid,stat,cmd --no-headers)",
+      "Bash(kill -9 2409939)",
+      "Bash(ps -eo pid,cmd)",
+      "Bash(git add *)",
+      "Bash(git commit -q -m ' *)",
+      "Bash(git push *)"
+    ]
+  }
+}

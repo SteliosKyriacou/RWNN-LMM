@@ -1,0 +1,221 @@
+<title>RWNN Pareto Elites — Gen 8 Schematics</title>
+<style>
+  :root{
+    --ground:#eef1f5; --panel:#ffffff; --ink:#16202b; --muted:#5c6b7a;
+    --hair:#d6dde5; --spine:#9aa7b4;
+    --attn:#3352d9; --attn-soft:#3352d922;
+    --mlp:#0d9488; --mlp-soft:#0d948822;
+    --skip:#d97706; --bypass:#b6c0cb;
+    --good:#1a7f45; --emb:#5b647a;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#0c0f14; --panel:#141a22; --ink:#e7eef6; --muted:#8b99a8;
+      --hair:#26303c; --spine:#3d4a58;
+      --attn:#6d86ff; --attn-soft:#6d86ff26;
+      --mlp:#2dd4bf; --mlp-soft:#2dd4bf26;
+      --skip:#f6a94b; --bypass:#3a4552; --emb:#8791a8;
+    }
+  }
+  :root[data-theme="light"]{
+    --ground:#eef1f5; --panel:#ffffff; --ink:#16202b; --muted:#5c6b7a;
+    --hair:#d6dde5; --spine:#9aa7b4; --attn:#3352d9; --attn-soft:#3352d922;
+    --mlp:#0d9488; --mlp-soft:#0d948822; --skip:#d97706; --bypass:#b6c0cb; --emb:#5b647a;
+  }
+  :root[data-theme="dark"]{
+    --ground:#0c0f14; --panel:#141a22; --ink:#e7eef6; --muted:#8b99a8;
+    --hair:#26303c; --spine:#3d4a58; --attn:#6d86ff; --attn-soft:#6d86ff26;
+    --mlp:#2dd4bf; --mlp-soft:#2dd4bf26; --skip:#f6a94b; --bypass:#3a4552; --emb:#8791a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+       line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:48px 24px 72px}
+  header .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;
+       text-transform:uppercase;color:var(--skip);margin:0 0 10px}
+  h1{font-size:clamp(26px,4vw,40px);line-height:1.1;margin:0 0 14px;font-weight:680;
+     text-wrap:balance;letter-spacing:-.01em}
+  .lede{max-width:68ch;color:var(--muted);font-size:16px;margin:0 0 8px}
+  .lede strong{color:var(--ink);font-weight:620}
+  .rule{height:1px;background:var(--hair);border:0;margin:32px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:18px 26px;font-family:var(--mono);font-size:12.5px;
+     color:var(--muted);align-items:center}
+  .legend .k{display:inline-flex;align-items:center;gap:8px}
+  .sw{width:22px;height:12px;border-radius:3px;display:inline-block}
+  .sw.attn{background:var(--attn)} .sw.mlp{background:var(--mlp)}
+  .sw.byp{background:transparent;border:1.5px dashed var(--bypass)}
+  .arc{width:24px;height:12px;display:inline-block;position:relative}
+  .arc::after{content:"";position:absolute;inset:0;border:2px solid var(--skip);
+     border-bottom:0;border-radius:12px 12px 0 0}
+  .card{background:var(--panel);border:1px solid var(--hair);border-radius:14px;
+     padding:18px 18px 12px;margin:16px 0;display:grid;grid-template-columns:186px 1fr;gap:18px}
+  @media (max-width:720px){.card{grid-template-columns:1fr}}
+  .meta .rank{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+     color:var(--muted)}
+  .meta h3{margin:2px 0 12px;font-size:19px;font-weight:640}
+  .stat{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);
+     font-size:12.5px;padding:3px 0;border-bottom:1px dotted var(--hair)}
+  .stat:last-child{border-bottom:0}
+  .stat .v{color:var(--ink);font-variant-numeric:tabular-nums}
+  .stat .v.loss{color:var(--good);font-weight:600}
+  .stat .v.skip{color:var(--skip);font-weight:600}
+  .tag{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:10.5px;
+     letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;
+     border:1px solid var(--hair);color:var(--muted)}
+  .tag.champ{color:var(--attn);border-color:var(--attn)}
+  .tag.spar{color:var(--skip);border-color:var(--skip)}
+  .diagram{overflow-x:auto;padding:2px 0}
+  svg{display:block}
+  .note{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:2px 2px 6px}
+  footer{margin-top:40px;font-family:var(--mono);font-size:12px;color:var(--muted);
+     border-top:1px solid var(--hair);padding-top:16px}
+  text{font-family:var(--mono)}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">RWNN-LMM · agentic-optim · generation 8</p>
+    <h1>Pareto elites, drawn from the compiled graph — not the vector</h1>
+    <p class="lede">Each row is one non-dominated architecture, read straight from its saved
+      <code>nodes/edges</code>. Top lane = <strong>attention</strong> blocks, bottom lane =
+      <strong>MLP</strong> blocks, position = layer depth. Amber arcs are real
+      <strong>long-range skip highways</strong> (≥2 layers), including embedding→deep-layer jumps.</p>
+    <p class="lede">The split is stark: the three <strong>loss-champions</strong> (ranks 1, 3, 6) are
+      dense, skip-free decoupled backbones. Every architecture that <strong>uses skips</strong> is a
+      sparse skeleton — 5–10 active layers out of ~18–23 — stitched together by highways carrying the
+      residual across bypassed depth. Skips buy parameter efficiency, not lower loss.</p>
+  </header>
+
+  <hr class="rule">
+  <div class="legend">
+    <span class="k"><span class="sw attn"></span>Attention block</span>
+    <span class="k"><span class="sw mlp"></span>MLP block (GELU)</span>
+    <span class="k"><span class="sw byp"></span>Bypassed layer</span>
+    <span class="k"><span class="arc"></span>Skip highway (≥2 layers)</span>
+    <span class="k">◆ emb / head</span>
+  </div>
+
+  <div id="gallery"></div>
+
+  <footer>
+    Source: checkpoints/agentic-optim/pareto_gen8_ind*_config.json · d_model 768 · 12 heads ·
+    4× MLP · all activations GELU · width fixed (depth &amp; block placement searched).
+  </footer>
+</div>
+
+<script>
+const DATA = {"1": {"params": 157773649, "loss": 3.693, "nlayer": 24, "active": [{"l": 0, "attn": true, "mlp": false, "act": null}, {"l": 1, "attn": true, "mlp": false, "act": null}, {"l": 2, "attn": false, "mlp": true, "act": "activation"}, {"l": 3, "attn": true, "mlp": false, "act": null}, {"l": 4, "attn": true, "mlp": false, "act": null}, {"l": 5, "attn": false, "mlp": true, "act": "activation"}, {"l": 6, "attn": true, "mlp": false, "act": null}, {"l": 7, "attn": true, "mlp": false, "act": null}, {"l": 8, "attn": false, "mlp": true, "act": "activation"}, {"l": 9, "attn": true, "mlp": false, "act": null}, {"l": 10, "attn": true, "mlp": false, "act": null}, {"l": 11, "attn": false, "mlp": true, "act": "activation"}, {"l": 12, "attn": true, "mlp": false, "act": null}, {"l": 13, "attn": false, "mlp": true, "act": "activation"}, {"l": 14, "attn": false, "mlp": true, "act": "activation"}, {"l": 15, "attn": true, "mlp": false, "act": null}, {"l": 16, "attn": false, "mlp": true, "act": "activation"}, {"l": 17, "attn": false, "mlp": true, "act": "activation"}, {"l": 18, "attn": true, "mlp": false, "act": null}, {"l": 19, "attn": false, "mlp": true, "act": "activation"}, {"l": 20, "attn": false, "mlp": true, "act": "activation"}, {"l": 21, "attn": true, "mlp": false, "act": null}, {"l": 22, "attn": false, "mlp": true, "act": "activation"}], "skips": []}, "2": {"params": 136510033, "loss": 3.817, "nlayer": 18, "active": [{"l": 0, "attn": true, "mlp": false, "act": null}, {"l": 1, "attn": true, "mlp": false, "act": null}, {"l": 2, "attn": false, "mlp": true, "act": "activation"}, {"l": 3, "attn": true, "mlp": false, "act": null}, {"l": 4, "attn": false, "mlp": true, "act": "activation"}, {"l": 5, "attn": true, "mlp": false, "act": null}, {"l": 6, "attn": false, "mlp": true, "act": "activation"}, {"l": 7, "attn": true, "mlp": false, "act": null}, {"l": 8, "attn": false, "mlp": true, "act": "activation"}, {"l": 9, "attn": true, "mlp": false, "act": null}, {"l": 10, "attn": false, "mlp": true, "act": "activation"}, {"l": 11, "attn": true, "mlp": false, "act": null}, {"l": 12, "attn": false, "mlp": true, "act": "activation"}, {"l": 13, "attn": true, "mlp": false, "act": null}, {"l": 14, "attn": false, "mlp": true, "act": "activation"}, {"l": 15, "attn": true, "mlp": false, "act": null}, {"l": 16, "attn": false, "mlp": true, "act": "activation"}], "skips": []}, "3": {"params": 143601745, "loss": 3.707, "nlayer": 21, "active": [{"l": 0, "attn": true, "mlp": false, "act": null}, {"l": 1, "attn": true, "mlp": false, "act": null}, {"l": 2, "attn": false, "mlp": true, "act": "activation"}, {"l": 3, "attn": true, "mlp": false, "act": null}, {"l": 4, "attn": false, "mlp": true, "act": "activation"}, {"l": 5, "attn": true, "mlp": false, "act": null}, {"l": 6, "attn": true, "mlp": false, "act": null}, {"l": 7, "attn": false, "mlp": true, "act": "activation"}, {"l": 8, "attn": true, "mlp": false, "act": null}, {"l": 9, "attn": false, "mlp": true, "act": "activation"}, {"l": 10, "attn": true, "mlp": false, "act": null}, {"l": 11, "attn": true, "mlp": false, "act": null}, {"l": 12, "attn": false, "mlp": true, "act": "activation"}, {"l": 13, "attn": true, "mlp": false, "act": null}, {"l": 14, "attn": false, "mlp": true, "act": "activation"}, {"l": 15, "attn": true, "mlp": false, "act": null}, {"l": 16, "attn": true, "mlp": false, "act": null}, {"l": 17, "attn": false, "mlp": true, "act": "activation"}, {"l": 18, "attn": true, "mlp": false, "act": null}, {"l": 19, "attn": false, "mlp": true, "act": "activation"}], "skips": []}, "4": {"params": 110522449, "loss": 3.884, "nlayer": 23, "active": [{"l": 2, "attn": true, "mlp": false, "act": null}, {"l": 3, "attn": true, "mlp": false, "act": null}, {"l": 4, "attn": true, "mlp": false, "act": null}, {"l": 7, "attn": false, "mlp": true, "act": "activation"}, {"l": 8, "attn": false, "mlp": true, "act": "activation"}, {"l": 10, "attn": false, "mlp": true, "act": "activation"}, {"l": 11, "attn": true, "mlp": false, "act": null}, {"l": 12, "attn": true, "mlp": false, "act": null}, {"l": 13, "attn": false, "mlp": true, "act": "activation"}, {"l": 21, "attn": true, "mlp": false, "act": null}], "skips": [[-1, 2], [4, 7], [8, 10], [13, 21]]}, "5": {"params": 112882513, "loss": 3.854, "nlayer": 17, "active": [{"l": 1, "attn": true, "mlp": false, "act": null}, {"l": 2, "attn": true, "mlp": true, "act": "activation"}, {"l": 5, "attn": false, "mlp": true, "act": "activation"}, {"l": 7, "attn": true, "mlp": true, "act": "activation"}, {"l": 8, "attn": true, "mlp": true, "act": "activation"}, {"l": 9, "attn": false, "mlp": true, "act": "activation"}, {"l": 15, "attn": true, "mlp": false, "act": null}], "skips": [[-1, 1], [2, 5], [5, 7], [9, 15]]}, "6": {"params": 143597905, "loss": 3.765, "nlayer": 20, "active": [{"l": 0, "attn": true, "mlp": false, "act": null}, {"l": 1, "attn": true, "mlp": false, "act": null}, {"l": 2, "attn": false, "mlp": true, "act": "activation"}, {"l": 3, "attn": true, "mlp": false, "act": null}, {"l": 4, "attn": false, "mlp": true, "act": "activation"}, {"l": 5, "attn": true, "mlp": false, "act": null}, {"l": 6, "attn": false, "mlp": true, "act": "activation"}, {"l": 7, "attn": false, "mlp": true, "act": "activation"}, {"l": 8, "attn": true, "mlp": false, "act": null}, {"l": 9, "attn": false, "mlp": true, "act": "activation"}, {"l": 10, "attn": true, "mlp": false, "act": null}, {"l": 11, "attn": false, "mlp": true, "act": "activation"}, {"l": 12, "attn": true, "mlp": false, "act": null}, {"l": 13, "attn": true, "mlp": false, "act": null}, {"l": 14, "attn": false, "mlp": true, "act": "activation"}, {"l": 15, "attn": true, "mlp": false, "act": null}, {"l": 16, "attn": false, "mlp": true, "act": "activation"}, {"l": 17, "attn": true, "mlp": false, "act": null}, {"l": 18, "attn": false, "mlp": true, "act": "activation"}], "skips": []}, "7": {"params": 134146129, "loss": 3.829, "nlayer": 19, "active": [{"l": 0, "attn": true, "mlp": false, "act": null}, {"l": 1, "attn": true, "mlp": false, "act": null}, {"l": 2, "attn": false, "mlp": true, "act": "activation"}, {"l": 3, "attn": true, "mlp": false, "act": null}, {"l": 4, "attn": false, "mlp": true, "act": "activation"}, {"l": 6, "attn": false, "mlp": true, "act": "activation"}, {"l": 8, "attn": false, "mlp": true, "act": "activation"}, {"l": 9, "attn": true, "mlp": false, "act": null}, {"l": 10, "attn": true, "mlp": false, "act": null}, {"l": 11, "attn": false, "mlp": true, "act": "activation"}, {"l": 12, "attn": true, "mlp": false, "act": null}, {"l": 13, "attn": false, "mlp": true, "act": "activation"}, {"l": 14, "attn": true, "mlp": false, "act": null}, {"l": 15, "attn": false, "mlp": true, "act": "activation"}, {"l": 16, "attn": true, "mlp": false, "act": null}, {"l": 17, "attn": false, "mlp": true, "act": "activation"}], "skips": [[4, 6], [6, 8]]}, "8": {"params": 96342865, "loss": 3.963, "nlayer": 18, "active": [{"l": 3, "attn": true, "mlp": false, "act": null}, {"l": 6, "attn": false, "mlp": true, "act": "activation"}, {"l": 8, "attn": false, "mlp": true, "act": "activation"}, {"l": 9, "attn": true, "mlp": false, "act": null}, {"l": 10, "attn": false, "mlp": true, "act": "activation"}], "skips": [[-1, 3], [3, 6], [6, 8], [10, 17]]}};
+
+const TAGS = {
+  1:["champ","loss champion"], 3:["champ","loss champion"], 6:["champ","dense backbone"],
+  2:["","dense backbone"], 7:["spar","local skips"], 4:["spar","sparse + highways"],
+  5:["spar","sparse + highways"], 8:["spar","min-param skeleton"]
+};
+
+function schematic(e){
+  const cellW=32, mL=52, mR=18, laneH=26, gap=18;
+  const arcTop=46, attnY=arcTop, spineY=attnY+laneH+gap/2, mlpY=attnY+laneH+gap;
+  const H=mlpY+laneH+26;
+  const cols=e.nlayer+2;                       // emb + layers + head
+  const W=mL+mR+cols*cellW;
+  const cx=col=>mL+col*cellW+cellW/2;          // col 0 = emb, col l+1 = layer l, last = head
+  const xLayer=l=> l===-1 ? cx(0) : cx(l+1);
+  const act={}; e.active.forEach(a=>act[a.l]=a);
+  const NS="http://www.w3.org/2000/svg";
+  const svg=document.createElementNS(NS,"svg");
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  svg.setAttribute("width",W); svg.setAttribute("height",H);
+  svg.setAttribute("role","img");
+  const el=(t,a)=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);return n;};
+
+  // residual spine
+  svg.appendChild(el("line",{x1:cx(0),y1:spineY,x2:cx(cols-1),y2:spineY,
+     stroke:"var(--spine)","stroke-width":2}));
+
+  // lane labels
+  svg.appendChild(el("text",{x:8,y:attnY+laneH/2+4,fill:"var(--attn)","font-size":11,
+     "font-weight":700}))["textContent"]="ATTN";
+  svg.appendChild(el("text",{x:8,y:mlpY+laneH/2+4,fill:"var(--mlp)","font-size":11,
+     "font-weight":700}))["textContent"]="MLP";
+
+  // nominal layer slots + blocks
+  for(let l=0;l<e.nlayer;l++){
+    const x=cx(l+1);
+    const a=act[l];
+    // axis tick label every few
+    if(l%2===0||e.nlayer<=12){
+      const t=el("text",{x:x,y:H-8,fill:"var(--muted)","font-size":9,"text-anchor":"middle"});
+      t.textContent=l; svg.appendChild(t);
+    }
+    if(!a){ // bypassed
+      svg.appendChild(el("rect",{x:x-9,y:spineY-7,width:18,height:14,rx:3,fill:"none",
+        stroke:"var(--bypass)","stroke-width":1.4,"stroke-dasharray":"3 3"}));
+      continue;
+    }
+    if(a.attn){
+      svg.appendChild(el("rect",{x:x-11,y:attnY,width:22,height:laneH,rx:5,
+        fill:"var(--attn)","stroke":"var(--attn)"}));
+      // connector to spine
+      svg.appendChild(el("line",{x1:x,y1:attnY+laneH,x2:x,y2:spineY,stroke:"var(--attn)",
+        "stroke-width":1.4,opacity:.5}));
+    }
+    if(a.mlp){
+      const r=el("rect",{x:x-11,y:mlpY,width:22,height:laneH,rx:5,
+        fill:"var(--mlp)","stroke":"var(--mlp)"});
+      svg.appendChild(r);
+      svg.appendChild(el("line",{x1:x,y1:mlpY,x2:x,y2:spineY,stroke:"var(--mlp)",
+        "stroke-width":1.4,opacity:.5}));
+      const g=el("text",{x:x,y:mlpY+laneH/2+4,fill:"#fff","font-size":10,"text-anchor":"middle",
+        "font-weight":700}); g.textContent="G"; svg.appendChild(g);
+    }
+  }
+
+  // emb + head nodes
+  for(const [col,label,who] of [[0,"emb","emb"],[cols-1,"head","head"]]){
+    const x=cx(col);
+    svg.appendChild(el("rect",{x:x-13,y:attnY,width:26,height:mlpY+laneH-attnY,rx:6,
+      fill:"none",stroke:"var(--emb)","stroke-width":1.6}));
+    const t=el("text",{x:x,y:spineY+4,fill:"var(--emb)","font-size":9.5,"text-anchor":"middle",
+      "font-weight":700}); t.textContent=label; svg.appendChild(t);
+  }
+
+  // skip highways (arcs above attn lane)
+  (e.skips||[]).forEach(([s,d])=>{
+    const x1=xLayer(s), x2=xLayer(d);
+    const span=Math.abs(d-s);
+    const peak=Math.max(6, attnY-6-span*3.2);
+    const cxm=(x1+x2)/2;
+    const path=el("path",{d:`M ${x1} ${attnY-2} Q ${cxm} ${peak} ${x2} ${attnY-2}`,
+      fill:"none",stroke:"var(--skip)","stroke-width":2,"stroke-linecap":"round"});
+    svg.appendChild(path);
+    // arrowhead at target
+    svg.appendChild(el("path",{d:`M ${x2-3} ${attnY-6} L ${x2} ${attnY-1} L ${x2+3} ${attnY-6}`,
+      fill:"none",stroke:"var(--skip)","stroke-width":2,"stroke-linecap":"round"}));
+  });
+
+  return svg;
+}
+
+const gallery=document.getElementById("gallery");
+Object.keys(DATA).sort((a,b)=>a-b).forEach(k=>{
+  const e=DATA[k];
+  const [cls,label]=TAGS[k]||["",""];
+  const card=document.createElement("div"); card.className="card";
+  const meta=document.createElement("div"); meta.className="meta";
+  meta.innerHTML=`
+    <div class="rank">Elite rank ${k}</div>
+    <h3>${(e.params/1e6).toFixed(1)}M params</h3>
+    <div class="stat"><span>val loss</span><span class="v loss">${e.loss.toFixed(3)}</span></div>
+    <div class="stat"><span>active layers</span><span class="v">${e.active.length} / ${e.nlayer}</span></div>
+    <div class="stat"><span>attn blocks</span><span class="v">${e.active.filter(a=>a.attn).length}</span></div>
+    <div class="stat"><span>mlp blocks</span><span class="v">${e.active.filter(a=>a.mlp).length}</span></div>
+    <div class="stat"><span>skip highways</span><span class="v skip">${(e.skips||[]).length}</span></div>
+    <span class="tag ${cls}">${label}</span>`;
+  const dia=document.createElement("div"); dia.className="diagram";
+  dia.appendChild(schematic(e));
+  card.appendChild(meta); card.appendChild(dia);
+  gallery.appendChild(card);
+});
+</script>
