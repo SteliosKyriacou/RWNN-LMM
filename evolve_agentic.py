@@ -577,6 +577,10 @@ def run_agentic_optimization(generations=10, pop_size=20, eval_steps=57860, use_
     SATURATION_GENS = 2         # "a couple of generations"
     desat_rng = np.random.RandomState(4321)
 
+    # Plotting history: cumulative cloud of ALL feasible evaluated individuals + the Gen-1 GPT-2 seeds
+    all_eval_points = []        # [[loss, active_flops], ...] across every generation
+    gpt2_seed_points = []       # [(active_flops, loss, label), ...] captured in generation 1
+
     # 5. Agentic Optimization Loop
     for gen in range(highest_gen, generations):
         print(f"\n--- Agentic Generation {gen + 1} / {generations} ---")
@@ -692,6 +696,17 @@ def run_agentic_optimization(generations=10, pop_size=20, eval_steps=57860, use_
         print(f" -> {n_feasible}/{pop_size} feasible; rejected reasons: "
               f"{ {r: sum(1 for m in meta if m['reason']==r) for r in set(m['reason'] for m in meta if not m['feasible'])} }")
 
+        # Accumulate the cumulative cloud (all feasible evaluated individuals) and, in generation 1,
+        # capture the 5 dense GPT-2 seed architectures (first 5 of the initial population) to annotate.
+        for k in range(pop_size):
+            if F_arr[k][0] < LOSS_MAX:
+                all_eval_points.append([float(F_arr[k][0]), float(F_arr[k][1])])
+        if gen == 0:
+            seed_labels = ["gpt2-medium (24L)", "15L", "gpt2-small (12L)", "gpt2-sparse (24L)", "18L dense"]
+            for k in range(min(5, pop_size)):
+                if F_arr[k][0] < LOSS_MAX:
+                    gpt2_seed_points.append((float(F_arr[k][1]), float(F_arr[k][0]), seed_labels[k]))
+
         # Dynamic hypervolume reference point (Obj2 is now active-FLOPs)
         combined_F = list(all_historical_pareto_F) + [f for f in F_arr.tolist() if f[0] < LOSS_MAX]
         if len(combined_F) > 0:
@@ -783,24 +798,32 @@ def run_agentic_optimization(generations=10, pop_size=20, eval_steps=57860, use_
             json.dump(pareto_reports, f, indent=4)
         print(f"✓ Saved {report_file}")
 
-        # Plot: x-axis = active-FLOPs/token, y-axis = loss
-        plt.figure(figsize=(8, 6))
-        valid_F = F_arr[F_arr[:, 0] < LOSS_MAX]
-        if len(valid_F) > 0:
-            plt.scatter(valid_F[:, 1] / 1e9, valid_F[:, 0], color='#555555', alpha=0.6,
-                        label=f'Evaluated population (< {LOSS_MAX} loss)')
+        # Plot: cumulative gray cloud of ALL evaluated individuals + current Pareto front,
+        # with the Gen-1 GPT-2 dense seed architectures annotated. x = active-FLOPs, y = loss.
+        plt.figure(figsize=(9, 6.5))
+        if all_eval_points:
+            allF = np.array(all_eval_points)
+            plt.scatter(allF[:, 1] / 1e9, allF[:, 0], color='#9aa7b4', alpha=0.45, s=32,
+                        label='All evaluated (cumulative)', zorder=2)
         elite_valid = Fp[Fp[:, 0] < LOSS_MAX] if len(Fp) else Fp
         if len(elite_valid) > 0:
-            ex = elite_valid[:, 1] / 1e9; ey = elite_valid[:, 0]
-            order = np.argsort(ex)
+            ex = elite_valid[:, 1] / 1e9; ey = elite_valid[:, 0]; order = np.argsort(ex)
             if len(ex) > 1:
-                plt.plot(ex[order], ey[order], color='#ff3333', linestyle='--', alpha=0.8)
-            plt.scatter(ex, ey, color='#ff3333', s=100, marker='*', label='Pareto frontier (elites)')
+                plt.plot(ex[order], ey[order], '--', color='#ff3333', alpha=0.8, zorder=3)
+            plt.scatter(ex, ey, color='#ff3333', s=140, marker='*', edgecolor='white',
+                        linewidth=0.6, label='Pareto frontier (elites)', zorder=5)
+        if gpt2_seed_points:
+            sx = [p[0] / 1e9 for p in gpt2_seed_points]; sy = [p[1] for p in gpt2_seed_points]
+            plt.scatter(sx, sy, marker='s', s=95, color='#2b6cb0', edgecolor='white',
+                        linewidth=0.6, label='GPT-2 seeds (Gen 1)', zorder=6)
+            for (fx, ly, lab) in gpt2_seed_points:
+                plt.annotate(lab, (fx / 1e9, ly), textcoords='offset points', xytext=(6, 6),
+                             fontsize=7.5, color='#1a3a5c', zorder=7)
         plt.xlabel("Active-FLOPs per token (GFLOPs)")
         plt.ylabel("Validation Loss (Cross-Entropy)")
-        plt.title(f"Gen {gen+1} Pareto Front — loss vs active-FLOPs (MoE-aware)")
+        plt.title(f"Gen {gen+1} Pareto Front — loss vs active-FLOPs (cumulative, MoE-aware)")
         plt.grid(True, linestyle=':', alpha=0.6)
-        plt.legend()
+        plt.legend(loc='upper right')
         plot_file = f"checkpoints/agentic-optim/generation_{gen+1}_pareto.png"
         plt.savefig(plot_file, dpi=300, bbox_inches='tight')
         plt.close()
