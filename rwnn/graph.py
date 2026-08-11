@@ -7,7 +7,7 @@ from rwnn.nodes import (
     ConcatNode, ElementMulNode, DropoutNode, RWNNNode,
     MeanReduceNode, SquareNode, SubtractNode, DivideNode,
     SqrtNode, ScaleShiftNode, MatMulNode, AddBiasNode,
-    TransposeNode, ReshapeNode, CausalBatchMatMulNode
+    TransposeNode, ReshapeNode, CausalBatchMatMulNode, MoEFFNNode
 )
 
 class EdgeConnection(nn.Module):
@@ -121,6 +121,8 @@ class RWNNGraph(nn.Module):
             return ReshapeNode(n_id, **kwargs)
         elif n_type == 'causal_batch_matmul':
             return CausalBatchMatMulNode(n_id, **kwargs)
+        elif n_type == 'moe_ffn':
+            return MoEFFNNode(n_id, **kwargs)
         else:
             raise ValueError(f"Unknown node type: {n_type}")
 
@@ -199,6 +201,8 @@ class RWNNGraph(nn.Module):
                 self.node_out_dims[u] = node.d_out
             elif isinstance(node, CausalAttentionNode):
                 self.node_out_dims[u] = node.d_model
+            elif isinstance(node, MoEFFNNode):
+                self.node_out_dims[u] = node.d_model
             elif isinstance(node, ActivationNode):
                 pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model
                 self.node_out_dims[u] = pred_dim if pred_dim is not None else self.global_d_model
@@ -270,3 +274,15 @@ class RWNNGraph(nn.Module):
         if not terminal_nodes:
             raise ValueError("Graph has no terminal/output node!")
         return outputs[terminal_nodes[-1]]
+
+    def moe_aux_loss(self):
+        """Sum the load-balance aux losses of all MoE nodes from the most recent forward.
+        Returns a scalar tensor (0.0 if there are no MoE nodes)."""
+        total = None
+        for m in self.modules():
+            if isinstance(m, MoEFFNNode):
+                total = m.aux_loss if total is None else total + m.aux_loss
+        if total is None:
+            p = next(self.parameters(), None)
+            return torch.zeros((), device=p.device if p is not None else 'cpu')
+        return total

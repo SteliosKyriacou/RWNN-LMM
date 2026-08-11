@@ -32,9 +32,16 @@ from agentic_optimizer.metis_agent import MetisAgent
 from rwnn.graph import RWNNGraph
 from rwnn.mutator import get_gpt2_dag, is_valid_dag
 
+# ---- Continuous-encoding dimensionality ----
+# 0: depth | 1-16 attn | 17-32 mlp | 33-48 activation | 49-64 skip
+# 65-80: MoE n_experts | 81-96: MoE top_k   (MoE genes default 0 -> E=1 dense = GPT-2)
+N_VAR = 97
+
+
 def multilayer_graph_to_vector(model_type):
-    """Encodes standard configurations ('gpt2', 'gpt2-medium', etc.) into a 65-dimensional continuous vector."""
-    x = np.zeros(65)
+    """Encodes standard configurations ('gpt2', 'gpt2-medium', etc.) into an N_VAR continuous vector.
+    MoE genes (65:97) are left at 0 -> every FFN is a dense GPT-2 block (backward compatible)."""
+    x = np.zeros(N_VAR)
     if model_type == 'gpt2':
         x[0] = 6.0 / 24.0      # 12 layers: 6 + 6 = 12
         x[1:17] = 1.0          # Attention active
@@ -62,14 +69,32 @@ def multilayer_graph_to_vector(model_type):
     return x
 
 
+def _decode_experts(e_val):
+    """MoE n_experts gene -> {1, 2, 4, 8}. 1 == dense FFN."""
+    if e_val < 0.25: return 1
+    if e_val < 0.50: return 2
+    if e_val < 0.75: return 4
+    return 8
+
+
+def _decode_topk(k_val, n_experts):
+    """MoE top_k gene -> {1, 2}, clamped to <= n_experts."""
+    k = 1 if k_val < 0.5 else 2
+    return min(k, n_experts)
+
+
 def vector_to_multilayer_graph(x, vocab_size=50257, block_size=256, d_model=768):
-    """Decodes a continuous vector x of shape [65] back into a fully connected multi-layer H-DAG."""
+    """Decodes a continuous vector x of shape [N_VAR] into a multi-layer H-DAG.
+    FFN slots become an MoE block when the n_experts gene decodes to E>1, else a dense FFN."""
+    x = np.asarray(x)
     L_var = x[0]
     attn_vars = x[1:17]
     mlp_vars = x[17:33]
     act_vars = x[33:49]
     skip_vars = x[49:65]
-    
+    nexp_vars = x[65:81] if x.shape[0] >= 81 else np.zeros(16)   # MoE n_experts genes
+    topk_vars = x[81:97] if x.shape[0] >= 97 else np.zeros(16)   # MoE top_k genes
+
     n_layer = 6 + int(L_var * 24) # Map to [6, 30] layers
     n_layer = min(n_layer, 30)
     
@@ -116,7 +141,7 @@ def vector_to_multilayer_graph(x, vocab_size=50257, block_size=256, d_model=768)
         else:
             current_attn_out = current_x
             
-        # 2. MLP Sub-Block (active if mlp_vars[idx_16] > 0.5)
+        # 2. FFN Sub-Block (active if mlp_vars[idx_16] > 0.5). Dense FFN or MoE per the E gene.
         if mlp_vars[idx_16] > 0.5:
             act_val = act_vars[idx_16]
             if act_val < 0.33:
@@ -125,19 +150,32 @@ def vector_to_multilayer_graph(x, vocab_size=50257, block_size=256, d_model=768)
                 act_type = 'silu'
             else:
                 act_type = 'relu'
-                
+
+            n_experts = _decode_experts(nexp_vars[idx_16])
             nodes.append({'id': ln2_id, 'type': 'layer_norm', 'kwargs': {'d_model': d_model}})
-            nodes.append({'id': mlp_up_id, 'type': 'linear', 'kwargs': {'d_in': d_model, 'd_out': 4 * d_model}})
-            nodes.append({'id': act_id, 'type': 'activation', 'kwargs': {'act_type': act_type}})
-            nodes.append({'id': mlp_down_id, 'type': 'linear', 'kwargs': {'d_in': 4 * d_model, 'd_out': d_model}})
-            nodes.append({'id': sum_mlp_id, 'type': 'sum', 'kwargs': {}})
-            
-            edges.append((current_attn_out, ln2_id))
-            edges.append((ln2_id, mlp_up_id))
-            edges.append((mlp_up_id, act_id))
-            edges.append((act_id, mlp_down_id))
-            edges.append((current_attn_out, sum_mlp_id)) # Residual
-            edges.append((mlp_down_id, sum_mlp_id))
+            if n_experts > 1:
+                # MoE FFN: one fused node (router + experts + top-k combine) replaces up/act/down
+                top_k = _decode_topk(topk_vars[idx_16], n_experts)
+                nodes.append({'id': mlp_up_id, 'type': 'moe_ffn',
+                              'kwargs': {'d_model': d_model, 'n_experts': n_experts, 'top_k': top_k,
+                                         'd_hidden': 4 * d_model, 'act_type': act_type, 'dropout': 0.1}})
+                nodes.append({'id': sum_mlp_id, 'type': 'sum', 'kwargs': {}})
+                edges.append((current_attn_out, ln2_id))
+                edges.append((ln2_id, mlp_up_id))
+                edges.append((current_attn_out, sum_mlp_id))   # Residual
+                edges.append((mlp_up_id, sum_mlp_id))
+            else:
+                # Dense FFN (standard GPT-2 block)
+                nodes.append({'id': mlp_up_id, 'type': 'linear', 'kwargs': {'d_in': d_model, 'd_out': 4 * d_model}})
+                nodes.append({'id': act_id, 'type': 'activation', 'kwargs': {'act_type': act_type}})
+                nodes.append({'id': mlp_down_id, 'type': 'linear', 'kwargs': {'d_in': 4 * d_model, 'd_out': d_model}})
+                nodes.append({'id': sum_mlp_id, 'type': 'sum', 'kwargs': {}})
+                edges.append((current_attn_out, ln2_id))
+                edges.append((ln2_id, mlp_up_id))
+                edges.append((mlp_up_id, act_id))
+                edges.append((act_id, mlp_down_id))
+                edges.append((current_attn_out, sum_mlp_id))   # Residual
+                edges.append((mlp_down_id, sum_mlp_id))
             current_mlp_out = sum_mlp_id
         else:
             current_mlp_out = current_attn_out
@@ -185,9 +223,13 @@ def vector_to_multilayer_graph(x, vocab_size=50257, block_size=256, d_model=768)
     return nodes, edges
 
 
-def train_and_eval_bpe_model(nodes, edges, d_model=192, max_iters=1000, batch_size=32, block_size=256, parent_state_dict=None):
-    """Trains a compiled H-DAG model on BPE tokens and returns validation loss."""
+def train_and_eval_bpe_model(nodes, edges, d_model=192, max_iters=1000, batch_size=32, block_size=256,
+                             parent_state_dict=None, aux_coef=0.01):
+    """Trains a compiled H-DAG model on BPE tokens. Returns (model, val_loss, peak_mem_bytes).
+    Adds an MoE load-balance aux loss so routers don't collapse to a single expert."""
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    if device == "cuda":
+        torch.cuda.reset_peak_memory_stats()
     
     # Load compiled BPE datasets
     train_data = np.memmap('train.bin', dtype=np.uint16, mode='r')
@@ -225,12 +267,13 @@ def train_and_eval_bpe_model(nodes, edges, d_model=192, max_iters=1000, batch_si
         with torch.amp.autocast(device_type=device, dtype=torch.bfloat16):
             logits = model(xb)
             loss = F.cross_entropy(logits.view(-1, logits.size(-1)), yb.view(-1))
+            loss = loss + aux_coef * model.moe_aux_loss()   # MoE load-balancing (0 if no MoE)
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
 
-    # Evaluate Val Loss
+    # Evaluate Val Loss (cross-entropy only; aux loss is a training regulariser)
     model.eval()
     val_losses = []
     with torch.no_grad():
@@ -240,21 +283,28 @@ def train_and_eval_bpe_model(nodes, edges, d_model=192, max_iters=1000, batch_si
                 logits = model(X)
                 loss = F.cross_entropy(logits.view(-1, logits.size(-1)), Y.view(-1))
             val_losses.append(loss.item())
-            
-    return model, np.mean(val_losses)
+
+    peak_mem = torch.cuda.max_memory_allocated() if device == "cuda" else 0
+    return model, np.mean(val_losses), peak_mem
 
 
-# ---- 65-D gene grouping (used for the initial population and saturation diagnostics) ----
-GENE_ATTN = list(range(1, 17))
-GENE_MLP  = list(range(17, 33))
-GENE_ACT  = list(range(33, 49))
-GENE_SKIP = list(range(49, 65))
+# ---- gene grouping (used for the initial population and saturation diagnostics) ----
+GENE_ATTN    = list(range(1, 17))
+GENE_MLP     = list(range(17, 33))
+GENE_ACT     = list(range(33, 49))
+GENE_SKIP    = list(range(49, 65))
+GENE_NEXPERT = list(range(65, 81))   # MoE n_experts
+GENE_TOPK    = list(range(81, 97))   # MoE top_k
 
 
 def _phenotype(gene_idx, val):
     """Map a raw gene value to the discrete phenotype the decoder actually sees."""
     if gene_idx in GENE_ACT:
         return 'gelu' if val < 0.33 else ('silu' if val < 0.66 else 'relu')
+    if gene_idx in GENE_NEXPERT:
+        return _decode_experts(val)         # 1 / 2 / 4 / 8 experts
+    if gene_idx in GENE_TOPK:
+        return 1 if val < 0.5 else 2
     if gene_idx == 0:
         return 6 + min(int(val * 24), 24)   # decoded layer count
     return val > 0.5                        # attn / mlp / skip on-off
@@ -262,10 +312,12 @@ def _phenotype(gene_idx, val):
 
 def _gene_label(j):
     if j == 0: return "depth"
-    if j in GENE_ATTN: return f"attn[{j-1}]"
-    if j in GENE_MLP:  return f"mlp[{j-17}]"
-    if j in GENE_ACT:  return f"act[{j-33}]"
-    return f"skip[{j-49}]"
+    if j in GENE_ATTN:    return f"attn[{j-1}]"
+    if j in GENE_MLP:     return f"mlp[{j-17}]"
+    if j in GENE_ACT:     return f"act[{j-33}]"
+    if j in GENE_SKIP:    return f"skip[{j-49}]"
+    if j in GENE_NEXPERT: return f"n_experts[{j-65}]"
+    return f"top_k[{j-81}]"
 
 
 def detect_saturated_genes(X):
@@ -284,10 +336,42 @@ def desaturate_value(gene_idx, pheno, rng):
     if gene_idx in GENE_ACT:
         others = [v for v, name in [(0.15, 'gelu'), (0.5, 'silu'), (0.85, 'relu')] if name != pheno]
         return float(rng.choice(others))
+    if gene_idx in GENE_NEXPERT:
+        # jump to a different expert bucket (bucket centers for 1/2/4/8)
+        others = [v for v, e in [(0.1, 1), (0.4, 2), (0.6, 4), (0.9, 8)] if e != pheno]
+        return float(rng.choice(others))
+    if gene_idx in GENE_TOPK:
+        return float(rng.uniform(0.6, 0.95)) if pheno == 1 else float(rng.uniform(0.05, 0.4))
     if gene_idx == 0:
         return float(rng.uniform(0.1, 0.95))
     # binary attn/mlp/skip: flip across the 0.5 threshold
     return float(rng.uniform(0.6, 0.95)) if pheno is False else float(rng.uniform(0.05, 0.4))
+
+
+def active_flops_per_token(nodes, block_size, d_model):
+    """Objective 2: active (used) FLOPs per token through the transformer body.
+    Attention + FFN only (embeddings and the final head are constant across architectures
+    and excluded). A dense FFN counts its full cost; an MoE FFN counts only its top_k
+    active experts (+ router) -- so extra experts add capacity/params/memory but NOT FLOPs,
+    which is exactly what makes MoE attractive under this objective."""
+    T = block_size
+    flops = 0.0
+    for n in nodes:
+        t = n['type']
+        if t == 'causal_attention':
+            d = n['kwargs']['d_model']
+            flops += 2 * (4 * d * d)        # qkv + out projections (mac*2)
+            flops += 2 * (2 * T * d)        # QK^T and attn*V (mac*2)
+        elif t == 'linear':
+            if n['id'] == 13:               # exclude the LM head (constant)
+                continue
+            flops += 2 * (n['kwargs']['d_in'] * n['kwargs']['d_out'])
+        elif t == 'moe_ffn':
+            kw = n['kwargs']
+            d, h, E, topk = kw['d_model'], kw['d_hidden'], kw['n_experts'], kw['top_k']
+            flops += 2 * (d * E)            # router
+            flops += topk * 2 * (2 * d * h) # only top_k active experts (each expert = d*h + h*d macs)
+    return flops
 
 
 def build_initial_population(pop_size, seed=1234):
@@ -296,19 +380,26 @@ def build_initial_population(pop_size, seed=1234):
     rng = np.random.RandomState(seed)
     pop = []
 
+    def _pad(v):
+        """Pad/truncate a vector to N_VAR (MoE genes default 0 -> dense)."""
+        v = np.asarray(v, dtype=float)
+        if v.shape[0] < N_VAR:
+            v = np.concatenate([v, np.zeros(N_VAR - v.shape[0])])
+        return v[:N_VAR]
+
     # --- 5 GPT-2 family seeds (the 2 first-elite-set vectors first, if available) ---
     if os.path.exists("seed_elites.json"):
         for e in json.load(open("seed_elites.json"))[:2]:
-            pop.append(np.array(e['vector'], dtype=float))
+            pop.append(_pad(e['vector']))                    # 65-D elites padded to N_VAR (dense)
     pop.append(multilayer_graph_to_vector('gpt2'))
     pop.append(multilayer_graph_to_vector('gpt2-sparse'))
     # 5th variant: a dense 18-layer GPT-2-style stack (~185M). Distinct depth, and safely under
     # the 12 GB OOM ceiling -- replaces gpt2-large (30L / ~290M) which OOMs during training.
-    gpt2_18 = np.zeros(65)
+    gpt2_18 = np.zeros(N_VAR)
     gpt2_18[0] = 0.5          # 6 + int(0.5*24) = 18 layers
     gpt2_18[1:33] = 1.0       # every layer: attention + MLP both active
     gpt2_18[33:49] = 0.1      # GELU
-    gpt2_18[49:65] = 0.0      # no skips
+    gpt2_18[49:65] = 0.0      # no skips (65:97 stay 0 -> dense)
     pop.append(gpt2_18)
     while len(pop) < 5:                                   # fallback if seed_elites.json was missing
         pop.append(multilayer_graph_to_vector('gpt2-medium'))
@@ -317,7 +408,7 @@ def build_initial_population(pop_size, seed=1234):
     # --- (pop_size - 5) structurally-diverse, UNBIASED explorers ---
     n_unbiased = max(0, pop_size - 5)
     for i in range(n_unbiased):
-        x = np.zeros(65)
+        x = np.zeros(N_VAR)
         x[0] = np.clip((i + 0.5) / n_unbiased, 0.12, 0.95)     # spread depth / model size
 
         # FRONT-LOADED attention: dominant in early slots, tapering later
@@ -347,6 +438,19 @@ def build_initial_population(pop_size, seed=1234):
             x[49 + s] = np.clip((0.8 if rng.rand() < skip_density else 0.2) + rng.normal(0, 0.1), 0.0, 1.0)
         for s in rng.choice(16, size=3, replace=False):
             x[49 + s] = rng.uniform(0.6, 0.95)
+
+        # MoE GENES: give ~half the explorers real MoE variance so n_experts/top_k are not
+        # born saturated at dense (E=1). Under the active-FLOPs objective, MoE = capacity for free.
+        if i % 2 == 0:
+            # dense explorer: leave n_experts genes low (E=1) but keep small noise for variance
+            x[65:81] = rng.uniform(0.0, 0.24, 16)   # -> E=1
+            x[81:97] = rng.uniform(0.0, 1.0, 16)
+        else:
+            # MoE explorer: per-slot varied expert counts (2/4/8) and top_k (1/2)
+            e_center = rng.choice([0.4, 0.6, 0.9])  # bias this individual toward 2 / 4 / 8 experts
+            for s in range(16):
+                x[65 + s] = np.clip(e_center + rng.normal(0, 0.12), 0.26, 1.0)   # E in {2,4,8}
+                x[81 + s] = rng.uniform(0.0, 1.0)                                 # top_k in {1,2}
 
         pop.append(np.clip(x, 0.0, 1.0))
 
@@ -380,41 +484,53 @@ def run_agentic_optimization(generations=10, pop_size=20, eval_steps=57860, use_
     # 2. Plain-Text Auxiliary Context (Domain Knowledge Injection)
     problem_context = (
         "You are optimizing a multi-layer stacked Randomly Wired Large Language Model (RWNN-LLM) H-DAG.\n\n"
-        "## Decision Variable Guide (x is of size 65):\n"
+        "## Decision Variable Guide (x is of size 97):\n"
         "- Variable 0 controls the depth of the model (number of layers, from 6 to 30 layers).\n"
-        "- Variables 1 to 16 represent the fractional attention states active (> 0.5) or bypassed (<= 0.5).\n"
-        "- Variables 17 to 32 represent the fractional MLP states active (> 0.5) or bypassed (<= 0.5).\n"
-        "- Variables 33 to 48 represent the fractional activation types ([0, 0.33] for GELU, [0.33, 0.66] for SiLU, [0.66, 1.0] for ReLU).\n"
-        "- Variables 49 to 64 (> 0.5) add a genuine long-range residual skip: the active block's output is re-added into the residual stream of the active block two active-layers later.\n\n"
+        "- Variables 1 to 16: attention active (> 0.5) or bypassed (<= 0.5) per layer-slot.\n"
+        "- Variables 17 to 32: feed-forward (FFN) active (> 0.5) or bypassed (<= 0.5) per layer-slot.\n"
+        "- Variables 33 to 48: activation type ([0,0.33] GELU, [0.33,0.66] SiLU, [0.66,1.0] ReLU).\n"
+        "- Variables 49 to 64 (> 0.5): add a genuine long-range residual skip (block output re-added two active-layers later).\n"
+        "- Variables 65 to 80: MoE n_experts per FFN slot ([0,0.25]->1 dense, [0.25,0.5]->2, [0.5,0.75]->4, [0.75,1]->8 experts).\n"
+        "- Variables 81 to 96: MoE top_k per FFN slot (<0.5 -> 1 active expert, >=0.5 -> 2), clamped to n_experts.\n\n"
         "## Domain Knowledge & Structural Physics:\n"
-        "1. Active Depth: Deeper models (larger Var 0) have more parameters but converge much faster and achieve lower validation loss.\n"
-        "2. Bypass Channels: Bypassing attention or MLP at some layers reduces parameter complexity with minimal loss penalty.\n"
-        "3. Cross-Layer Skips: A skip re-adds an earlier block's output into a later block's residual stream (a dense/DenseNet-style residual over an intervening block), improving gradient flow at almost no parameter cost.\n"
-        "4. Activations: Rotating between GELU, SiLU, and ReLU can dynamically reshape MLP representational capacity. Do NOT leave every layer on the same activation; a heterogeneous mix is encouraged.\n"
-        "5. Front-Loaded Attention: Concentrating attention in the EARLY layers and MLP/feed-forward in the later layers (a 'sandwich'-style ordering) tends to lower loss at equal parameter budget.\n"
-        "6. Non-Uniform MLP: The MLP hidden width is FIXED at 4x d_model and cannot be changed. Vary MLP *placement* (which layers carry an MLP) and its *activation* -- do not expect to change MLP size.\n\n"
-        "## Objectives and Constraints:\n"
-        "- Minimizing Objective 1: Validation Cross-Entropy Loss (Perplexity). You must keep loss strictly < 6.0. Any loss >= 6.0 is a complete failure.\n"
-        "- Minimizing Objective 2: Trainable parameter count (Complexity).\n"
-        "- Maintain a stable trade-off frontier. Deeper networks (with active residual bypasses) will have more parameters but achieve lower loss.\n"
-        "- Reference point for hypervolume calculation is (5.0e8 parameters, 6.0 loss).\n\n"
+        "1. Active Depth: Deeper models converge faster and reach lower validation loss, but cost more FLOPs and memory.\n"
+        "2. Bypass Channels: Bypassing attention or FFN at some layers cuts FLOPs and memory with a small loss penalty.\n"
+        "3. Cross-Layer Skips: A skip re-adds an earlier block's output into a later block's residual stream (DenseNet-style), improving gradient flow at almost no FLOP cost.\n"
+        "4. Activations: Mix GELU/SiLU/ReLU across layers; do not leave every layer on one activation.\n"
+        "5. Front-Loaded Attention: Attention EARLY, FFN LATER ('sandwich' ordering) tends to lower loss at equal budget.\n"
+        "6. MIXTURE-OF-EXPERTS (KEY): An FFN slot with n_experts>1 becomes an MoE block. Only top_k experts run per token, so **extra experts add capacity (lower loss) and parameters/memory but almost NO active-FLOPs**. Because Objective 2 is active-FLOPs (not parameters), MoE lets you buy loss reduction very cheaply -- exploit it. n_experts controls capacity; top_k controls active-FLOPs; both are bounded by the memory constraint below.\n\n"
+        "## Objectives (minimize both):\n"
+        "- Objective 1: Validation Cross-Entropy Loss.\n"
+        "- Objective 2: Active-FLOPs per token (attention + only the top_k active experts of each FFN). Total parameters are NOT an objective -- only used compute is.\n\n"
+        "## Hard Constraints (a violating candidate is REJECTED, not scored):\n"
+        "- Peak training memory must fit the 12 GB GPU budget (large n_experts inflates memory even though FLOPs stay low -- this is what bounds MoE size).\n"
+        "- Validation loss must be < 4.5 (kills degenerate near-empty models).\n"
+        "- At least 3 active blocks (no empty / embeddings-only models).\n"
+        "- Reference point for hypervolume is (6.0e9 active-FLOPs, 4.5 loss).\n\n"
         "## Search Guidance:\n"
-        "- Keep the population DIVERSE. Actively try skip connections (Vars 49-64 > 0.5), heterogeneous activations (Vars 33-48 spanning all three bins), and non-uniform attention/MLP placement -- these regions are under-explored and must not collapse to a single value.\n"
-        "- SATURATION: if a decision variable collapses to the same value across the whole population/front for two or more consecutive generations, it is stuck on a flat plateau. Explicitly dedicate a couple of your exploration individuals to markedly DIFFERENT values for that variable -- large moves that CROSS the 0.5 / activation-bin thresholds -- rather than perturbing near the front."
+        "- Keep the population DIVERSE across ALL gene groups, especially the MoE genes (65-96): try n_experts in {2,4,8} with top_k in {1,2}, not just dense.\n"
+        "- The sweet spot is HIGH n_experts + LOW top_k (big capacity, low active-FLOPs) pushed until the memory constraint bites.\n"
+        "- SATURATION: if any variable collapses to one value across the whole population for two+ generations it is stuck on a flat plateau; dedicate a couple of exploration individuals to markedly DIFFERENT values that CROSS its thresholds."
     )
 
-    # 3. Instantiate MetisAgent
+    # Objective/constraint configuration
+    LOSS_MAX = 4.5            # hard loss constraint (kills degenerate empty models)
+    MIN_ACTIVE_BLOCKS = 3     # hard structural constraint
+    MEM_BUDGET = 11.0e9       # hard peak-memory constraint (bytes) on the 12 GB card
+    PENALTY_LOSS = 10.0       # objective-1 value assigned to a constraint-violating candidate
+
+    # 3. Instantiate MetisAgent  (Obj1 = loss, Obj2 = active-FLOPs/token)
     agent = MetisAgent(
-        n_var=65,
+        n_var=N_VAR,
         n_obj=2,
-        bounds=[(0.0, 1.0)] * 65,
+        bounds=[(0.0, 1.0)] * N_VAR,
         population_size=pop_size,
         initial_population=initial_pop_arr,
         max_elites=100,
         problem_context=problem_context
     )
-    # Reference point for Hypervolume (Rx = 5.0e8 parameters, Ry = 6.0 validation loss)
-    agent.ref = [500000000.0, 6.0]
+    # Reference point for Hypervolume (Rx = 6.0e9 active-FLOPs, Ry = 4.5 loss)
+    agent.ref = [4.5, 6.0e9]
     
     # Adjust starting generation and restore Agent's internal state memory if resuming
     if highest_gen > 0:
@@ -496,85 +612,92 @@ def run_agentic_optimization(generations=10, pop_size=20, eval_steps=57860, use_
             f.write(agent.last_code)
         print(f"✓ Saved generated sampling code: {code_file}")
 
-        # Batch evaluation
+        # Batch evaluation. Objectives = [loss, active_flops]; constraints = memory, loss<4.5, min blocks.
         F = []
         state_dicts = []
+        meta = []   # per-candidate diagnostics for reporting
         for idx in range(pop_size):
             x = X[idx]
             nodes, edges = vector_to_multilayer_graph(x, vocab_size, block_size, d_model=d_model)
-            
-            # Calculate parameter count
+
+            # Structure metrics (no training needed)
             dummy_model = RWNNGraph(nodes, edges, global_d_model=d_model)
             params = sum(p.numel() for p in dummy_model.parameters())
-            
+            active_flops = active_flops_per_token(nodes, block_size, d_model)
+            active_blocks = len({(n['id'] - 4) // 10 for n in nodes
+                                 if n['id'] >= 4 and n['id'] != 13 and (n['id'] - 4) % 10 in (1, 4)})
+            moe_nodes = [n for n in nodes if n['type'] == 'moe_ffn']
+            total_experts = sum(n['kwargs']['n_experts'] for n in moe_nodes)
+            moe_tag = f" MoE[{len(moe_nodes)} blk/{total_experts} exp]" if moe_nodes else ""
+
             # Distance-Based Ancestry Matching for Lamarckian Weight Inheritance / Resume Training
             parent_state = None
             if len(agent.pf_X) > 0:
                 Xp_arr = np.array(agent.pf_X)
                 dists = np.linalg.norm(Xp_arr - x, axis=1)
-                best_idx = np.argmin(dists)
-                min_dist = dists[best_idx]
-                if min_dist < 1e-5:  # Exact match for promoted elites!
+                best_idx = int(np.argmin(dists)); min_dist = dists[best_idx]
+                if min_dist < 1e-5:
                     print(f" -> Promoted elite exact match. Resuming from its previous checkpoint.")
-                    p_best = agent.pf_X[best_idx]
-                    parent_state = X_hash_to_state.get(tuple(p_best))
-                elif use_lamarckian and min_dist < 0.6:  # Candidate is in the evolutionary neighborhood of parent
-                    p_best = agent.pf_X[best_idx]
-                    parent_state = X_hash_to_state.get(tuple(p_best))
-            
-            # Train and evaluate on GPU
-            print(f"Evaluating candidate {idx+1}/{pop_size} (Params: {params:,})...")
-            try:
-                # Proactive GPU memory pre-cleanup
-                import gc
-                gc.collect()
-                torch.cuda.empty_cache()
-                
-                trained_model, val_loss = train_and_eval_bpe_model(
-                    nodes, edges, d_model=d_model, max_iters=eval_steps, batch_size=8, block_size=block_size,
-                    parent_state_dict=parent_state # Inherit parent weights!
-                )
-                print(f" -> Success! Validation Loss: {val_loss:.4f}")
-                if val_loss >= 6.0:
-                    # Enforce strict validation loss constraint < 6.0
-                    val_loss = 99.9
-                    s_dict = None
-                else:
-                    s_dict = trained_model.state_dict()
-                
-                # Delete model references to free up memory
-                del trained_model
-                del dummy_model
-                gc.collect()
-                torch.cuda.empty_cache()
-            except Exception as e:
-                print(f"Evaluation failed: {e}")
-                val_loss = 99.9
-                s_dict = None
-                
-            F.append([val_loss, params])
+                    parent_state = X_hash_to_state.get(tuple(agent.pf_X[best_idx]))
+                elif use_lamarckian and min_dist < 0.6:
+                    parent_state = X_hash_to_state.get(tuple(agent.pf_X[best_idx]))
+
+            print(f"Evaluating candidate {idx+1}/{pop_size} (Params: {params:,}, "
+                  f"aFLOPs/tok: {active_flops/1e9:.3f}G, blocks: {active_blocks}{moe_tag})...")
+
+            feasible, reason, peak_mem = True, "ok", 0
+            # Constraint: minimum active blocks (cheap pre-check, skip training)
+            if active_blocks < MIN_ACTIVE_BLOCKS:
+                feasible, reason, val_loss, s_dict = False, "too_few_blocks", PENALTY_LOSS, None
+                print(f" -> REJECTED: only {active_blocks} active blocks (< {MIN_ACTIVE_BLOCKS}).")
+            else:
+                try:
+                    import gc
+                    gc.collect(); torch.cuda.empty_cache()
+                    trained_model, val_loss, peak_mem = train_and_eval_bpe_model(
+                        nodes, edges, d_model=d_model, max_iters=eval_steps, batch_size=8,
+                        block_size=block_size, parent_state_dict=parent_state)
+                    print(f" -> Success! Val Loss: {val_loss:.4f} | peak mem: {peak_mem/1e9:.2f} GB")
+                    if peak_mem > MEM_BUDGET:
+                        feasible, reason, s_dict = False, "memory", None
+                        print(f" -> REJECTED: peak memory {peak_mem/1e9:.2f} GB > budget {MEM_BUDGET/1e9:.1f} GB.")
+                        val_loss = PENALTY_LOSS
+                    elif val_loss >= LOSS_MAX:
+                        feasible, reason, s_dict = False, "loss", None
+                        print(f" -> REJECTED: loss {val_loss:.4f} >= {LOSS_MAX}.")
+                    else:
+                        s_dict = trained_model.state_dict()
+                    del trained_model
+                    del dummy_model
+                    gc.collect(); torch.cuda.empty_cache()
+                except Exception as e:
+                    feasible, reason, val_loss, s_dict = False, "oom", PENALTY_LOSS, None
+                    print(f" -> REJECTED (constraint): {str(e)[:80]}")
+
+            F.append([val_loss, active_flops])
             state_dicts.append(s_dict)
-            
+            meta.append({'params': int(params), 'active_flops': float(active_flops),
+                         'active_blocks': int(active_blocks), 'peak_mem': int(peak_mem),
+                         'n_moe_blocks': len(moe_nodes), 'total_experts': int(total_experts),
+                         'feasible': bool(feasible), 'reason': reason})
+
         F_arr = np.array(F)
-        
+
         # Cache newly evaluated state-dicts
         for k in range(pop_size):
             if state_dicts[k] is not None:
                 X_hash_to_state[tuple(X[k])] = state_dicts[k]
-                
-        # Dynamically compute hypervolume reference point from all current and historical candidates
-        combined_F = []
-        if len(all_historical_pareto_F) > 0:
-            combined_F.extend(all_historical_pareto_F)
-        combined_F.extend([f for f in F_arr if f[0] < 6.0])
-        
+
+        n_feasible = sum(1 for m in meta if m['feasible'])
+        print(f" -> {n_feasible}/{pop_size} feasible; rejected reasons: "
+              f"{ {r: sum(1 for m in meta if m['reason']==r) for r in set(m['reason'] for m in meta if not m['feasible'])} }")
+
+        # Dynamic hypervolume reference point (Obj2 is now active-FLOPs)
+        combined_F = list(all_historical_pareto_F) + [f for f in F_arr.tolist() if f[0] < LOSS_MAX]
         if len(combined_F) > 0:
-            combined_F_arr = np.array(combined_F)
-            max_loss = np.max(combined_F_arr[:, 0])
-            max_params = np.max(combined_F_arr[:, 1])
-            # Set dynamic reference point with a 10% safety margin to strictly dominate all candidates
-            agent.ref = [1.1 * max_loss, 1.1 * max_params]
-            print(f" -> Dynamic Reference Point for HV calculation set to: Loss={agent.ref[0]:.4f}, Params={int(agent.ref[1]):,}")
+            arr = np.array(combined_F)
+            agent.ref = [max(1.1 * float(np.max(arr[:, 0])), LOSS_MAX), 1.1 * float(np.max(arr[:, 1]))]
+            print(f" -> Dynamic Reference Point: Loss={agent.ref[0]:.4f}, aFLOPs={agent.ref[1]/1e9:.3f}G")
             
         # Report results back to MetisAgent
         agent.tell(X, F_arr)
@@ -593,94 +716,91 @@ def run_agentic_optimization(generations=10, pop_size=20, eval_steps=57860, use_
             print(f" ⚠ SATURATION across all {pop_size} individuals for >= {SATURATION_GENS} gens: {details}")
             print(f"    -> will force diverse values into 2 explorers next generation.")
 
-        # Get Pareto Front elites (restricted to loss < 6.0 and parents < 6.0)
+        # Get Pareto Front elites, restricted to FEASIBLE ones (loss < LOSS_MAX).
         Xp, Fp = agent.result()
-        
-        # We manually filter elites that have loss < 6.0 as per constraint!
-        valid_idx = [i for i, f in enumerate(Fp) if f[0] < 6.0]
+        valid_idx = [i for i, f in enumerate(Fp) if f[0] < LOSS_MAX]
         Xp = Xp[valid_idx] if len(valid_idx) > 0 else Xp
         Fp = Fp[valid_idx] if len(valid_idx) > 0 else Fp
 
         # Update historical Pareto front members list
         all_historical_pareto_F = [f for f in Fp]
 
-        # Prune X_hash_to_state to keep only active Pareto front members' state dicts (Prevents memory bloat!)
+        # Prune cached state dicts to active Pareto members only
         active_keys = set(tuple(x) for x in Xp)
         X_hash_to_state = {k: v for k, v in X_hash_to_state.items() if k in active_keys}
 
-        print(f"\n🏆 Generation {gen + 1} Agentic Pareto Front:")
-        
+        print(f"\n🏆 Generation {gen + 1} Agentic Pareto Front (Obj1=loss, Obj2=active-FLOPs):")
+
         pareto_reports = []
         for i, (x_elite, f_elite) in enumerate(zip(Xp, Fp)):
-            loss_val = f_elite[0]
-            param_val = int(f_elite[1])
-            print(f"  Elite {i+1}: Params={param_val:,}, Loss={loss_val:.4f}")
-            
-            # Decode elite graph structure
+            loss_val = float(f_elite[0])
+            flops_val = float(f_elite[1])
+
             elite_nodes, elite_edges = vector_to_multilayer_graph(x_elite, vocab_size, block_size, d_model=d_model)
-            
-            # Save PyTorch weights (.pt) of the elite if present
+
+            # Look up this elite's per-candidate diagnostics + save weights if it was evaluated this gen
+            m = None
             weight_file = "checkpoints/agentic-optim/no_weights.pt"
             for k in range(pop_size):
-                if np.array_equal(X[k], x_elite) and state_dicts[k] is not None:
-                    weight_file = f"checkpoints/agentic-optim/pareto_gen{gen+1}_ind{i+1}_loss{loss_val:.2f}.pt"
-                    try:
-                        torch.save(state_dicts[k], weight_file)
-                    except Exception as save_err:
-                        print(f" -> Warning: Skipped saving weights to disk ({save_err}). Continuing with in-memory caching.")
+                if np.array_equal(X[k], x_elite):
+                    m = meta[k]
+                    if state_dicts[k] is not None:
+                        weight_file = f"checkpoints/agentic-optim/pareto_gen{gen+1}_ind{i+1}_loss{loss_val:.2f}.pt"
+                        try:
+                            torch.save(state_dicts[k], weight_file)
+                        except Exception as save_err:
+                            print(f" -> Warning: could not save weights ({save_err}).")
                     break
-                    
+            params_val = m['params'] if m else 0
+            moe_str = f", MoE {m['n_moe_blocks']}blk/{m['total_experts']}exp" if (m and m['n_moe_blocks']) else ""
+            print(f"  Elite {i+1}: Loss={loss_val:.4f}, aFLOPs/tok={flops_val/1e9:.3f}G, "
+                  f"Params={params_val:,}{moe_str}")
+
             config_file = f"checkpoints/agentic-optim/pareto_gen{gen+1}_ind{i+1}_config.json"
             config_data = {
-                'nodes': elite_nodes,
-                'edges': elite_edges,
-                'params': param_val,
-                'loss': loss_val,
+                'nodes': elite_nodes, 'edges': elite_edges,
+                'loss': loss_val, 'active_flops': flops_val, 'params': params_val,
+                'active_blocks': (m['active_blocks'] if m else None),
+                'peak_mem': (m['peak_mem'] if m else None),
+                'n_moe_blocks': (m['n_moe_blocks'] if m else 0),
+                'total_experts': (m['total_experts'] if m else 0),
                 'vector': x_elite.tolist()
             }
             with open(config_file, 'w') as f:
                 json.dump(config_data, f, indent=4)
-                
+
             pareto_reports.append({
-                'rank': i + 1,
-                'nodes': len(elite_nodes),
-                'edges': len(elite_edges),
-                'params': param_val,
-                'loss': loss_val,
-                'saved_weights': weight_file,
-                'saved_config': config_file
+                'rank': i + 1, 'nodes': len(elite_nodes), 'edges': len(elite_edges),
+                'loss': loss_val, 'active_flops': flops_val, 'params': params_val,
+                'active_blocks': (m['active_blocks'] if m else None),
+                'n_moe_blocks': (m['n_moe_blocks'] if m else 0),
+                'total_experts': (m['total_experts'] if m else 0),
+                'saved_weights': weight_file, 'saved_config': config_file
             })
 
-        # Save Generation Report JSON
         report_file = f"checkpoints/agentic-optim/generation_{gen+1}_report.json"
         with open(report_file, 'w') as f:
             json.dump(pareto_reports, f, indent=4)
         print(f"✓ Saved {report_file}")
 
-        # Plot and save Pareto Front PNG
+        # Plot: x-axis = active-FLOPs/token, y-axis = loss
         plt.figure(figsize=(8, 6))
-        valid_F = F_arr[F_arr[:, 0] < 6.0]
+        valid_F = F_arr[F_arr[:, 0] < LOSS_MAX]
         if len(valid_F) > 0:
-            all_x = valid_F[:, 1]
-            all_y = valid_F[:, 0]
-            plt.scatter(all_x, all_y, color='#555555', alpha=0.6, label='Evaluated Population (< 6.0)')
-            
-        elite_valid = Fp[Fp[:, 0] < 6.0]
+            plt.scatter(valid_F[:, 1] / 1e9, valid_F[:, 0], color='#555555', alpha=0.6,
+                        label=f'Evaluated population (< {LOSS_MAX} loss)')
+        elite_valid = Fp[Fp[:, 0] < LOSS_MAX] if len(Fp) else Fp
         if len(elite_valid) > 0:
-            elite_x = elite_valid[:, 1]
-            elite_y = elite_valid[:, 0]
-            plt.scatter(elite_x, elite_y, color='#ff3333', s=100, marker='*', label='Pareto Frontier (Elites)')
-            
-            elites_sorted_idx = np.argsort(elite_x)
-            if len(elite_x) > 1:
-                plt.plot(elite_x[elites_sorted_idx], elite_y[elites_sorted_idx], color='#ff3333', linestyle='--', alpha=0.8)
-            
-        plt.xlabel("Complexity (Trainable Parameter Count)")
+            ex = elite_valid[:, 1] / 1e9; ey = elite_valid[:, 0]
+            order = np.argsort(ex)
+            if len(ex) > 1:
+                plt.plot(ex[order], ey[order], color='#ff3333', linestyle='--', alpha=0.8)
+            plt.scatter(ex, ey, color='#ff3333', s=100, marker='*', label='Pareto frontier (elites)')
+        plt.xlabel("Active-FLOPs per token (GFLOPs)")
         plt.ylabel("Validation Loss (Cross-Entropy)")
-        plt.title(f"Gen {gen+1} Agentic Optimization Pareto Front (< 6.0 Loss)")
+        plt.title(f"Gen {gen+1} Pareto Front — loss vs active-FLOPs (MoE-aware)")
         plt.grid(True, linestyle=':', alpha=0.6)
         plt.legend()
-        
         plot_file = f"checkpoints/agentic-optim/generation_{gen+1}_pareto.png"
         plt.savefig(plot_file, dpi=300, bbox_inches='tight')
         plt.close()
