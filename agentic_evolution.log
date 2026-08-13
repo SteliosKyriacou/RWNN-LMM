@@ -5,198 +5,254 @@ Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
 
 --- Agentic Generation 1 / 10 ---
 ✓ Saved generated sampling code: checkpoints/agentic-optim/generation_1_code.py
-Evaluating candidate 1/20 (Params: 247,552,081)...
- -> Success! Validation Loss: 3.9781
-Evaluating candidate 2/20 (Params: 153,049,681)...
- -> Success! Validation Loss: 3.9114
-Evaluating candidate 3/20 (Params: 162,497,617)...
- -> Success! Validation Loss: 3.9838
-Evaluating candidate 4/20 (Params: 153,057,361)...
- -> Success! Validation Loss: 3.9307
-Evaluating candidate 5/20 (Params: 205,024,849)...
- -> Success! Validation Loss: 3.8849
-Evaluating candidate 6/20 (Params: 115,242,577)...
- -> Success! Validation Loss: 3.8803
-Evaluating candidate 7/20 (Params: 122,330,449)...
- -> Success! Validation Loss: 3.9953
-Evaluating candidate 8/20 (Params: 101,074,513)...
- -> Success! Validation Loss: 4.0713
-Evaluating candidate 9/20 (Params: 110,518,609)...
- -> Success! Validation Loss: 4.0995
-Evaluating candidate 10/20 (Params: 134,142,289)...
- -> Success! Validation Loss: 4.0545
-Evaluating candidate 11/20 (Params: 160,129,873)...
- -> Success! Validation Loss: 3.8994
-Evaluating candidate 12/20 (Params: 150,674,257)...
- -> Success! Validation Loss: 3.8736
-Evaluating candidate 13/20 (Params: 136,502,353)...
- -> Success! Validation Loss: 3.9145
-Evaluating candidate 14/20 (Params: 157,765,969)...
-Evaluation failed: CUDA out of memory. Tried to allocate 198.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 135.62 MiB is free. Including non-PyTorch memory, this process has 11.46 GiB memory in use. Of the allocated memory 11.18 GiB is allocated by PyTorch, and 37.12 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 15/20 (Params: 122,334,289)...
- -> Success! Validation Loss: 3.8676
-Evaluating candidate 16/20 (Params: 183,745,873)...
-Evaluation failed: CUDA out of memory. Tried to allocate 148.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 95.62 MiB is free. Including non-PyTorch memory, this process has 11.50 GiB memory in use. Of the allocated memory 11.21 GiB is allocated by PyTorch, and 43.97 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 17/20 (Params: 202,649,425)...
-Evaluation failed: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 97.62 MiB is free. Including non-PyTorch memory, this process has 11.49 GiB memory in use. Of the allocated memory 10.93 GiB is allocated by PyTorch, and 336.40 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 18/20 (Params: 179,037,265)...
-Evaluation failed: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 217.62 MiB is free. Including non-PyTorch memory, this process has 11.38 GiB memory in use. Of the allocated memory 10.84 GiB is allocated by PyTorch, and 300.27 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 19/20 (Params: 186,121,297)...
-Evaluation failed: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 177.62 MiB is free. Including non-PyTorch memory, this process has 11.42 GiB memory in use. Of the allocated memory 10.88 GiB is allocated by PyTorch, and 298.29 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 20/20 (Params: 160,126,033)...
-Evaluation failed: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 15.62 MiB is free. Including non-PyTorch memory, this process has 11.57 GiB memory in use. Of the allocated memory 11.30 GiB is allocated by PyTorch, and 32.84 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
- -> Dynamic Reference Point for HV calculation set to: Loss=4.5094, Params=272,307,289
+Evaluating candidate 1/20 (Params: 247,552,081, aFLOPs/tok: 0.359G, blocks: 24)...
+ -> Success! Val Loss: 4.0420 | peak mem: 7.74 GB
+Evaluating candidate 2/20 (Params: 153,049,681, aFLOPs/tok: 0.160G, blocks: 15)...
+ -> Success! Val Loss: 4.0034 | peak mem: 5.68 GB
+Evaluating candidate 3/20 (Params: 162,497,617, aFLOPs/tok: 0.179G, blocks: 12)...
+ -> Success! Val Loss: 4.0968 | peak mem: 6.53 GB
+Evaluating candidate 4/20 (Params: 153,057,361, aFLOPs/tok: 0.164G, blocks: 24)...
+ -> Success! Val Loss: 3.9320 | peak mem: 7.14 GB
+Evaluating candidate 5/20 (Params: 205,024,849, aFLOPs/tok: 0.269G, blocks: 18)...
+ -> Success! Val Loss: 3.8068 | peak mem: 9.17 GB
+Evaluating candidate 6/20 (Params: 115,242,577, aFLOPs/tok: 0.079G, blocks: 8)...
+ -> Success! Val Loss: 3.9208 | peak mem: 7.01 GB
+Evaluating candidate 7/20 (Params: 160,110,673, aFLOPs/tok: 0.073G, blocks: 5 MoE[3 blk/16 exp])...
+ -> Success! Val Loss: 4.0779 | peak mem: 8.32 GB
+Evaluating candidate 8/20 (Params: 117,606,481, aFLOPs/tok: 0.084G, blocks: 9)...
+ -> Success! Val Loss: 3.9127 | peak mem: 8.15 GB
+Evaluating candidate 9/20 (Params: 240,417,361, aFLOPs/tok: 0.141G, blocks: 9 MoE[8 blk/32 exp])...
+ -> Success! Val Loss: 4.0552 | peak mem: 11.35 GB
+ -> REJECTED: peak memory 11.35 GB > budget 11.0 GB.
+Evaluating candidate 10/20 (Params: 141,230,161, aFLOPs/tok: 0.133G, blocks: 13)...
+ -> Success! Val Loss: 3.9272 | peak mem: 9.39 GB
+Evaluating candidate 11/20 (Params: 233,336,401, aFLOPs/tok: 0.165G, blocks: 11 MoE[9 blk/30 exp])...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 
+Evaluating candidate 12/20 (Params: 129,414,481, aFLOPs/tok: 0.107G, blocks: 11)...
+ -> Success! Val Loss: 3.9109 | peak mem: 9.39 GB
+Evaluating candidate 13/20 (Params: 249,872,977, aFLOPs/tok: 0.226G, blocks: 17 MoE[14 blk/34 exp])...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 16.00 MiB. GPU 0 has a total capacity of 1
+Evaluating candidate 14/20 (Params: 153,042,001, aFLOPs/tok: 0.157G, blocks: 15)...
+ -> Success! Val Loss: 3.9812 | peak mem: 10.82 GB
+Evaluating candidate 15/20 (Params: 412,827,217, aFLOPs/tok: 0.231G, blocks: 18 MoE[15 blk/68 exp])...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 
+Evaluating candidate 16/20 (Params: 176,669,521, aFLOPs/tok: 0.208G, blocks: 17)...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 
+Evaluating candidate 17/20 (Params: 469,530,193, aFLOPs/tok: 0.379G, blocks: 21 MoE[19 blk/76 exp])...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 14.00 MiB. GPU 0 has a total capacity of 1
+Evaluating candidate 18/20 (Params: 157,773,649, aFLOPs/tok: 0.170G, blocks: 17)...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 
+Evaluating candidate 19/20 (Params: 344,352,337, aFLOPs/tok: 0.276G, blocks: 20 MoE[18 blk/52 exp])...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 
+Evaluating candidate 20/20 (Params: 171,953,233, aFLOPs/tok: 0.201G, blocks: 19)...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 198.00 MiB. GPU 0 has a total capacity of 
+ -> 11/20 feasible; rejected reasons: {'oom': 8, 'memory': 1}
+ -> Dynamic Reference Point: Loss=4.5065, aFLOPs=0.394G
 
-🏆 Generation 1 Agentic Pareto Front:
-  Elite 1: Params=115,242,577, Loss=3.8803
-  Elite 2: Params=101,074,513, Loss=4.0713
-  Elite 3: Params=122,334,289, Loss=3.8676
+🏆 Generation 1 Agentic Pareto Front (Obj1=loss, Obj2=active-FLOPs):
+  Elite 1: Loss=3.8068, aFLOPs/tok=0.269G, Params=205,024,849
+  Elite 2: Loss=3.9208, aFLOPs/tok=0.079G, Params=115,242,577
+  Elite 3: Loss=4.0779, aFLOPs/tok=0.073G, Params=160,110,673, MoE 3blk/16exp
+  Elite 4: Loss=3.9127, aFLOPs/tok=0.084G, Params=117,606,481
+  Elite 5: Loss=3.9109, aFLOPs/tok=0.107G, Params=129,414,481
 ✓ Saved checkpoints/agentic-optim/generation_1_report.json
 ✓ Saved Pareto plot: checkpoints/agentic-optim/generation_1_pareto.png
 ✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
 
 --- Agentic Generation 2 / 10 ---
 
-  [32m[THINKING] **Generation 1 Candidate Solution Generation Plan**
+  [32m[THINKING] **Generation 1 Candidate Generation Strategy**
 
-Okay, so Generation 0 is done. Time to craft 20 new candidate solutions for Generation 1. I'm dealing with a 65-variable optimization problem, each variable bounded between 0.0 and 1.0. The goal is to minimize two objectives: f1 (Loss/Perplexity) - aiming for < 6.0 - and f2 (Parameters/Complexity), where the reference point for the Hypervolume (HV) calculation is (5e8, 6.0). Our current f2 values are in the ballpark of 1e8 to 2.4e8. The current Pareto Front (PF) holds just 3 solutions: [3.8676, 122M], [3.8802, 115M], and [4.0712, 101M] (f1, f2).
+Okay, so we're starting Gen 1, and the immediate task is to generate 20 candidate solutions. Let's start by quickly reviewing what we've got in our data. We have the current Pareto front (`pf_X`, `pf_F`) and the whole population from the previous generation (`all_X`, `all_F`). The shapes check out; we're good to go.
 
-Considering our reference point of (5e8, 6.0), the f2 values are comfortably below 5e8, and the loss is around 3.8-4.0. If I crank up the model depth (Var 0) or activate more layers, the complexity (f2) will likely go up, but I'm expecting the loss (f1) to come down.
+Objective-wise, our focus is on validation loss (ideally below 4.5, with past values showing some range) and active FLOPs per token, which we want to keep under control. My prior knowledge suggests a strong relationship between model depth (variable 0) and these objectives: deeper means more FLOPs but potentially lower loss. I need to be mindful of this connection as I build my generation strategy. I'm recalling the domain specifics here too: attention/FFN activation, activation types, long-range skips, and importantly, the MoE (Mixture of Experts) configuration, specifically the `n_experts` and `top_k` parameters. My goal is to exploit these MoE controls to build high-capacity, low-FLOP solutions, but of course memory constraints will be a limiting factor.
 
-The variables are: depth (Var 0), attention activation (Var 1-16), MLP activation (Var 17-32), activation functions (GELU, SiLU, ReLU; Var 33-48), and genuine long-range residual skips (Var 49-64).
+Now for the strategy. The text says to rotate between algorithms, so Differential Evolution (DE) is the starting point. I can use Differential Evolution (DE) with domain-specific initialization. I'll need to assess the separability, multimodality, and variable roles. Let's use Differential Evolution (DE) combined with domain-specific initialization. I'm thinking a mixed approach makes sense:
 
-I have some domain knowledge to leverage: attention should be front-loaded, deeper models (larger Var 0) should drive down loss (validation), and I should use cross-layer skips to improve gradient flow at a minimal complexity cost. Heterogeneous activations should also help.
+*   **DE-generated candidates (8):** A standard DE approach using mutation and crossover will be useful, especially given the existing PF points for crossover and mutation.
 
-Let's quickly run some diagnostics to assess the state of things. The prompt says to print them as a single line each, with a brief interpretation. So, I will do that:
-```python
-# Correlation matrix of all_X and pf_X
-# Since we only have 3 PF solutions, correlation matrix of pf_X might be unstable or have NaNs if std is 0.
-# We should handle NaNs safely.
-```
+*   **Gap-filling candidates (6):** I need to target the largest gap, which is the FLOPs gap between the existing PF points (Gap 0-1), through interpolation to fill the gap.
 
-The approach for Generation 1 will be a mix. Differential Evolution (DE) seems tricky since I only have 3 PF solutions, so I will have to adapt. I'll take a "Domain Guided Hybrid" approach:
+*   **Domain-guided candidates (6):** I'll be explicitly targeting regions in the design space that, based on my understanding, should provide a favorable trade-off between loss and FLOPs. High `n_experts` (aiming for 8) and low `top_k` (aiming for 1) in the MoE configuration. For these, I'll be using a "sandwich" structure: early attention layers and later FFN layers with skip connections, with variable depth.
 
-*   **3 candidates:** Perturb the existing PF solutions slightly.
-*   **5 candidates:** Focus on reducing loss (f1). I will try to make Var 0 high, activate early attention layers, make later layers MLP, use active skips, and combine activation functions.
-*   **5 candidates:** Focus on reducing parameters (f2). I will make Var 0 smaller, bypass some attention and MLP layers, but keep the skips active to keep loss low.
-*   **4 candidates:** I'll linearly interpolate (crossover) between the 3 PF solutions to fill the solution space.
-*   **3 candidates:** Random sampling, but guided by what I know: keep skips active and use mixed activations.
+Let's quickly create the diagnostic tools, for separability, multimodality. The code is:
 
-Let's refine this strategy. I am thinking of the current solutions. In the current PF, the depth (Var 0) values are 0.6333, 0.1200, 0.1667. Var 0 = 0.1200 achieves f1=3.8802, f2=115M. Var 0 = 0.6333 achieves f1=3.8676, f2=122M. I bet that if I make Var 0 close to 0.9, I could push loss below 3.5 without crossing 1.5e8 parameters. Now, I have to make sure that any value I create is inside the [0, 1] bounds.
+*   **Excess correlation:** The plan is to compare the correlation structures of the PF and the entire population. High correlation in the PF suggests non-separability, and I'll need to carefully manage NaNs in the data.
 
-Time to implement this in code. Keep it compact, robust, and error-free.
+*   **Multimodality:** I will do a distance-based analysis to check multimodality, but the code needs to be efficient. Let's do a fast numpy implementation to avoid scipy dependency.
+
+Then, I can start writing the generation code with the MoE-specific guidance. For the MoE variables:
+*   `n_experts`: Let's set some to high values to test high capacity.
+*   `top_k`: Let's set some to 1 to keep active FLOPs low.
+*   `depth`: I'll vary depth to explore the space.
+*   "Sandwich" attention and FFN activation.
+*   Enable skip connections.
+
+All this will be written to output exactly 20 candidates.
 
 
 [0m
-Excess corr: 0.2703 — partially coupled variables
-Multimodality ratio: 0.0000 — unimodal structure expected
+Excess corr: 0.1299 — non-separable
  -> Promoted 2 elites directly to the population to continue their fine-tuning.
 ✓ Saved generated sampling code: checkpoints/agentic-optim/generation_2_code.py
-Evaluating candidate 1/20 (Params: 112,882,513)...
- -> Inherited 58 parameter tensors from parent weights.
- -> Success! Validation Loss: 3.9514
-Evaluating candidate 2/20 (Params: 108,162,385)...
+Evaluating candidate 1/20 (Params: 186,121,297, aFLOPs/tok: 0.228G, blocks: 16)...
+ -> Success! Val Loss: 3.8368 | peak mem: 8.50 GB
+Evaluating candidate 2/20 (Params: 197,929,297, aFLOPs/tok: 0.213G, blocks: 14 MoE[5 blk/10 exp])...
+ -> Success! Val Loss: 3.7461 | peak mem: 9.52 GB
+Evaluating candidate 3/20 (Params: 190,849,105, aFLOPs/tok: 0.239G, blocks: 16)...
+ -> Success! Val Loss: 3.8469 | peak mem: 10.25 GB
+Evaluating candidate 4/20 (Params: 98,706,769, aFLOPs/tok: 0.035G, blocks: 4 MoE[1 blk/2 exp])...
+ -> Success! Val Loss: 4.1948 | peak mem: 8.07 GB
+Evaluating candidate 5/20 (Params: 193,209,169, aFLOPs/tok: 0.243G, blocks: 19)...
+ -> Success! Val Loss: 3.9709 | peak mem: 11.37 GB
+ -> REJECTED: peak memory 11.37 GB > budget 11.0 GB.
+Evaluating candidate 6/20 (Params: 108,154,705, aFLOPs/tok: 0.064G, blocks: 5 MoE[1 blk/2 exp])...
+ -> Success! Val Loss: 4.1150 | peak mem: 8.70 GB
+Evaluating candidate 7/20 (Params: 112,877,137, aFLOPs/tok: 0.045G, blocks: 6 MoE[1 blk/4 exp])...
+ -> Success! Val Loss: 4.1231 | peak mem: 9.15 GB
+Evaluating candidate 8/20 (Params: 103,430,737, aFLOPs/tok: 0.054G, blocks: 6)...
+ -> Success! Val Loss: 3.8091 | peak mem: 9.41 GB
+Evaluating candidate 9/20 (Params: 122,330,449, aFLOPs/tok: 0.094G, blocks: 8)...
  -> Inherited 52 parameter tensors from parent weights.
- -> Success! Validation Loss: 3.8146
-Evaluating candidate 3/20 (Params: 122,334,289)...
- -> Inherited 84 parameter tensors from parent weights.
- -> Success! Validation Loss: 3.8427
-Evaluating candidate 4/20 (Params: 122,330,449)...
+ -> Success! Val Loss: 3.8828 | peak mem: 10.46 GB
+Evaluating candidate 10/20 (Params: 148,321,873, aFLOPs/tok: 0.149G, blocks: 12)...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 
+Evaluating candidate 11/20 (Params: 119,966,545, aFLOPs/tok: 0.088G, blocks: 8)...
  -> Inherited 52 parameter tensors from parent weights.
- -> Success! Validation Loss: 3.9531
-Evaluating candidate 5/20 (Params: 98,710,609)...
- -> Inherited 34 parameter tensors from parent weights.
- -> Success! Validation Loss: 4.1541
-Evaluating candidate 6/20 (Params: 115,246,417)...
- -> Inherited 52 parameter tensors from parent weights.
- -> Success! Validation Loss: 3.8467
-Evaluating candidate 7/20 (Params: 157,773,649)...
- -> Success! Validation Loss: 4.0845
-Evaluating candidate 8/20 (Params: 179,037,265)...
- -> Success! Validation Loss: 3.9424
-Evaluating candidate 9/20 (Params: 169,585,489)...
- -> Success! Validation Loss: 3.9524
-Evaluating candidate 10/20 (Params: 164,861,521)...
- -> Success! Validation Loss: 4.0218
-Evaluating candidate 11/20 (Params: 162,497,617)...
- -> Success! Validation Loss: 4.0653
-Evaluating candidate 12/20 (Params: 77,443,153)...
- -> Success! Validation Loss: 5.4263
-Evaluating candidate 13/20 (Params: 77,443,153)...
- -> Success! Validation Loss: 5.3736
-Evaluating candidate 14/20 (Params: 77,443,153)...
- -> Success! Validation Loss: 5.4128
-Evaluating candidate 15/20 (Params: 77,443,153)...
- -> Success! Validation Loss: 5.4602
-Evaluating candidate 16/20 (Params: 77,443,153)...
- -> Success! Validation Loss: 5.3791
-Evaluating candidate 17/20 (Params: 108,162,385)...
- -> Inherited 52 parameter tensors from parent weights.
-Evaluation failed: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 191.62 MiB is free. Including non-PyTorch memory, this process has 11.40 GiB memory in use. Of the allocated memory 10.99 GiB is allocated by PyTorch, and 172.05 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-Evaluating candidate 18/20 (Params: 134,142,289)...
-Evaluation failed: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 11.62 MiB is free. Including non-PyTorch memory, this process has 11.58 GiB memory in use. Of the allocated memory 11.31 GiB is allocated by PyTorch, and 26.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ -> Success! Val Loss: 4.0074 | peak mem: 10.84 GB
+Evaluating candidate 12/20 (Params: 176,673,361, aFLOPs/tok: 0.209G, blocks: 14)...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacity of 1
+Evaluating candidate 13/20 (Params: 169,585,489, aFLOPs/tok: 0.194G, blocks: 13)...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 12.00 MiB. GPU 0 has a total capacity of 1
+Evaluating candidate 14/20 (Params: 124,694,353, aFLOPs/tok: 0.099G, blocks: 10)...
+ -> Success! Val Loss: 4.0745 | peak mem: 11.54 GB
+ -> REJECTED: peak memory 11.54 GB > budget 11.0 GB.
+Evaluating candidate 15/20 (Params: 278,198,353, aFLOPs/tok: 0.075G, blocks: 10 MoE[5 blk/40 exp])...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 72.00 MiB. GPU 0 has a total capacity of 1
+Evaluating candidate 16/20 (Params: 238,047,313, aFLOPs/tok: 0.060G, blocks: 8 MoE[4 blk/32 exp])...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 148.00 MiB. GPU 0 has a total capacity of 
+Evaluating candidate 17/20 (Params: 358,500,433, aFLOPs/tok: 0.105G, blocks: 14 MoE[7 blk/56 exp])...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 
+Evaluating candidate 18/20 (Params: 360,864,337, aFLOPs/tok: 0.110G, blocks: 15 MoE[7 blk/56 exp])...
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 
  -> Promoted elite exact match. Resuming from its previous checkpoint.
-Evaluating candidate 19/20 (Params: 115,242,577)...
- -> Inherited 66 parameter tensors from parent weights.
-Evaluation failed: CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 171.62 MiB is free. Including non-PyTorch memory, this process has 11.42 GiB memory in use. Of the allocated memory 11.06 GiB is allocated by PyTorch, and 129.20 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
- -> Promoted elite exact match. Resuming from its previous checkpoint.
-Evaluating candidate 20/20 (Params: 122,334,289)...
+Evaluating candidate 19/20 (Params: 129,414,481, aFLOPs/tok: 0.107G, blocks: 11)...
  -> Inherited 84 parameter tensors from parent weights.
-Evaluation failed: CUDA out of memory. Tried to allocate 198.00 MiB. GPU 0 has a total capacity of 11.63 GiB of which 11.62 MiB is free. Including non-PyTorch memory, this process has 11.58 GiB memory in use. Of the allocated memory 11.30 GiB is allocated by PyTorch, and 40.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
- -> Dynamic Reference Point for HV calculation set to: Loss=6.0062, Params=196,940,991
+ -> Success! Val Loss: 4.0628 | peak mem: 11.44 GB
+ -> REJECTED: peak memory 11.44 GB > budget 11.0 GB.
+ -> Promoted elite exact match. Resuming from its previous checkpoint.
+Evaluating candidate 20/20 (Params: 205,024,849, aFLOPs/tok: 0.269G, blocks: 18)...
+ -> Inherited 222 parameter tensors from parent weights.
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 
+ -> 9/20 feasible; rejected reasons: {'oom': 8, 'memory': 3}
+ -> Dynamic Reference Point: Loss=4.6142, aFLOPs=0.296G
+ ⚠ SATURATION across all 20 individuals for >= 2 gens: attn[0]=True[2g], attn[2]=True[2g]
+    -> will force diverse values into 2 explorers next generation.
 
-🏆 Generation 2 Agentic Pareto Front:
-  Elite 1: Params=101,074,513, Loss=4.0713
-  Elite 2: Params=108,162,385, Loss=3.8146
-  Elite 3: Params=98,710,609, Loss=4.1541
-  Elite 4: Params=77,443,153, Loss=5.3736
+🏆 Generation 2 Agentic Pareto Front (Obj1=loss, Obj2=active-FLOPs):
+  Elite 1: Loss=3.7461, aFLOPs/tok=0.213G, Params=197,929,297, MoE 5blk/10exp
+  Elite 2: Loss=4.1948, aFLOPs/tok=0.035G, Params=98,706,769, MoE 1blk/2exp
+  Elite 3: Loss=4.1231, aFLOPs/tok=0.045G, Params=112,877,137, MoE 1blk/4exp
+  Elite 4: Loss=3.8091, aFLOPs/tok=0.054G, Params=103,430,737
 ✓ Saved checkpoints/agentic-optim/generation_2_report.json
 ✓ Saved Pareto plot: checkpoints/agentic-optim/generation_2_pareto.png
 ✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
 
 --- Agentic Generation 3 / 10 ---
-
-  [32m[THINKING] **Surrogate-Inverse Model for Enhanced Pareto Front Exploration**
-
-Okay, let's take stock. HV is up significantly again, which is a good sign, and we've got a new Pareto front (PF) with four solutions now. Looking at the current front, the validation loss is in the 3.8 to 5.4 range, and parameter counts are between 77 million and 108 million. We didn't see any deep models on the PF this time, which is interesting.
-
-I'm remembering our guide's advice – deeper models should converge faster and achieve lower loss. We tried deep models in the first generation, but they didn't make it to the PF. It looks like the issue is that none of the generation 1 deep models, even though they had lower loss, had sufficiently lower loss to beat the shallow models in terms of Pareto dominance, especially when their higher parameter cost is considered. Even a model with a validation loss of 3.5 and 200M parameters, should have been on the PF. The minimum validation loss across all evaluations is 3.81, so we didn't find any models that achieved lower loss. We didn't see any deep models in the PF because we only did one generation with deep models. In Generation 1, we generated 5 deep models (Var 0 in [0.7, 1.0]).
-
-So, it's either convergence time or the configurations aren't right. We need to consider attention, MLPs, and skips for these deep models.
-
-Let's look at what's driving the PF. The most influential variables, by variance, are variables related to attention states. And all of those are active. Conversely, the long-range skips are mostly inactive or bypassed. Skips, however, don't cost much parameter-wise, so why aren't they more active?
-
-We need to explore the space further, and per instructions, we need to switch algorithms. Last time was a domain-guided hybrid; this time, it's either PCA-EA or Surrogate-Inverse Model. Given the data (40 evaluations), the Surrogate-Inverse Model seems like a good fit, or, PCA-EA might be a good choice. We need to map from objective space back to the decision space.
-
-We can fit the inverse model on all of the valid data points, or just the PF. Given we only have 4 PF solutions, we will have a very underdetermined model with just pf_F to pf_X. I think we will need to fit it from a set of top solutions, perhaps the top 15-20 based on Pareto rank or hypervolume, and then use a multi-output Ridge regression.
-
-We can use the Surrogate-Inverse Model for:
-a) gap filling,
-b) front pushing (scaling objectives of existing PF solutions), and
-c) extreme extension (targeting lower loss and lower parameters).
-
-The model's input will be the objectives, and the output will be the decisions (variables). We'll use Ridge regression in NumPy. We'll solve for the weights and use a regularization parameter of 0.1 or 1.0.
-
-Now, which data to train on? Fitting just on the 4 PF solutions would be a simple linear interpolation/extrapolation. It may actually work well, because the Pareto set is likely a 1D manifold in 65D space! I think we can fit a clean model on the PF and also incorporate more solutions for robustness. It's a valid choice to use both, and do some DE or PCA-guided perturbation to maintain diversity.
-
-Okay, let's break down the next 20 candidates:
-
-*   **Surrogate-Inverse Model (10 Candidates)**: We'll target extreme loss reduction, parameter reduction, gap filling, and front pushing via scaling, interpolation, and extrapolation.
-*   **PCA-EA/Covariance Mutation (6 Candidates)**: We'll compute PCA on the decision variables of the PF or the top solutions and mutate along the principal components.
-*   **Exploratory Candidates with Domain Knowledge (4 Candidates)**: We'll re-visit deeper models but this time with a moderate depth (Var 0 around 0.4 - 0.6) to see if we can find a sweet spot using front-loaded attention and active skips.
-
-Finally, we need to refine the diagnostics. We'll compute correlation, but need to account for potential zero variance, and then replace NaN values with zero. We need a robust function for this.
-
-Finally, let's double-check all the bounds and clipping and write the code to ensure all candidate solutions fall within the valid range of \[0.0, 1.0].
-
-
-[0m
-Excess corr: 0.4182 — partial coupling detected
-Multimodality ratio: 0.1347 — unimodal trajectory
+  Agent error: 401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'ACCESS_TOKEN_TYPE_UNSUPPORTED', 'metadata': {'method': 'google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent', 'service': 'generativelanguage.googleapis.com'}}]}}
  -> Promoted 2 elites directly to the population to continue their fine-tuning.
+ -> Broke saturation: injected diverse values into individuals 0,1 for 2 gene(s): attn[0], attn[2]
 ✓ Saved generated sampling code: checkpoints/agentic-optim/generation_3_code.py
-Evaluating candidate 1/20 (Params: 183,753,553)...
- -> Success! Validation Loss: 3.8729
-Evaluating candidate 2/20 (Params: 205,021,009)...
- -> Success! Validation Loss: 3.9178
-Evaluating candidate 3/20 (Params: 77,443,153)...
+Evaluating candidate 1/20 (Params: 98,702,929, aFLOPs/tok: 0.043G, blocks: 4)...
+ -> Success! Val Loss: 4.2477 | peak mem: 4.79 GB
+Evaluating candidate 2/20 (Params: 93,978,961, aFLOPs/tok: 0.024G, blocks: 2 MoE[1 blk/2 exp])...
+ -> REJECTED: only 2 active blocks (< 3).
+Evaluating candidate 3/20 (Params: 117,601,105, aFLOPs/tok: 0.064G, blocks: 6 MoE[1 blk/4 exp])...
+ -> Inherited 36 parameter tensors from parent weights.
+ -> Success! Val Loss: 4.1049 | peak mem: 5.72 GB
+Evaluating candidate 4/20 (Params: 117,601,105, aFLOPs/tok: 0.064G, blocks: 6 MoE[1 blk/4 exp])...
+ -> Inherited 36 parameter tensors from parent weights.
+ -> Success! Val Loss: 3.9650 | peak mem: 6.18 GB
+Evaluating candidate 5/20 (Params: 138,859,345, aFLOPs/tok: 0.088G, blocks: 7 MoE[2 blk/8 exp])...
+ -> Inherited 34 parameter tensors from parent weights.
+ -> Success! Val Loss: 4.1031 | peak mem: 7.21 GB
+Evaluating candidate 6/20 (Params: 221,552,977, aFLOPs/tok: 0.234G, blocks: 16 MoE[8 blk/16 exp])...
+ -> Inherited 139 parameter tensors from parent weights.
+ -> Success! Val Loss: 3.6707 | peak mem: 10.47 GB
+Evaluating candidate 7/20 (Params: 105,794,641, aFLOPs/tok: 0.050G, blocks: 6 MoE[1 blk/2 exp])...
+ -> Inherited 26 parameter tensors from parent weights.
+ -> Success! Val Loss: 4.0800 | peak mem: 7.88 GB
+Evaluating candidate 8/20 (Params: 122,325,073, aFLOPs/tok: 0.064G, blocks: 6 MoE[2 blk/6 exp])...
+ -> Inherited 32 parameter tensors from parent weights.
+ -> Success! Val Loss: 3.7763 | peak mem: 8.64 GB
+Evaluating candidate 9/20 (Params: 98,706,769, aFLOPs/tok: 0.035G, blocks: 4 MoE[1 blk/2 exp])...
+ -> Inherited 37 parameter tensors from parent weights.
+ -> Success! Val Loss: 4.0759 | peak mem: 8.60 GB
+Evaluating candidate 10/20 (Params: 190,841,425, aFLOPs/tok: 0.189G, blocks: 13 MoE[6 blk/12 exp])...
+ -> Inherited 131 parameter tensors from parent weights.
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total capacity of 
+Evaluating candidate 11/20 (Params: 214,465,105, aFLOPs/tok: 0.228G, blocks: 15 MoE[7 blk/14 exp])...
+ -> Inherited 154 parameter tensors from parent weights.
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 74.00 MiB. GPU 0 has a total capacity of 1
+Evaluating candidate 12/20 (Params: 96,342,865, aFLOPs/tok: 0.030G, blocks: 3 MoE[1 blk/2 exp])...
+ -> Inherited 31 parameter tensors from parent weights.
+ -> Success! Val Loss: 4.0267 | peak mem: 8.90 GB
+Evaluating candidate 13/20 (Params: 223,913,041, aFLOPs/tok: 0.228G, blocks: 15 MoE[9 blk/18 exp])...
+ -> Inherited 146 parameter tensors from parent weights.
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 12.00 MiB. GPU 0 has a total capacity of 1
+Evaluating candidate 14/20 (Params: 193,205,329, aFLOPs/tok: 0.213G, blocks: 14 MoE[4 blk/8 exp])...
+ -> Inherited 150 parameter tensors from parent weights.
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 198.00 MiB. GPU 0 has a total capacity of 
+Evaluating candidate 15/20 (Params: 167,217,745, aFLOPs/tok: 0.168G, blocks: 11 MoE[3 blk/6 exp])...
+ -> Inherited 106 parameter tensors from parent weights.
+ -> Success! Val Loss: 4.0120 | peak mem: 11.48 GB
+ -> REJECTED: peak memory 11.48 GB > budget 11.0 GB.
+Evaluating candidate 16/20 (Params: 209,741,137, aFLOPs/tok: 0.228G, blocks: 15 MoE[6 blk/12 exp])...
+ -> Inherited 149 parameter tensors from parent weights.
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacity of 1
+Evaluating candidate 17/20 (Params: 108,153,169, aFLOPs/tok: 0.035G, blocks: 4 MoE[1 blk/4 exp])...
+ -> Inherited 32 parameter tensors from parent weights.
+ -> Success! Val Loss: 4.1620 | peak mem: 9.54 GB
+Evaluating candidate 18/20 (Params: 105,790,801, aFLOPs/tok: 0.049G, blocks: 5 MoE[1 blk/2 exp])...
+ -> Inherited 38 parameter tensors from parent weights.
+ -> Success! Val Loss: 4.1322 | peak mem: 9.89 GB
+ -> Promoted elite exact match. Resuming from its previous checkpoint.
+Evaluating candidate 19/20 (Params: 103,430,737, aFLOPs/tok: 0.054G, blocks: 6)...
+ -> Inherited 48 parameter tensors from parent weights.
+ -> Success! Val Loss: 4.0535 | peak mem: 10.30 GB
+ -> Promoted elite exact match. Resuming from its previous checkpoint.
+Evaluating candidate 20/20 (Params: 197,929,297, aFLOPs/tok: 0.213G, blocks: 14 MoE[5 blk/10 exp])...
+ -> Inherited 173 parameter tensors from parent weights.
+ -> REJECTED (constraint): CUDA out of memory. Tried to allocate 12.00 MiB. GPU 0 has a total capacity of 1
+ -> 12/20 feasible; rejected reasons: {'too_few_blocks': 1, 'oom': 6, 'memory': 1}
+ -> Dynamic Reference Point: Loss=4.6725, aFLOPs=0.257G
+ ⚠ SATURATION across all 20 individuals for >= 2 gens: attn[3]=True[2g], mlp[11]=True[2g], mlp[12]=True[2g], mlp[13]=True[2g], top_k[5]=1[2g]
+    -> will force diverse values into 2 explorers next generation.
+
+🏆 Generation 3 Agentic Pareto Front (Obj1=loss, Obj2=active-FLOPs):
+  Elite 1: Loss=3.7461, aFLOPs/tok=0.213G, Params=197,929,297, MoE 5blk/10exp
+  Elite 2: Loss=3.8091, aFLOPs/tok=0.054G, Params=103,430,737
+  Elite 3: Loss=3.6707, aFLOPs/tok=0.234G, Params=221,552,977, MoE 8blk/16exp
+  Elite 4: Loss=3.7763, aFLOPs/tok=0.064G, Params=122,325,073, MoE 2blk/6exp
+  Elite 5: Loss=4.0267, aFLOPs/tok=0.030G, Params=96,342,865, MoE 1blk/2exp
+✓ Saved checkpoints/agentic-optim/generation_3_report.json
+✓ Saved Pareto plot: checkpoints/agentic-optim/generation_3_pareto.png
+✓ Saved Agent learnings to: checkpoints/agentic-optim/agent_learnings_history.txt
+
+--- Agentic Generation 4 / 10 ---
+  Agent error: 401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'ACCESS_TOKEN_TYPE_UNSUPPORTED', 'metadata': {'method': 'google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent', 'service': 'generativelanguage.googleapis.com'}}]}}
+ -> Promoted 2 elites directly to the population to continue their fine-tuning.
+ -> Broke saturation: injected diverse values into individuals 0,1 for 5 gene(s): attn[3], mlp[11], mlp[12], mlp[13], top_k[5]
+✓ Saved generated sampling code: checkpoints/agentic-optim/generation_4_code.py
+Evaluating candidate 1/20 (Params: 164,857,681, aFLOPs/tok: 0.155G, blocks: 12 MoE[4 blk/8 exp])...
+ -> Success! Val Loss: 3.8605 | peak mem: 7.90 GB
+Evaluating candidate 2/20 (Params: 105,789,265, aFLOPs/tok: 0.039G, blocks: 3 MoE[1 blk/4 exp])...
+ -> Success! Val Loss: 4.0051 | peak mem: 6.57 GB
+Evaluating candidate 3/20 (Params: 131,771,473, aFLOPs/tok: 0.073G, blocks: 5 MoE[2 blk/8 exp])...
+ -> Inherited 30 parameter tensors from parent weights.
+ -> Success! Val Loss: 3.8483 | peak mem: 7.65 GB
+Evaluating candidate 4/20 (Params: 101,066,833, aFLOPs/tok: 0.039G, blocks: 3 MoE[2 blk/4 exp])...
+ -> Inherited 27 parameter tensors from parent weights.
+ -> Success! Val Loss: 4.0193 | peak mem: 7.47 GB
+Evaluating candidate 5/20 (Params: 200,289,361, aFLOPs/tok: 0.198G, blocks: 13 MoE[7 blk/14 exp])...
+ -> Inherited 133 parameter tensors from parent weights.
