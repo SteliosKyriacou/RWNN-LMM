@@ -7,7 +7,7 @@ Guidance for working in this repo. This is a research codebase for the paper
 
 Neural architecture search (NAS) for decoder-only LMs. An architecture is a **Heterogeneous
 Directed Acyclic Graph (H-DAG)** of primitive nodes, compiled and trained on the fly. An
-LLM agent (Metis-Agent, Gemini-backed) drives a multi-objective search that writes its own
+LLM agent (Metis-Agent, **Claude-backed**) drives a multi-objective search that writes its own
 optimization code each generation. Two objectives are minimized on a Pareto front:
 **validation cross-entropy loss** and **trainable parameter count**. New candidates copy weights
 from their nearest Pareto-front parent ("Lamarckian inheritance") to skip cold-start training.
@@ -54,9 +54,10 @@ python evolve_agentic.py          # or: nohup python -u evolve_agentic.py > agen
 ```
 
 Requires:
-- A sibling repo at **`/home/stelios/repos/agentic-optimizer`** (hardcoded `sys.path` in `evolve_agentic.py:29`)
-  providing `agentic_optimizer.metis_agent.MetisAgent`. Not part of this repo.
-- `.env` with `GOOGLE_API_KEY` (+ optional `GEMINI_MODEL`). Loaded manually at the top of `evolve_agentic.py`.
+- The **vendored `agentic_optimizer/` package in this repo** (was an external sibling; now self-contained),
+  providing `MetisAgent`. It is backed by **Claude** via `agentic_optimizer/claude_llm.py` — the Claude
+  Agent SDK drives the local `claude` CLI using its subscription login (`pip install claude-agent-sdk`;
+  no API key needed). Model via `CLAUDE_MODEL` env (default `sonnet`).
 - `train.bin` / `val.bin` (git-ignored; produced by `prepare_wikitext103.py`).
 
 ## Gotchas / conventions

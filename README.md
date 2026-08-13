@@ -9,7 +9,7 @@ decoder-only language models, where each architecture is a **Heterogeneous Direc
 
 ## What we are doing
 
-An LLM agent (Metis-Agent, Gemini-backed) drives an evolutionary search over a continuous encoding
+An LLM agent (Metis-Agent, **Claude-backed**) drives an evolutionary search over a continuous encoding
 of language-model architectures. Every generation the agent **writes its own optimization code**
 (PCA-EA, CMA-ES, Ridge surrogate-inverse, gap-filling, …) to propose the next population of
 candidate vectors. Each candidate is decoded into a real H-DAG, compiled into a PyTorch module,
@@ -77,6 +77,8 @@ generations and injects diversity to escape the plateau.
 - `evolve_agentic.py` — **main script**: `vector_to_multilayer_graph()` (decode), MoE-aware
   `active_flops_per_token()`, `train_and_eval_bpe_model()` (train + measure peak memory),
   `build_initial_population()`, and `run_agentic_optimization()` (the generation loop).
+- `agentic_optimizer/` — **vendored** Metis-Agent optimizer (`metis_agent.py`, `hypervolume.py`,
+  `individual.py`) backed by Claude via `claude_llm.py` (Claude Agent SDK → local `claude` CLI).
 - `calculate_agentic_hypervolume.py` — hypervolume (S-metric) + convergence plots.
 - `generate_graph_visualization.py`, `generate_all_elites_samples.py` — layouts and samples.
 - `prepare_wikitext103.py` — BPE tokenize into `train.bin` / `val.bin`.
@@ -94,10 +96,12 @@ python prepare_wikitext103.py     # once: produces train.bin / val.bin
 python evolve_agentic.py          # or: nohup python -u evolve_agentic.py > agentic_evolution.log 2>&1 &
 ```
 
-Requires a sibling repo at `/home/stelios/repos/agentic-optimizer` (provides `MetisAgent`), a `.env`
-with `GOOGLE_API_KEY`, and `train.bin` / `val.bin`. Set
-`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` before launching to reduce fragmentation on a
-12 GB card. Note: `run_agentic_optimization()` clears `checkpoints/agentic-optim/` on startup.
+The agentic optimizer is **vendored** in `agentic_optimizer/` and backed by **Claude**: install the
+SDK (`pip install claude-agent-sdk`) and make sure the local `claude` CLI is logged in (subscription;
+no API key needed). Choose the model with `CLAUDE_MODEL` (default `sonnet`). You also need
+`train.bin` / `val.bin`. Set `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` before launching to
+reduce fragmentation on a 12 GB card. Note: `run_agentic_optimization()` clears
+`checkpoints/agentic-optim/` on startup.
 
 ---
 

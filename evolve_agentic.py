@@ -1,7 +1,7 @@
 import os
 import sys
 
-# Load local .env file from project root if present to populate GOOGLE_API_KEY and model variables
+# Load local .env file from project root if present (optional overrides like CLAUDE_MODEL)
 env_path = os.path.join(os.path.dirname(__file__), ".env")
 if os.path.exists(env_path):
     with open(env_path) as f:
@@ -11,9 +11,8 @@ if os.path.exists(env_path):
                 k, v = line.split("=", 1)
                 os.environ[k.strip()] = v.strip()
 
-# Default model variable fallback
-if "GEMINI_MODEL" not in os.environ:
-    os.environ["GEMINI_MODEL"] = "gemini-3.5-flash"
+# Default Claude model for the agentic optimizer (resolved by the local `claude` CLI).
+os.environ.setdefault("CLAUDE_MODEL", "sonnet")
 
 import json
 import time
@@ -25,8 +24,7 @@ import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 
-# 1. Setup local agentic-optimizer path
-sys.path.insert(0, "/home/stelios/repos/agentic-optimizer")
+# Agentic optimizer now lives in this repo (agentic_optimizer/), backed by Claude.
 from agentic_optimizer.metis_agent import MetisAgent
 
 from rwnn.graph import RWNNGraph
