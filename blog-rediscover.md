@@ -1,4 +1,4 @@
-# An LLM Agent Rediscovers the Modern Transformer from GPT-2
+# An Agentic Optimizer Rediscovers Frontier-Model Architectures Given GPT-2 as Its Starting Point
 
 The distance between GPT-2 (2019) and today's frontier open models — [Qwen](https://arxiv.org/abs/2505.09388), [Kimi K2](https://arxiv.org/abs/2507.20534), [DeepSeek-V3](https://arxiv.org/abs/2412.19437) — is, architecturally, a small and well-understood set of moves: attention concentrated in the early layers, a departure from the rigid one-to-one interleaving of attention and feed-forward blocks, dense residual shortcuts, and above all the replacement of the dense feed-forward block by a sparsely-activated **Mixture-of-Experts (MoE)**. Each of these was discovered, named, and published by a different group over the last five years.
 
