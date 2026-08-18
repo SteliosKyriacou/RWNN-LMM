@@ -33,7 +33,7 @@ Starting from five GPT-2 seeds and fifteen diverse explorers, the front advanced
 
 ![Generation 6 Pareto front](assets/blog-rediscover/gen6_pareto.png)
 
-**Fig 1;** The generation-6 Pareto front in the (used compute, loss) plane. Grey are all evaluated feasible candidates across six generations; the dashed red curve is the non-dominated front. At the cheap-compute extreme sits an attention-only model (purple); the interior is held by dense models (blue); and the loss-leading corner — lower loss *and* fewer FLOPs than any dense competitor — is taken by a **Mixture-of-Experts hybrid** (orange).
+**Fig 1;** The generation-6 Pareto front in the (used compute, loss) plane. Grey are all evaluated feasible candidates across six generations; the dashed red curve is the non-dominated front. The black diamonds are the **GPT-2 seed variants** the search started from — every one of them sits up and to the right of the evolved front, dominated on both objectives; the best seed (gpt2-small, loss 3.858) is beaten by the evolved champion at lower loss *and* less compute, while the larger seeds fall far out on the compute axis. At the cheap-compute extreme sits an attention-only model (purple); the interior is held by dense models (blue); and the loss-leading corner is taken by a **Mixture-of-Experts hybrid** (orange).
 
 The champion is worth reading node by node.
 
