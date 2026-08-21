@@ -329,6 +329,16 @@ class CausalBatchMatMulNode(RWNNNode):
         return att
 
 
+class SoftmaxNode(RWNNNode):
+    """Softmax over the last dimension. A primitive atom (e.g. for emergent gating/routing)."""
+    def __init__(self, node_id, dim=-1):
+        super().__init__(node_id, "softmax")
+        self.dim = dim
+
+    def forward(self, inputs):
+        return F.softmax(inputs[0], dim=self.dim)
+
+
 class MoEFFNNode(RWNNNode):
     """Fused Mixture-of-Experts feed-forward block.
 

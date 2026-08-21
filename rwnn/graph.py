@@ -7,7 +7,7 @@ from rwnn.nodes import (
     ConcatNode, ElementMulNode, DropoutNode, RWNNNode,
     MeanReduceNode, SquareNode, SubtractNode, DivideNode,
     SqrtNode, ScaleShiftNode, MatMulNode, AddBiasNode,
-    TransposeNode, ReshapeNode, CausalBatchMatMulNode, MoEFFNNode
+    TransposeNode, ReshapeNode, CausalBatchMatMulNode, MoEFFNNode, SoftmaxNode
 )
 
 class EdgeConnection(nn.Module):
@@ -123,6 +123,8 @@ class RWNNGraph(nn.Module):
             return CausalBatchMatMulNode(n_id, **kwargs)
         elif n_type == 'moe_ffn':
             return MoEFFNNode(n_id, **kwargs)
+        elif n_type == 'softmax':
+            return SoftmaxNode(n_id, **kwargs)
         else:
             raise ValueError(f"Unknown node type: {n_type}")
 
@@ -217,6 +219,9 @@ class RWNNGraph(nn.Module):
             elif isinstance(node, ElementMulNode):
                 self.node_out_dims[u] = d_tgt
             elif isinstance(node, DropoutNode):
+                pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model
+                self.node_out_dims[u] = pred_dim if pred_dim is not None else self.global_d_model
+            elif isinstance(node, SoftmaxNode):
                 pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model
                 self.node_out_dims[u] = pred_dim if pred_dim is not None else self.global_d_model
             elif isinstance(node, MeanReduceNode):
