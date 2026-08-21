@@ -1,0 +1,67 @@
+[
+    {
+        "rank": 1,
+        "nodes": 33,
+        "edges": 43,
+        "loss": 3.8999507427215576,
+        "active_flops": 50331648.0,
+        "params": 0,
+        "active_blocks": null,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/no_weights.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen5_ind1_config.json"
+    },
+    {
+        "rank": 2,
+        "nodes": 81,
+        "edges": 109,
+        "loss": 3.8917107582092285,
+        "active_flops": 140771328.0,
+        "params": 0,
+        "active_blocks": null,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/no_weights.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen5_ind2_config.json"
+    },
+    {
+        "rank": 3,
+        "nodes": 76,
+        "edges": 102,
+        "loss": 3.896532154083252,
+        "active_flops": 131334144.0,
+        "params": 0,
+        "active_blocks": null,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/no_weights.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen5_ind3_config.json"
+    },
+    {
+        "rank": 4,
+        "nodes": 90,
+        "edges": 123,
+        "loss": 3.8236101627349854,
+        "active_flops": 157286400.0,
+        "params": 153042001,
+        "active_blocks": 15,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/pareto_gen5_ind4_loss3.82.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen5_ind4_config.json"
+    },
+    {
+        "rank": 5,
+        "nodes": 21,
+        "edges": 29,
+        "loss": 3.976079511642456,
+        "active_flops": 27525120.0,
+        "params": 89262673,
+        "active_blocks": 5,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/pareto_gen5_ind5_loss3.98.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen5_ind5_config.json"
+    }
+]

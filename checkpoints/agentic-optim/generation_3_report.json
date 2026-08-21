@@ -1,0 +1,80 @@
+[
+    {
+        "rank": 1,
+        "nodes": 102,
+        "edges": 126,
+        "loss": 3.858038377761841,
+        "active_flops": 179306496.0,
+        "params": 162497617,
+        "active_blocks": 12,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/no_weights.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen3_ind1_config.json"
+    },
+    {
+        "rank": 2,
+        "nodes": 27,
+        "edges": 39,
+        "loss": 4.009248924255371,
+        "active_flops": 42479616.0,
+        "params": 0,
+        "active_blocks": null,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/no_weights.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen3_ind2_config.json"
+    },
+    {
+        "rank": 3,
+        "nodes": 33,
+        "edges": 43,
+        "loss": 3.8999507427215576,
+        "active_flops": 50331648.0,
+        "params": 0,
+        "active_blocks": null,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/no_weights.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen3_ind3_config.json"
+    },
+    {
+        "rank": 4,
+        "nodes": 94,
+        "edges": 116,
+        "loss": 3.8611948013305666,
+        "active_flops": 164364288.0,
+        "params": 155409745,
+        "active_blocks": 11,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/pareto_gen3_ind4_loss3.86.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen3_ind4_config.json"
+    },
+    {
+        "rank": 5,
+        "nodes": 90,
+        "edges": 123,
+        "loss": 3.867110013961792,
+        "active_flops": 157286400.0,
+        "params": 153042001,
+        "active_blocks": 15,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/pareto_gen3_ind5_loss3.87.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen3_ind5_config.json"
+    },
+    {
+        "rank": 6,
+        "nodes": 24,
+        "edges": 33,
+        "loss": 4.085813999176025,
+        "active_flops": 33030144.0,
+        "params": 91626577,
+        "active_blocks": 6,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/pareto_gen3_ind6_loss4.09.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen3_ind6_config.json"
+    }
+]

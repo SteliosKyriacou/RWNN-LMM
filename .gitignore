@@ -2,5 +2,8 @@ __pycache__/
 input.txt
 *.bin
 *.pt
-checkpoints/
 .env
+
+# checkpoints/ results (per-elite config.json, generation reports, generated
+# optimizer code, Pareto PNGs) are TRACKED. Only the large *.pt weight files are
+# excluded (via the *.pt rule above) — each is ~600 MB, over GitHub's 100 MB limit.

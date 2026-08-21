@@ -1,0 +1,54 @@
+[
+    {
+        "rank": 1,
+        "nodes": 21,
+        "edges": 29,
+        "loss": 3.976079511642456,
+        "active_flops": 27525120.0,
+        "params": 0,
+        "active_blocks": null,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/no_weights.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen9_ind1_config.json"
+    },
+    {
+        "rank": 2,
+        "nodes": 56,
+        "edges": 79,
+        "loss": 3.749717283248901,
+        "active_flops": 136851456.0,
+        "params": 148314193,
+        "active_blocks": 11,
+        "n_moe_blocks": 4,
+        "total_experts": 8,
+        "saved_weights": "checkpoints/agentic-optim/no_weights.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen9_ind2_config.json"
+    },
+    {
+        "rank": 3,
+        "nodes": 33,
+        "edges": 43,
+        "loss": 3.810356616973877,
+        "active_flops": 50331648.0,
+        "params": 101070673,
+        "active_blocks": 7,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/pareto_gen9_ind3_loss3.81.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen9_ind3_config.json"
+    },
+    {
+        "rank": 4,
+        "nodes": 15,
+        "edges": 19,
+        "loss": 4.3341117858886715,
+        "active_flops": 16515072.0,
+        "params": 84534865,
+        "active_blocks": 3,
+        "n_moe_blocks": 0,
+        "total_experts": 0,
+        "saved_weights": "checkpoints/agentic-optim/pareto_gen9_ind4_loss4.33.pt",
+        "saved_config": "checkpoints/agentic-optim/pareto_gen9_ind4_config.json"
+    }
+]

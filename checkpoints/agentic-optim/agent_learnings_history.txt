@@ -1,0 +1,87 @@
+
+======================================== GENERATION 1 ========================================
+Hypervolume: 215535517.1884 (Delta: +0.0000)
+Strategy: Shared initial population (injected)
+Learnings:
+
+
+======================================== GENERATION 2 ========================================
+Hypervolume: 116936373.6187 (Delta: -98599143.5698)
+Strategy: Strategy: DE-from-PF + domain-guided extremes/gap-fill (MoE sweet spot, front-loaded attention)
+Learnings:
+- Sep: undetermined (only 5 PF pts, corr noisy) — treat as partial, use domain groups: MoE genes (65-96) paired per slot, attn/ffn per slot
+- Multimod: unknown yet, ratio not reliable at n=5, assume unimodal-ish for now, revisit gen2
+- Worked: random init found initial front (+HV). Failed: none yet
+- Plan: DE + domain-guided extreme pushing (MoE sweet-spot, front-loaded attention) to exploit known structural physics while diagnostics mature
+
+======================================== GENERATION 3 ========================================
+Hypervolume: 112347459.5312 (Delta: -4588914.0874)
+Strategy: Strategy: Coordinate-wise group refinement from feasible PF baselines (conservative)
+Learnings:
+- Sep: undetermined, corr noisy at n=40; treat MoE slot pairs (65+i,81+i) as coupled groups by domain knowledge
+- Multimod: unclear; PF collapsed to 4 pts, big f1=10 spike suggests many gen1 candidates hit constraint violation (loss>4.5) not multimodality
+- Worked: gen0 random init. Failed: DE+extreme domain push, too aggressive (shallow/bypass & high-experts+deep) broke constraints -> HV -98.6M
+- Plan: Coordinate/group-wise LOCAL refinement from known-feasible PF baselines (small perturbations + single-group MoE/skip pushes) to avoid constraint violations while still exploiting MoE cheapness
+
+======================================== GENERATION 4 ========================================
+Hypervolume: 121785492.4934 (Delta: +9438032.9621)
+Strategy: FALLBACK (code error)
+Learnings:
+- Sep: undetermined, corr noisy at n=40; treat MoE slot pairs (65+i,81+i) as coupled groups by domain knowledge
+- Multimod: unclear; PF collapsed to 4 pts, big f1=10 spike suggests many gen1 candidates hit constraint violation (loss>4.5) not multimodality
+- Worked: gen0 random init. Failed: DE+extreme domain push, too aggressive (shallow/bypass & high-experts+deep) broke constraints -> HV -98.6M
+- Plan: Coordinate/group-wise LOCAL refinement from known-feasible PF baselines (small perturbations + single-group MoE/skip pushes) to avoid constraint violations while still exploiting MoE cheapness
+
+======================================== GENERATION 5 ========================================
+Hypervolume: 119250676.9163 (Delta: -2534815.5771)
+Strategy: Strategy: PCA-EA (fixed) + gap-fill + coordinated MoE-group push + extreme pushing
+Learnings:
+- Sep: MoE slots (66,70,74,76,77,78) show consistent corr with both f1(+) & f2(-) — coupled group, move together
+- Multimod: PF is monotone frontier (f2 decreasing as f1 increases), looks unimodal single front
+- Worked: PCA-EA direction promising (+9.4M) but errored (np.ptp bug) — retry properly this gen. Failed: aggressive domain push broke constraints
+- Plan: Fix ptp bug, run real PCA-EA (crossover+mutation) + gap-fill largest gap (4-5) + MoE-group coordinated perturbation + extreme pushing
+
+======================================== GENERATION 6 ========================================
+Hypervolume: 111304406.8014 (Delta: -7946270.1149)
+Strategy: Strategy: CMA-ES-inspired sampling + gap-fill + mild extreme pushing
+Learnings:
+- Sep: MoE slot vars (66,70,74,77,78) recurrent influential+coupled with f1&f2 but sign flips gen-to-gen — noisy at n~100, keep grouped moves cautious
+- Multimod: PF monotone single frontier, ratio not yet computed reliably; treat as unimodal, focus convergence+gaps
+- Worked: fallback small perturbation (+9.4M, best so far!). Failed: aggressive MoE push (gen1,gen4 regressed) — MoE extremes destabilize feasibility
+- Plan: CMA-ES-inspired (untried) sampling from PF covariance for exploit + targeted gap-fill at largest gap (2-3, 81M) + mild extreme pushes (small step, not aggressive MoE forcing)
+
+======================================== GENERATION 7 ========================================
+Hypervolume: 131106406.8088 (Delta: +19802000.0074)
+Strategy: Strategy: Stagnation-break: diversity restore (random) + light local refine + gap-fill
+Learnings:
+- Sep: MoE vars (66,68,70,74,76,77,78,79) persistently correlated w/ f2(-) f1(+) but grouped pushes keep breaking feasibility — treat as coupled but perturb SMALL
+- Multimod: PF monotone single front, but HV declining 4 of 5 gens — actually STAGNATING/regressing, gen0 pure-random still best HV ever
+- Worked: none clearly (only fallback tiny-perturbation +9.4M). Failed: DE-domain-push, coord-refine, PCA-EA, CMA-ES — ALL regressed, likely too aggressive/narrow, losing diversity
+- Plan: STAGNATION BREAK — half pure random space-filling (recover diversity like gen0), quarter small PF-local refine, quarter gap-fill+extreme push; stop grouped MoE forcing at scale
+
+======================================== GENERATION 8 ========================================
+Hypervolume: 198310648.9678 (Delta: +67204242.1590)
+Strategy: Strategy: Diversity-heavy random + DE (light) + gap-fill focus on gap1-2 + tiny local refine
+Learnings:
+- Sep: MoE vars (66,68,70,74,76,78,79) still coupled w/ f2(-) but PF unchanged 2 gens straight — likely saturated on these dims
+- Multimod: PF static at 4 solutions same 2 gens despite testing many strategies; ratio not computed this gen (compute again below)
+- Worked: Stagnation-break (random-heavy 10/20) +19.8M despite 0 new PF pts — pop diversity elsewhere improved HV calc; grouped/PCA/CMA all failed. Failed: PCA-EA, CMA-ES, aggressive MoE-group forcing
+- Plan: Continue diversity-heavy approach + try real DE (untried cleanly) since random-heavy worked; keep MoE perturbations SMALL/single-slot only, target largest gap 1-2 hard
+
+======================================== GENERATION 9 ========================================
+Hypervolume: 145101937.2109 (Delta: -53208711.7569)
+Strategy: Strategy: Coordinate-wise group optimization + gap-fill + light random diversity
+Learnings:
+- Sep: MoE vars (66,68,70,74,76,78,79) persistently f2-correlated but PF frozen 3 gens — try coordinate-wise (untried) to isolate true effects
+- Multimod: PF frontier same 4 pts despite big HV gains from population diversity — suggests near-PF/dominated solutions matter for HV; keep pop diverse
+- Worked: diversity-heavy random+DE+gapfill 2 gens straight (+19.8M,+67.2M). Failed: PCA-EA, CMA-ES, aggressive grouped MoE forcing
+- Plan: switch primary algo to Coordinate-wise group optimization (untried) on PF solutions + keep gap-fill + light random diversity for exploration
+
+======================================== GENERATION 10 ========================================
+Hypervolume: 316025172.7072 (Delta: +170923235.4963)
+Strategy: Strategy: Diversity-heavy random + light DE + gap-fill (gen7 winning formula, revived) + extreme pushes
+Learnings:
+- Sep: MoE vars (66,68,70,74,76,78,79) persistently f2-correlated but grouped/coordinate pushes keep hurting HV — treat loosely, don't force in blocks
+- Multimod: PF frontier keeps shifting; new extreme f2=16.5M found via random diversity, ratio still not stable — treat as unimodal-ish, exploit diversity+gapfill
+- Worked: diversity-heavy random+DE+gapfill (gen6,7: +19.8M,+67.2M) — best proven. Failed: coordinate-wise group opt (-53.2M, too disruptive), PCA-EA, CMA-ES
+- Plan: REVERT to winning gen7 formula (diversity random + light DE + gap-fill), add extreme-push for both f1 and f2 given new PF extremes found
