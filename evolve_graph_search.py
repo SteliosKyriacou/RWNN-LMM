@@ -181,6 +181,34 @@ def anchors_of(g):
     return tail, ln_f, sums
 
 
+def seed_gates_and_skips(g, rng):
+    """Seed a graph (in the initial population) with an emergent softmax gate + a SwiGLU-style gate
+    and a couple of random long-range skip connections. Built from existing atoms only."""
+    tail, ln_f, _ = anchors_of(g)
+    if tail is None or ln_f is None:
+        return g
+    act = str(rng.choice(["gelu", "silu", "relu"]))
+    ops = [
+        {"op": "add_node", "id": "v",  "type": "linear",     "kwargs": {"d_out": DMODEL}, "inputs": [tail]},
+        {"op": "add_node", "id": "gl", "type": "linear",     "kwargs": {"d_out": DMODEL}, "inputs": [tail]},
+        {"op": "add_node", "id": "gg", "type": "activation", "kwargs": {"act_type": act}, "inputs": ["gl"]},
+        {"op": "add_node", "id": "sw", "type": "element_mul", "inputs": ["v", "gg"]},        # SwiGLU-style gate
+        {"op": "add_node", "id": "sl", "type": "linear",     "kwargs": {"d_out": DMODEL}, "inputs": [tail]},
+        {"op": "add_node", "id": "sm", "type": "softmax",    "inputs": ["sl"]},
+        {"op": "add_node", "id": "sg", "type": "element_mul", "inputs": ["v", "sm"]},        # softmax gate
+        {"op": "add_node", "id": "gm", "type": "sum",        "inputs": [tail, "sw", "sg"]},
+        {"op": "remove_edge", "u": tail, "v": ln_f},
+        {"op": "add_edge", "u": "gm", "v": ln_f},
+    ]
+    g = apply_edits(g, ops)
+    sums = anchors_of(g)[2]                                   # add 1-2 random long-range skips
+    if len(sums) >= 3:
+        for _ in range(int(rng.randint(1, 3))):
+            i = int(rng.randint(0, len(sums) - 2)); j = int(rng.randint(i + 1, len(sums)))
+            g = apply_edits(g, [{"op": "add_edge", "u": sums[i], "v": sums[j]}])
+    return g
+
+
 # ----------------------------------------------------------------------------- Claude atomic-edit agent
 SYSTEM = """You are Metis-Graph, an autonomous neural-architecture search agent. You evolve a
 decoder-only language model whose architecture is a directed ACYCLIC graph of PRIMITIVE atoms.
@@ -265,7 +293,14 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
     for x in seeds:
         n, e = vector_to_multilayer_graph(x, VOCAB, BLOCK, d_model=DMODEL)
         seed_graphs.append({"nodes": [dict(nd) for nd in n], "edges": [tuple(t) for t in e]})
-    print(f"Seeded {len(seed_graphs)} graphs from the standard initial population.", flush=True)
+    # seed emergent softmax/gates + random skips into a subset of the explorer graphs (leave GPT-2 seeds 0-4 clean)
+    _rng = np.random.RandomState(0)
+    n_gated = 0
+    for j in range(5, min(13, len(seed_graphs))):
+        g2 = seed_gates_and_skips(seed_graphs[j], _rng)
+        if summarize(g2)["gating"] > 0:
+            seed_graphs[j] = g2; n_gated += 1
+    print(f"Seeded {len(seed_graphs)} graphs; injected softmax-gates/skips into {n_gated}.", flush=True)
 
     front, sig2state, best_hist, msgs, all_pts = [], {}, [], [], []
 
@@ -338,20 +373,35 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
             if l < LOSS_MAX: all_pts.append((f, l))
         reasons = Counter(r[5] for r in results if r[5] != "ok")
         print(f" -> {feas}/{pop_size} feasible | front {len(front)} | best loss {best:.4f} | rejects {dict(reasons)}", flush=True)
-        _save(gen, front, all_pts)
+        _save(gen, front, all_pts, sig2state)
 
     print("\n=== GRAPH SEARCH COMPLETE ===", flush=True)
 
 
-def _save(gen, front, all_pts):
+def _save(gen, front, all_pts, sig2state):
+    import glob as _glob
+    for old in _glob.glob(f"{CKPT}/*.pt"):          # keep only the current front's weights on disk
+        try: os.remove(old)
+        except OSError: pass
     rep = []
     for i, a in enumerate(sorted(front, key=lambda z: z["flops"])):
         cfg = f"{CKPT}/graph_gen{gen+1}_ind{i+1}_config.json"
+        summ = {k: v for k, v in a["summary"].items() if k != "hist"}
+        wfile = None
+        st = sig2state.get(a["sig"])
+        if st is not None:                          # persist trained weights (reconstruct + resume)
+            wfile = f"{CKPT}/graph_gen{gen+1}_ind{i+1}_loss{a['loss']:.2f}.pt"
+            try: torch.save(st, wfile)
+            except Exception as ex: print(f"   [warn] weight save failed: {ex}", flush=True); wfile = None
+        # FULL graph is preserved: nodes (list of {id,type,kwargs}) + edges (list of [u,v])
         json.dump({"nodes": a["graph"]["nodes"], "edges": [list(e) for e in a["graph"]["edges"]],
-                   "loss": a["loss"], "active_flops": a["flops"], "params": a["params"], **a["summary"]},
-                  open(cfg, "w"), indent=2)
+                   "loss": a["loss"], "active_flops": a["flops"], "params": a["params"],
+                   "summary": summ, "weights": wfile}, open(cfg, "w"), indent=2)
         rep.append({"rank": i + 1, "loss": a["loss"], "active_flops": a["flops"], "params": a["params"],
-                    **{k: v for k, v in a["summary"].items() if k != "hist"}, "config": cfg})
+                    "n_nodes": summ.get("nodes"), "n_edges": summ.get("edges"),
+                    "attn": summ["attn"], "linear": summ["linear"], "softmax": summ["softmax"],
+                    "gating": summ["gating"], "skips": summ["skips"], "compute": summ["compute"],
+                    "config": cfg, "weights": wfile})
     json.dump(rep, open(f"{CKPT}/generation_{gen+1}_report.json", "w"), indent=2)
     plt.figure(figsize=(8, 5.5))
     if all_pts:
