@@ -160,6 +160,7 @@ def summarize(g):
     compute = hist.get("causal_attention", 0) + sum(1 for n in nodes if n["type"] == "linear" and n["id"] != 13)
     return dict(attn=hist.get("causal_attention", 0),
                 linear=sum(1 for n in nodes if n["type"] == "linear" and n["id"] != 13),
+                moe=hist.get("moe_ffn", 0),
                 softmax=hist.get("softmax", 0), elemmul=hist.get("element_mul", 0),
                 gating=gating, skips=skips, compute=compute,
                 nodes=len(nodes), edges=len(edges), hist=dict(hist))
@@ -207,6 +208,32 @@ def seed_gates_and_skips(g, rng):
             i = int(rng.randint(0, len(sums) - 2)); j = int(rng.randint(i + 1, len(sums)))
             g = apply_edits(g, [{"op": "add_edge", "u": sums[i], "v": sums[j]}])
     return g
+
+
+def seed_moe(g, experts, top_k, act):
+    """Seed a graph with one real top-k MoE block (pre-norm residual) at the tail. Seed-only:
+    moe_ffn is NOT in the agent's edit vocabulary, so MoE is present in the gene pool but the
+    agent cannot spawn templated MoE — it inherits/keeps/removes it and composes around it."""
+    g = copy.deepcopy(g)
+    tail, ln_f, _ = anchors_of(g)
+    if tail is None or ln_f is None:
+        return None
+    nid = _rid(g["nodes"]); ln, moe, sm = nid, nid + 1, nid + 2
+    g["nodes"].append({"id": ln, "type": "layer_norm", "kwargs": {"d_model": DMODEL}})
+    g["nodes"].append({"id": moe, "type": "moe_ffn",
+                       "kwargs": {"d_model": DMODEL, "n_experts": int(experts), "top_k": int(top_k),
+                                  "d_hidden": 4 * DMODEL, "act_type": act, "dropout": 0.1}})
+    g["nodes"].append({"id": sm, "type": "sum", "kwargs": {}})
+    g["edges"] += [(tail, ln), (ln, moe), (tail, sm), (moe, sm)]
+    if (tail, ln_f) in g["edges"]:
+        g["edges"].remove((tail, ln_f))
+    g["edges"].append((sm, ln_f))
+    ids = {n["id"] for n in g["nodes"]}
+    g["edges"] = [(u, v) for u, v in g["edges"] if u in ids and v in ids]
+    pn, pe = _prune_to_live(g["nodes"], g["edges"])
+    if pn is None or not is_valid_dag(pn, pe):
+        return None
+    return {"nodes": pn, "edges": pe}
 
 
 # ----------------------------------------------------------------------------- Claude atomic-edit agent
@@ -300,7 +327,15 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
         g2 = seed_gates_and_skips(seed_graphs[j], _rng)
         if summarize(g2)["gating"] > 0:
             seed_graphs[j] = g2; n_gated += 1
-    print(f"Seeded {len(seed_graphs)} graphs; injected softmax-gates/skips into {n_gated}.", flush=True)
+    # add 2 MoE variants (real top-k sparse) to the initial gene pool
+    n_moe = 0
+    for k, (E, tk, ac) in enumerate([(4, 2, "silu"), (8, 1, "gelu")]):
+        idx = 13 + k
+        if idx < len(seed_graphs):
+            gm = seed_moe(seed_graphs[idx], E, tk, ac)
+            if gm is not None and summarize(gm)["moe"] > 0:
+                seed_graphs[idx] = gm; n_moe += 1
+    print(f"Seeded {len(seed_graphs)} graphs; injected gates/skips into {n_gated}, MoE into {n_moe}.", flush=True)
 
     front, sig2state, best_hist, msgs, all_pts = [], {}, [], [], []
 
@@ -334,7 +369,7 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
             except Exception as ex:
                 print(f"Cand {idx+1}/{pop_size}: build error, reject ({str(ex)[:50]})", flush=True)
                 results.append((g, PENALTY, flops, 0, s, "build", None)); continue
-            print(f"Cand {idx+1}/{pop_size}: atoms A{s['attn']} L{s['linear']} sm{s['softmax']} "
+            print(f"Cand {idx+1}/{pop_size}: atoms A{s['attn']} L{s['linear']} moe{s['moe']} sm{s['softmax']} "
                   f"gate{s['gating']} skip{s['skips']} | {params/1e6:.0f}M {flops/1e9:.3f}G ...", flush=True)
             if s["compute"] < MIN_COMPUTE:
                 results.append((g, PENALTY, flops, params, s, "too_small", None)); continue
@@ -399,8 +434,9 @@ def _save(gen, front, all_pts, sig2state):
                    "summary": summ, "weights": wfile}, open(cfg, "w"), indent=2)
         rep.append({"rank": i + 1, "loss": a["loss"], "active_flops": a["flops"], "params": a["params"],
                     "n_nodes": summ.get("nodes"), "n_edges": summ.get("edges"),
-                    "attn": summ["attn"], "linear": summ["linear"], "softmax": summ["softmax"],
-                    "gating": summ["gating"], "skips": summ["skips"], "compute": summ["compute"],
+                    "attn": summ["attn"], "linear": summ["linear"], "moe": summ.get("moe", 0),
+                    "softmax": summ["softmax"], "gating": summ["gating"], "skips": summ["skips"],
+                    "compute": summ["compute"],
                     "config": cfg, "weights": wfile})
     json.dump(rep, open(f"{CKPT}/generation_{gen+1}_report.json", "w"), indent=2)
     plt.figure(figsize=(8, 5.5))
