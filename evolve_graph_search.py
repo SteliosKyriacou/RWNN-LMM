@@ -44,6 +44,7 @@ PRIMS = {
     "layer_norm":      {"d_model": DMODEL},
     "activation":      {"act_type": "gelu"},
     "softmax":         {},
+    "slice":           {"start": 0, "end": 1},
     "sum":             {},
     "element_mul":     {},
     "concat":          {"dim": -1},
@@ -152,8 +153,11 @@ def summarize(g):
     nodes, edges = g["nodes"], g["edges"]
     hist = Counter(n["type"] for n in nodes)
     sm = {n["id"] for n in nodes if n["type"] == "softmax"}
+    sl = {n["id"] for n in nodes if n["type"] == "slice"}
     em = {n["id"] for n in nodes if n["type"] == "element_mul"}
-    gating = sum(1 for u, v in edges if u in sm and v in em)         # emergent gate pattern
+    sl_from_sm = {v for u, v in edges if u in sm and v in sl}        # slices fed by a softmax (router)
+    gate_src = sm | sl_from_sm
+    gating = sum(1 for u, v in edges if u in gate_src and v in em)   # softmax/router -> element_mul gate
     sum_ids = [n["id"] for n in nodes if n["type"] == "sum" and n["id"] != 3]
     indeg = Counter(v for _, v in edges)
     skips = sum(max(0, indeg.get(s, 0) - 2) for s in sum_ids)
@@ -210,30 +214,31 @@ def seed_gates_and_skips(g, rng):
     return g
 
 
-def seed_moe(g, experts, top_k, act):
-    """Seed a graph with one real top-k MoE block (pre-norm residual) at the tail. Seed-only:
-    moe_ffn is NOT in the agent's edit vocabulary, so MoE is present in the gene pool but the
-    agent cannot spawn templated MoE — it inherits/keeps/removes it and composes around it."""
-    g = copy.deepcopy(g)
+def seed_atomic_moe(g, experts, rng):
+    """Seed a graph with a mixture-of-experts built ENTIRELY FROM ATOMS (no moe_ffn block):
+    router linear(d_out=E) -> softmax -> per-expert [slice(e,e+1) * (linear->activation)] -> sum.
+    This is a soft mixture (all E experts run); it lives in the gene pool and the agent can build
+    the same thing from atoms. E is kept small since soft mixtures cost E x the FFN FLOPs."""
     tail, ln_f, _ = anchors_of(g)
     if tail is None or ln_f is None:
         return None
-    nid = _rid(g["nodes"]); ln, moe, sm = nid, nid + 1, nid + 2
-    g["nodes"].append({"id": ln, "type": "layer_norm", "kwargs": {"d_model": DMODEL}})
-    g["nodes"].append({"id": moe, "type": "moe_ffn",
-                       "kwargs": {"d_model": DMODEL, "n_experts": int(experts), "top_k": int(top_k),
-                                  "d_hidden": 4 * DMODEL, "act_type": act, "dropout": 0.1}})
-    g["nodes"].append({"id": sm, "type": "sum", "kwargs": {}})
-    g["edges"] += [(tail, ln), (ln, moe), (tail, sm), (moe, sm)]
-    if (tail, ln_f) in g["edges"]:
-        g["edges"].remove((tail, ln_f))
-    g["edges"].append((sm, ln_f))
-    ids = {n["id"] for n in g["nodes"]}
-    g["edges"] = [(u, v) for u, v in g["edges"] if u in ids and v in ids]
-    pn, pe = _prune_to_live(g["nodes"], g["edges"])
-    if pn is None or not is_valid_dag(pn, pe):
-        return None
-    return {"nodes": pn, "edges": pe}
+    E = int(experts); act = str(rng.choice(["gelu", "silu", "relu"]))
+    ops = [{"op": "add_node", "id": "rt", "type": "linear", "kwargs": {"d_out": E}, "inputs": [tail]},
+           {"op": "add_node", "id": "sm", "type": "softmax", "inputs": ["rt"]}]
+    gated = []
+    for e in range(E):
+        ei, ai, gi, mi = f"e{e}", f"a{e}", f"g{e}", f"m{e}"
+        ops += [
+            {"op": "add_node", "id": ei, "type": "linear", "kwargs": {"d_out": DMODEL}, "inputs": [tail]},
+            {"op": "add_node", "id": ai, "type": "activation", "kwargs": {"act_type": act}, "inputs": [ei]},
+            {"op": "add_node", "id": gi, "type": "slice", "kwargs": {"start": e, "end": e + 1}, "inputs": ["sm"]},
+            {"op": "add_node", "id": mi, "type": "element_mul", "inputs": [ai, gi]},
+        ]
+        gated.append(mi)
+    ops += [{"op": "add_node", "id": "mx", "type": "sum", "inputs": [tail] + gated},
+            {"op": "remove_edge", "u": tail, "v": ln_f},
+            {"op": "add_edge", "u": "mx", "v": ln_f}]
+    return apply_edits(g, ops)
 
 
 # ----------------------------------------------------------------------------- Claude atomic-edit agent
@@ -254,8 +259,9 @@ to a node created earlier in the SAME program. `inputs` wires predecessors -> th
   linear {d_in,d_out}   -- affine map; the compiler AUTO-PROJECTS mismatched dims, so wiring is forgiving
   layer_norm {d_model}
   activation {act_type: gelu|silu|relu}
-  softmax {}            -- over the last dim (use to build gates/routers)
-  element_mul {}        -- elementwise product of its inputs (a width-1 input broadcasts) -> gating
+  softmax {}            -- over the last dim (a router: linear(d_out=E)->softmax gives E gate weights)
+  slice {start,end}     -- take channels [start:end] of the last dim (extract one gate: slice(i,i+1))
+  element_mul {}        -- elementwise product (a width-1 input broadcasts over d_model) -> apply a gate
   sum {}                -- elementwise add of ALL inputs -> residual/merge; extra inputs = skip connections
   concat {dim:-1}
   causal_attention {n_head:12,d_model:768}   -- one masked multi-head self-attention atom
@@ -267,8 +273,9 @@ current head-feeding node (`tail`), its final layer-norm id (`ln_f`), and its re
 
 ## Emergence, not templates
 Nothing is pre-built. If you want a feed-forward, wire linear->activation->linear and a `sum` for
-its residual. If you want a mixture-of-experts, build a router (linear->softmax) and gate several
-linear "experts" with element_mul, then sum them. If you want something nobody has tried, wire it.
+its residual. To build a mixture-of-experts from atoms: a router linear(d_out=E)->softmax gives E
+gate weights; for each expert e wire slice(e,e+1)->element_mul with that expert's output, then sum
+all gated experts (+ a residual). If you want something nobody has tried, wire it.
 Two objectives are MINIMIZED (Pareto): (1) validation loss, (2) active-FLOPs/token. Extra parallel
 compute costs FLOPs; skips and gates are cheap. Reject-triggers: peak mem >12GB, loss>=4.5, <3 compute atoms.
 
@@ -327,15 +334,15 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
         g2 = seed_gates_and_skips(seed_graphs[j], _rng)
         if summarize(g2)["gating"] > 0:
             seed_graphs[j] = g2; n_gated += 1
-    # add 2 MoE variants (real top-k sparse) to the initial gene pool
+    # add 2 atom-composed mixture-of-experts variants to the initial gene pool (built from atoms only)
     n_moe = 0
-    for k, (E, tk, ac) in enumerate([(4, 2, "silu"), (8, 1, "gelu")]):
+    for k, E in enumerate([2, 4]):
         idx = 13 + k
         if idx < len(seed_graphs):
-            gm = seed_moe(seed_graphs[idx], E, tk, ac)
-            if gm is not None and summarize(gm)["moe"] > 0:
+            gm = seed_atomic_moe(seed_graphs[idx], E, _rng)
+            if gm is not None and graph_sig(gm) != graph_sig(seed_graphs[idx]):
                 seed_graphs[idx] = gm; n_moe += 1
-    print(f"Seeded {len(seed_graphs)} graphs; injected gates/skips into {n_gated}, MoE into {n_moe}.", flush=True)
+    print(f"Seeded {len(seed_graphs)} graphs; injected gates/skips into {n_gated}, atom-MoE into {n_moe}.", flush=True)
 
     front, sig2state, best_hist, msgs, all_pts = [], {}, [], [], []
 
@@ -369,8 +376,8 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
             except Exception as ex:
                 print(f"Cand {idx+1}/{pop_size}: build error, reject ({str(ex)[:50]})", flush=True)
                 results.append((g, PENALTY, flops, 0, s, "build", None)); continue
-            print(f"Cand {idx+1}/{pop_size}: atoms A{s['attn']} L{s['linear']} moe{s['moe']} sm{s['softmax']} "
-                  f"gate{s['gating']} skip{s['skips']} | {params/1e6:.0f}M {flops/1e9:.3f}G ...", flush=True)
+            print(f"Cand {idx+1}/{pop_size}: atoms A{s['attn']} L{s['linear']} sm{s['softmax']} "
+                  f"em{s['elemmul']} gate{s['gating']} skip{s['skips']} | {params/1e6:.0f}M {flops/1e9:.3f}G ...", flush=True)
             if s["compute"] < MIN_COMPUTE:
                 results.append((g, PENALTY, flops, params, s, "too_small", None)); continue
             try:

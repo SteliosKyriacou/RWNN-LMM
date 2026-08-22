@@ -339,6 +339,18 @@ class SoftmaxNode(RWNNNode):
         return F.softmax(inputs[0], dim=self.dim)
 
 
+class SliceNode(RWNNNode):
+    """Select channels [start:end] of the last dimension. Primitive atom: lets a multi-way gate be
+    split into per-expert scalars (linear->softmax over E, then slice(i,i+1) -> element_mul expert i)."""
+    def __init__(self, node_id, start=0, end=1):
+        super().__init__(node_id, "slice")
+        self.start = int(start)
+        self.end = int(end)
+
+    def forward(self, inputs):
+        return inputs[0][..., self.start:self.end]
+
+
 class MoEFFNNode(RWNNNode):
     """Fused Mixture-of-Experts feed-forward block.
 
