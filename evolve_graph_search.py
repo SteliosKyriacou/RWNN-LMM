@@ -210,8 +210,10 @@ def _prune_to_live(nodes, edges):
     return ([n for n in nodes if n["id"] in live],
             [(u, v) for u, v in edges if u in live and v in live])
 
-def apply_edits(parent, ops):
-    """Apply a list of atomic edits to a copy of parent; revert entirely if the result is invalid."""
+def apply_edits(parent, ops, donors=None):
+    """Apply a list of atomic edits to a copy of parent; revert entirely if the result is invalid.
+    `donors` (the elite front) enables CROSSOVER via the `graft` op: copy a connected subgraph from
+    another parent into this child (fresh ids, internal wiring preserved), addressable as 'graft<id>'."""
     g = copy.deepcopy(parent)
     nodes, edges = g["nodes"], g["edges"]
     label2id = {}
@@ -246,6 +248,27 @@ def apply_edits(parent, ops):
                     continue
                 nodes[:] = [n for n in nodes if n["id"] != rn]
                 edges[:] = [(u, v) for u, v in edges if u != rn and v != rn]
+            elif k == "graft":                        # CROSSOVER: copy a subgraph from another parent
+                j = op.get("from")
+                if not donors or not isinstance(j, int) or not (0 <= j < len(donors)):
+                    continue
+                dmap = {n["id"]: n for n in donors[j]["nodes"]}
+                sel = [nid for nid in (op.get("nodes") or []) if nid in dmap and nid not in ANCHORS]
+                if not sel:
+                    continue
+                idmap = {}
+                for did in sel:                        # copy donor nodes with fresh ids
+                    nid = _rid(nodes)
+                    nodes.append({"id": nid, "type": dmap[did]["type"], "kwargs": dict(dmap[did].get("kwargs", {}))})
+                    idmap[did] = nid
+                    label2id[f"graft{did}"] = nid       # reference a grafted node as "graft<donor_id>"
+                prefix = op.get("id")
+                if isinstance(prefix, str):
+                    for did in sel:
+                        label2id[f"{prefix}{did}"] = idmap[did]
+                for (u, v) in donors[j]["edges"]:       # preserve the subgraph's internal wiring
+                    if u in idmap and v in idmap:
+                        edges.append((idmap[u], idmap[v]))
         except Exception:
             continue
     ids = {n["id"] for n in nodes}
@@ -375,9 +398,19 @@ graphs on the current Pareto front, using ONLY these generic atomic operations:
   {"op":"add_edge","u":<ref>,"v":<ref>}
   {"op":"remove_edge","u":<ref>,"v":<ref>}
   {"op":"remove_node","id":<real node id>}
+  {"op":"graft","from":<elite index>,"nodes":[<node ids in THAT elite>]}   # CROSSOVER
 
 A <ref> is either a real integer node id (shown to you in the context) or a "<label>" you assigned
 to a node created earlier in the SAME program. `inputs` wires predecessors -> the new node.
+
+## Crossover (combine features from parents)
+`graft` copies a connected subgraph FROM ANOTHER elite ("from": its index) INTO the child you are
+building — the selected `nodes` are copied with fresh ids and their internal wiring is preserved.
+Each grafted node becomes addressable as "graft<original_id>" (e.g. "graft42"), so AFTER a graft you
+wire it into the child with add_edge (feed its entry from the child's `tail` or a `sum`, and route its
+exit into a `sum` before ln_f). This is how you recombine good motifs from two or more parents — pick
+a base `parent` and graft, say, another elite's MoE/gate/attention motif onto it. Prefer combining
+features from DIFFERENT elites rather than only mutating one.
 
 ## Primitive vocabulary (these are the ONLY node types; there are NO attention/FFN/MoE blocks)
   linear {d_in,d_out}   -- affine map; the compiler AUTO-PROJECTS mismatched dims, so wiring is forgiving
@@ -410,17 +443,33 @@ compute costs FLOPs; skips and gates are cheap. Reject-triggers: peak mem >12GB,
 {pop_size} children, each {"parent": <elite index, or -1 for a random seed>, "ops":[ ...atomic ops... ]}.
 An empty ops list re-trains a parent unchanged. Wire every new subgraph so it reaches node 13."""
 
+_TSHORT = {"causal_attention": "attn", "layer_norm": "ln", "linear": "lin", "activation": "act",
+           "element_mul": "emul", "softmax": "sm", "slice": "sl", "sum": "+", "gather": "gath",
+           "scatter_add": "scat", "top_k": "topk", "matmul": "mm", "concat": "cat",
+           "token_embedding": "tok", "positional_embedding": "pos", "input": "in"}
+
 def build_context(gen, front, hist):
+    fsorted = sorted(front, key=lambda z: z["flops"])
     lines = [f"Generation {gen}. Pareto front ({len(front)} elites), sorted by active-FLOPs:"]
-    for i, e in enumerate(sorted(front, key=lambda z: z["flops"])):
+    for i, e in enumerate(fsorted):
         s = e["summary"]; t, lnf, sums = e["anchors"]
         lines.append(f"  [elite {i}] loss {e['loss']:.3f}, {e['flops']/1e9:.3f}G, {e['params']/1e6:.0f}M | "
                      f"atoms: attn {s['attn']}, linear {s['linear']}, softmax {s['softmax']}, "
                      f"element_mul {s['elemmul']}, gates {s['gating']}, skips {s['skips']}")
         lines.append(f"           anchors: tail(head-input)={t}, ln_f={lnf}, sum_ids={sums[:24]}")
+    # Full structure of the top elites so you can GRAFT subgraphs from them (crossover).
+    lines.append("\nGraft-able structure of the leading elites (node id:type ; edges) — pick connected "
+                 "subgraphs to graft with {\"op\":\"graft\",\"from\":<elite>,\"nodes\":[...]}:")
+    for i, e in enumerate(fsorted[:5]):
+        g = e["graph"]
+        nn = " ".join(f"{n['id']}:{_TSHORT.get(n['type'], n['type'])}" for n in g["nodes"] if n["id"] not in (0, 1, 2))
+        ee = " ".join(f"{u}>{v}" for u, v in g["edges"])
+        lines.append(f"  elite {i} nodes: {nn}")
+        lines.append(f"  elite {i} edges: {ee}")
     if hist:
         lines.append("\nBest loss per generation: " + ", ".join(f"{h:.3f}" for h in hist[-8:]))
-    lines.append(f"\nEmit a graph-edit program producing exactly {POP} children.")
+    lines.append(f"\nEmit a graph-edit program producing exactly {POP} children. Use `graft` to combine "
+                 f"features from DIFFERENT elites, not just mutate one.")
     return "\n".join(lines)
 
 def ask_edits(gen, front, hist, msgs):
@@ -479,6 +528,7 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
             children = [(dict(g), None) for g in seed_graphs]
         else:
             fsorted = sorted(front, key=lambda z: z["flops"])
+            donors = [e["graph"] for e in fsorted]     # crossover donors (graft op indexes into this)
             prog = ask_edits(gen, front, best_hist, msgs)
             children = []
             if prog is None:
@@ -490,7 +540,7 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
                         par = fsorted[pi]; pg, psig = par["graph"], par["sig"]
                     else:
                         pg, psig = seed_graphs[np.random.randint(len(seed_graphs))], None
-                    children.append((apply_edits(pg, item.get("ops", [])), psig))
+                    children.append((apply_edits(pg, item.get("ops", []), donors=donors), psig))
             while len(children) < pop_size and fsorted:
                 e = fsorted[len(children) % len(fsorted)]
                 children.append((copy.deepcopy(e["graph"]), e["sig"]))

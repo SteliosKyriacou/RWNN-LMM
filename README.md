@@ -16,8 +16,11 @@ as a single token-mixing primitive.
 
 - **The genome is the graph itself** — the raw `(nodes, edges)` H-DAG (not a fixed-length vector).
 - Each generation the agent is shown the current Pareto front and emits a **graph-edit program** —
-  generic atomic operations only: `add_node` / `add_edge` / `remove_node` / `remove_edge` over the
-  primitive vocabulary. Every edited graph is pruned to the input→head live set and DAG-validated;
+  generic operations over the primitive vocabulary: `add_node` / `add_edge` / `remove_node` /
+  `remove_edge` (mutation) and **`graft`** (crossover: copy a connected subgraph from *another* elite
+  parent into the child, preserving its internal wiring, then wire it in). The agent picks the base
+  parent and any donors from the elite front, so it recombines features from multiple parents rather
+  than only mutating one. Every edited graph is pruned to the input→head live set and DAG-validated;
   anything that still fails at runtime is rejected by the trainer.
 - **Lamarckian weight inheritance**: a child copies weight tensors in-place from its parent, so it
   resumes training rather than restarting.
