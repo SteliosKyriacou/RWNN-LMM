@@ -7,7 +7,7 @@ from rwnn.nodes import (
     ConcatNode, ElementMulNode, DropoutNode, RWNNNode,
     MeanReduceNode, SquareNode, SubtractNode, DivideNode,
     SqrtNode, ScaleShiftNode, MatMulNode, AddBiasNode,
-    TransposeNode, ReshapeNode, CausalBatchMatMulNode, MoEFFNNode, SoftmaxNode, SliceNode
+    TransposeNode, ReshapeNode, CausalBatchMatMulNode, MoEFFNNode, SoftmaxNode, SliceNode, TopKNode, GatherNode, ScatterAddNode
 )
 
 class EdgeConnection(nn.Module):
@@ -127,6 +127,12 @@ class RWNNGraph(nn.Module):
             return SoftmaxNode(n_id, **kwargs)
         elif n_type == 'slice':
             return SliceNode(n_id, **kwargs)
+        elif n_type == 'top_k':
+            return TopKNode(n_id, **kwargs)
+        elif n_type == 'gather':
+            return GatherNode(n_id, **kwargs)
+        elif n_type == 'scatter_add':
+            return ScatterAddNode(n_id, **kwargs)
         else:
             raise ValueError(f"Unknown node type: {n_type}")
 
@@ -228,6 +234,9 @@ class RWNNGraph(nn.Module):
                 self.node_out_dims[u] = pred_dim if pred_dim is not None else self.global_d_model
             elif isinstance(node, SliceNode):
                 self.node_out_dims[u] = node.end - node.start
+            elif isinstance(node, (TopKNode, GatherNode, ScatterAddNode)):
+                pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model
+                self.node_out_dims[u] = pred_dim if pred_dim is not None else self.global_d_model
             elif isinstance(node, MeanReduceNode):
                 pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model
                 self.node_out_dims[u] = 1 if node.dim == -1 else pred_dim

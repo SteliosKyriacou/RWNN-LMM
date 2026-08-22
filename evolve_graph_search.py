@@ -45,6 +45,9 @@ PRIMS = {
     "activation":      {"act_type": "gelu"},
     "softmax":         {},
     "slice":           {"start": 0, "end": 1},
+    "top_k":           {"k": 2},
+    "gather":          {"dim": 1},
+    "scatter_add":     {"dim": 1},
     "sum":             {},
     "element_mul":     {},
     "concat":          {"dim": -1},
@@ -261,6 +264,9 @@ to a node created earlier in the SAME program. `inputs` wires predecessors -> th
   activation {act_type: gelu|silu|relu}
   softmax {}            -- over the last dim (a router: linear(d_out=E)->softmax gives E gate weights)
   slice {start,end}     -- take channels [start:end] of the last dim (extract one gate: slice(i,i+1))
+  top_k {k}             -- keep the k largest gate weights (others 0), renormalized -> sparse routing
+  gather {dim}          -- select rows by integer indices along dim (route a token subset to an expert)
+  scatter_add {dim}     -- add gathered/expert outputs back to their positions (recombine routed tokens)
   element_mul {}        -- elementwise product (a width-1 input broadcasts over d_model) -> apply a gate
   sum {}                -- elementwise add of ALL inputs -> residual/merge; extra inputs = skip connections
   concat {dim:-1}

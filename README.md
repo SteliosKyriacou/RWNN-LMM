@@ -143,40 +143,53 @@ Tensors flow as `[B, T, C]` (batch, tokens, channels; `C = d_model = 768`). The 
 broadcast, so wirings are forgiving. `input`, `token_embedding`, `positional_embedding`, and the LM
 head (a `linear` at node 13) are the fixed I/O anchors.
 
+### I/O anchors (fixed; never removed by the search)
 | `type` | kwargs | inputs → output | what it is |
 |---|---|---|---|
 | `input` | — | token ids `[B,T]` → `[B,T]` | placeholder holding the raw token ids |
-| `token_embedding` | `vocab_size, d_model` | ids `[B,T]` → `[B,T,d]` | learned token embedding (a **gather** over a weight table) |
+| `token_embedding` | `vocab_size, d_model` | ids `[B,T]` → `[B,T,d]` | learned token embedding (a gather over a weight table) |
 | `positional_embedding` | `max_seq_len, d_model` | `[B,T,*]` → `[B,T,d]` | learned absolute position embedding (uses only `T`) |
-| `linear` | `d_in, d_out, bias` | `[B,T,d_in]` → `[B,T,d_out]` | affine map `xW+b` (a contraction over channels) |
-| `matmul` | `d_in, d_out` | `[B,T,d_in]` → `[B,T,d_out]` | linear map **without** bias (`F.linear(x, W)`) |
-| `causal_attention` | `n_head, d_model, dropout` | `[B,T,d]` (or Q,K,V) → `[B,T,d]` | masked multi-head self-attention (QKV+proj internally) — a *chunky* token-mixing primitive |
+| (LM head) | `d_in, d_out=vocab` | `[B,T,d]` → `[B,T,vocab]` | a `linear` at node 13 producing logits |
+
+### Arithmetic / functional primitives  (compute or transform *values*; † = has learnable parameters)
+| `type` | kwargs | inputs → output | what it is |
+|---|---|---|---|
+| `linear` † | `d_in, d_out, bias` | `[B,T,d_in]` → `[B,T,d_out]` | affine map `xW+b` — a contraction over channels |
+| `matmul` † | `d_in, d_out` | `[B,T,d_in]` → `[B,T,d_out]` | linear map without bias (`F.linear(x, W)`) |
+| `causal_attention` † | `n_head, d_model, dropout` | `[B,T,d]` (or Q,K,V) → `[B,T,d]` | masked multi-head self-attention (QKV+proj inside) — a *chunky* token mixer |
+| `causal_batch_matmul` | `scale` | Q,K `[B,H,T,d]` → `[B,H,T,T]` | `Q·Kᵀ·scale` + causal mask (to build attention from atoms) |
+| `layer_norm` † | `d_model, eps` | `[B,T,d]` → `[B,T,d]` | LayerNorm w/ affine (*chunky*; composable from square/mean_reduce/sqrt/divide/scale_shift) |
+| `scale_shift` † | `d_model` | `[B,T,d]` → `[B,T,d]` | learned per-channel affine `x·γ+β` (LN/RMSNorm affine) |
+| `add_bias` † | `d_model` | `[B,T,d]` → `[B,T,d]` | add a learned per-channel bias |
 | `activation` | `act_type: gelu\|silu\|relu` | `[B,T,C]` → `[B,T,C]` | elementwise nonlinearity |
 | `softmax` | `dim=-1` | `[B,T,C]` → `[B,T,C]` | softmax over the last dim (routers/gates) |
-| `slice` | `start, end` | `[B,T,C]` → `[B,T,end-start]` | select a channel range (extract one gate: `slice(i,i+1)`) |
-| `sum` | — | N×`[B,T,C]` → `[B,T,C]` | elementwise add of **all** inputs (residual/merge; extra inputs = skips) |
+| `sum` | — | N×`[B,T,C]` → `[B,T,C]` | elementwise add of ALL inputs (residual/merge; extra inputs = skips) |
 | `element_mul` | — | N×`[B,T,C]` → `[B,T,C]` | elementwise product (width-1 input broadcasts → gating) |
-| `concat` | `dim=-1` | N×`[B,T,Cᵢ]` → `[B,T,ΣCᵢ]` | concatenate along a dim |
-| `mean_reduce` | `dim=-1` | `[B,T,C]` → `[B,T,1]` | mean over an axis (keepdim) — the reduction/contraction atom |
+| `mean_reduce` | `dim=-1` | `[B,T,C]` → `[B,T,1]` | mean over an axis — the reduction/contraction atom |
 | `square` | — | `[B,T,C]` → `[B,T,C]` | elementwise `x²` |
 | `sqrt` | `eps` | `[B,T,C]` → `[B,T,C]` | elementwise `√(x+eps)` |
 | `subtract` | — | 2×`[B,T,C]` → `[B,T,C]` | `inputs[0] - inputs[1]` |
 | `divide` | — | 2×`[B,T,C]` → `[B,T,C]` | `inputs[0] / inputs[1]` (broadcasts) |
-| `scale_shift` | `d_model` | `[B,T,d]` → `[B,T,d]` | learned per-channel affine `x·γ + β` (LN/RMSNorm affine) |
-| `add_bias` | `d_model` | `[B,T,d]` → `[B,T,d]` | add a learned per-channel bias |
-| `layer_norm` | `d_model, eps` | `[B,T,d]` → `[B,T,d]` | LayerNorm with learned affine (*chunky*; also composable from square/mean_reduce/sqrt/divide/scale_shift) |
-| `transpose` | `dim1, dim2` | `[…]` → axes swapped | swap two axes |
-| `reshape` | `shape` | `[…]` → reshaped | reshape the tensor |
-| `causal_batch_matmul` | `scale` | Q,K `[B,H,T,d]` → scores `[B,H,T,T]` | `Q·Kᵀ·scale` + causal mask (for building attention from atoms) |
 | `dropout` | `dropout` | `[B,T,C]` → `[B,T,C]` | stochastic zeroing (train only) |
-| `moe_ffn` | `d_model, n_experts, top_k, d_hidden, act_type, dropout` | `[B,T,d]` → `[B,T,d]` | fused **real top-k sparse** MoE (router + experts + dispatch in one node); used by the vector search / as a seed only — *not* in the free graph-search vocabulary, where MoE is instead composed from atoms (`linear→softmax→slice→element_mul→sum`) |
+| `moe_ffn` † | `d_model, n_experts, top_k, d_hidden, act_type, dropout` | `[B,T,d]` → `[B,T,d]` | fused real top-k sparse MoE (router+experts+dispatch in one node); the *reference* block — in the free graph search MoE is instead **composed** from the data primitives below |
 
-Groups: **I/O anchors** (`input`, `token_embedding`, `positional_embedding`); **elementwise math**
-(`activation`, `sum`, `element_mul`, `square`, `sqrt`, `subtract`, `divide`, `softmax`); **shape/index**
-(`slice`, `concat`, `transpose`, `reshape`, `mean_reduce`); **parameterized maps** (`linear`, `matmul`,
-`scale_shift`, `add_bias`, `layer_norm`); **chunky mixers** (`causal_attention`, `causal_batch_matmul`,
-`moe_ffn`). Not yet present (the frontier gaps): `sin`/`cos` (RoPE), grouped/latent attention
-(GQA/MQA/MLA), a `scan`/state op (SSM), and dynamic dispatch (sparse-MoE compute savings).
+### Data-movement & indexing primitives  (rearrange / select / route data; ⚡ = data-dependent = dynamic dispatch)
+| `type` | kwargs | inputs → output | what it is |
+|---|---|---|---|
+| `concat` | `dim=-1` | N×`[B,T,Cᵢ]` → `[B,T,ΣCᵢ]` | concatenate along a dim |
+| `slice` | `start, end` | `[B,T,C]` → `[B,T,end-start]` | select a channel range (extract one gate: `slice(i,i+1)`) |
+| `transpose` | `dim1, dim2` | `[…]` → axes swapped | swap two axes |
+| `reshape` | `shape` | `[…]` → reshaped | reshape the tensor (e.g. split channels into heads) |
+| `top_k` ⚡ | `k` | `[B,T,E]` → `[B,T,E]` | keep the k largest gate weights (others 0), renormalized → **sparse routing** |
+| `gather` ⚡ | `dim=1` | data `[…]`, int idx → `[…]` (fewer rows) | select rows by data-dependent indices → **route a token subset to an expert** (this is what makes a downstream `linear` compute fewer rows = real FLOP saving) |
+| `scatter_add` ⚡ | `dim=1` | target, int idx, src → `[…]` | add routed/expert outputs back to their positions → **recombine** |
+
+The ⚡ trio (`top_k`, `gather`, `scatter_add`) is the **dynamic-dispatch family** — the "data-movement with
+data-dependent indices" that plain arithmetic atoms cannot express. With them a **real sparse MoE composes
+from primitives** (router `linear→softmax→top_k`; each expert a `linear`/`activation` chain run on a
+`gather`'d token subset; `scatter_add` to recombine), so only the active experts compute and the FLOP metric
+is real — no monolithic block required. Still absent (frontier gaps): `sin`/`cos` (RoPE), grouped/latent
+attention (GQA/MQA/MLA), and a `scan`/state op (SSM/Mamba recurrence).
 
 ---
 

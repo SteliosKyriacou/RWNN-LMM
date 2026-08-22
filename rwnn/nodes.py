@@ -351,6 +351,49 @@ class SliceNode(RWNNNode):
         return inputs[0][..., self.start:self.end]
 
 
+# ---- Data-movement / dispatch primitives (data-dependent indexing) --------------------------------
+class TopKNode(RWNNNode):
+    """Keep the top-k values along the last dim (others -> 0), renormalized so the kept weights sum to 1.
+    The selection atom for sparse routing: e.g. linear(->E) -> softmax -> top_k gives a sparse gate."""
+    def __init__(self, node_id, k=2):
+        super().__init__(node_id, "top_k")
+        self.k = int(k)
+
+    def forward(self, inputs):
+        x = inputs[0]
+        k = min(self.k, x.size(-1))
+        v, i = torch.topk(x, k, dim=-1)
+        out = torch.zeros_like(x).scatter(-1, i, v)
+        return out / (out.sum(dim=-1, keepdim=True) + 1e-9)
+
+
+class GatherNode(RWNNNode):
+    """Data-dependent row gather: select positions of inputs[0] using integer indices inputs[1] along
+    `dim` (default the token axis 1). Produces a (possibly smaller) tensor -> the basis of real sparse
+    dispatch, because a gathered subset flowing into a `linear` makes that linear compute fewer rows."""
+    def __init__(self, node_id, dim=1):
+        super().__init__(node_id, "gather")
+        self.dim = dim
+
+    def forward(self, inputs):
+        data, idx = inputs[0], inputs[1].reshape(-1).long()
+        return torch.index_select(data, self.dim, idx)
+
+
+class ScatterAddNode(RWNNNode):
+    """Scatter-add: add src (inputs[2]) into a zeros-like(inputs[0]) target at integer indices
+    inputs[1] along `dim`. Recombines routed/gathered expert outputs back to full sequence positions."""
+    def __init__(self, node_id, dim=1):
+        super().__init__(node_id, "scatter_add")
+        self.dim = dim
+
+    def forward(self, inputs):
+        target, idx, src = inputs[0], inputs[1].reshape(-1).long(), inputs[2]
+        out = torch.zeros_like(target)
+        out.index_add_(self.dim, idx, src)
+        return out
+
+
 class MoEFFNNode(RWNNNode):
     """Fused Mixture-of-Experts feed-forward block.
 
