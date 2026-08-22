@@ -2,4 +2,5 @@
 Seeded 20 graphs; injected gates/skips into 8, atom-MoE into 2.
 
 --- Graph-Search Generation 1/100 ---
+Cand 1/20 PLAN seed (initial population)
 Cand 1/20: atoms A24 L48 sm0 em0 gate0 skip0 | 248M 0.359G ...

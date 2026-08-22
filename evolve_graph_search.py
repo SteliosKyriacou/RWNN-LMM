@@ -58,6 +58,39 @@ PRIMS = {
     "dropout":         {"dropout": 0.1},
 }
 
+# One-line docs per primitive. The prompt's "Primitive vocabulary" block is GENERATED from PRIMS
+# (single source of truth) so it can never drift from what apply_edits actually accepts.
+PRIM_DOC = {
+    "linear":          "affine map; the compiler AUTO-PROJECTS mismatched dims, so wiring is forgiving",
+    "layer_norm":      "normalize over the feature dim",
+    "activation":      "pointwise nonlinearity (act_type: gelu|silu|relu)",
+    "softmax":         "over the last dim (a router: linear(d_out=E)->softmax gives E gate weights)",
+    "slice":           "take channels [start:end] of the last dim (extract one gate: slice(i,i+1))",
+    "top_k":           "keep the k largest gate weights (others 0), renormalized -> sparse routing",
+    "gather":          "select rows by integer indices along dim (route a token subset to an expert)",
+    "scatter_add":     "add gathered/expert outputs back to their positions (recombine routed tokens)",
+    "element_mul":     "elementwise product (a width-1 input broadcasts over d_model) -> apply a gate",
+    "sum":             "elementwise add of ALL inputs -> residual/merge; extra inputs = skip connections",
+    "concat":          "concatenate inputs along the given dim",
+    "causal_attention":"one masked multi-head self-attention atom",
+    "matmul":          "learned matrix multiply d_in->d_out",
+    "scale_shift":     "per-channel affine (gamma*x + beta)",
+    "add_bias":        "per-channel learned bias",
+    "mean_reduce":     "average over the given dim",
+    "dropout":         "stochastic feature zeroing (regularization)",
+}
+
+def _fmt_kwargs(kw):
+    if not kw:
+        return "{}"
+    return "{" + ", ".join(f"{k}:{v!r}" if isinstance(v, str) else f"{k}:{v}" for k, v in kw.items()) + "}"
+
+# Generated vocabulary block injected into SYSTEM at call time (see ask_edits).
+PRIM_VOCAB = "\n".join(
+    f"  {name} {_fmt_kwargs(PRIMS[name])}".ljust(46) + f"-- {PRIM_DOC.get(name, '')}".rstrip(" -")
+    for name in PRIMS
+)
+
 
 # ----------------------------------------------------------------------------- seed encoding + trainer
 # 65-D seed vector only (0 depth | 1-16 attn | 17-32 ffn | 33-48 activation | 49-64 skip). Dense only.
@@ -412,20 +445,9 @@ exit into a `sum` before ln_f). This is how you recombine good motifs from two o
 a base `parent` and graft, say, another elite's MoE/gate/attention motif onto it. Prefer combining
 features from DIFFERENT elites rather than only mutating one.
 
-## Primitive vocabulary (these are the ONLY node types; there are NO attention/FFN/MoE blocks)
-  linear {d_in,d_out}   -- affine map; the compiler AUTO-PROJECTS mismatched dims, so wiring is forgiving
-  layer_norm {d_model}
-  activation {act_type: gelu|silu|relu}
-  softmax {}            -- over the last dim (a router: linear(d_out=E)->softmax gives E gate weights)
-  slice {start,end}     -- take channels [start:end] of the last dim (extract one gate: slice(i,i+1))
-  top_k {k}             -- keep the k largest gate weights (others 0), renormalized -> sparse routing
-  gather {dim}          -- select rows by integer indices along dim (route a token subset to an expert)
-  scatter_add {dim}     -- add gathered/expert outputs back to their positions (recombine routed tokens)
-  element_mul {}        -- elementwise product (a width-1 input broadcasts over d_model) -> apply a gate
-  sum {}                -- elementwise add of ALL inputs -> residual/merge; extra inputs = skip connections
-  concat {dim:-1}
-  causal_attention {n_head:12,d_model:768}   -- one masked multi-head self-attention atom
-  matmul {d_in,d_out}, scale_shift {d_model}, add_bias {d_model}, mean_reduce {dim}, dropout {dropout}
+## Primitive vocabulary (these are the ONLY node types; there are NO attention/FFN/MoE blocks).
+## Each line is `name {default kwargs} -- description`; override any kwarg in your add_node op.
+{prim_vocab}
 
 ## Fixed anchors (never remove): 0 input, 1 token_emb, 2 pos_emb, 3 emb_sum, 13 LM head.
 Everything between node 3 and node 13 is yours to (re)build. For each elite you are given its
@@ -436,11 +458,27 @@ Nothing is pre-built. If you want a feed-forward, wire linear->activation->linea
 its residual. To build a mixture-of-experts from atoms: a router linear(d_out=E)->softmax gives E
 gate weights; for each expert e wire slice(e,e+1)->element_mul with that expert's output, then sum
 all gated experts (+ a residual). If you want something nobody has tried, wire it.
-Two objectives are MINIMIZED (Pareto): (1) validation loss, (2) active-FLOPs/token. Extra parallel
-compute costs FLOPs; skips and gates are cheap. Reject-triggers: peak mem >12GB, loss>=4.5, <3 compute atoms.
+## Your mandate (multi-objective optimization) — you ARE the optimizer, not a blind mutation operator
+Two objectives are MINIMIZED, forming a Pareto front: (1) validation loss, (2) active-FLOPs/token.
+Extra parallel compute costs FLOPs; skips and gates are cheap. Every generation your job is to
+IMPROVE AND EXPAND the front — grow its hypervolume (dominated area) — by spending your children
+across these classic multi-objective goals:
+  - DOMINATE  : push an existing elite down-and-left (lower loss at the same-or-lower FLOPs).
+  - EXTEND-LOSS : reach a NEW lowest-loss point (spend FLOPs where they actually buy loss).
+  - EXTEND-FLOPS: reach a NEW cheapest viable point (strip FLOPs while staying under the loss cap).
+  - FILL-GAP  : where two adjacent elites are far apart in FLOPs, add an intermediate trade-off.
+  - DIVERSIFY : keep structurally distinct lineages alive; never collapse the whole batch onto one motif.
+Budget your {pop_size} children ACROSS these goals; do not put them all on one. Learn from the last
+generation's outcomes (what improved the front, what was dominated/rejected) and adapt your plan.
+Reject-triggers (wasted evaluations, avoid them): peak mem >12GB, loss>=4.5, <3 compute atoms.
 
-## Output (STRICT): 3-4 short LEARNINGS bullets, then a fenced ```json block: a list of exactly
-{pop_size} children, each {"parent": <elite index, or -1 for a random seed>, "ops":[ ...atomic ops... ]}.
+## Output (STRICT): first 3-4 short LEARNINGS bullets — what the last generation taught you about the
+front and your plan to expand it this generation — then a fenced ```json block: a list of exactly
+{pop_size} children, each
+  {"parent": <elite index, or -1 for a random seed>,
+   "goal": "dominate|extend-loss|extend-flops|fill-gap|diversify",
+   "rationale": "<one sentence: what this child is trying to achieve on the front and why>",
+   "ops":[ ...atomic ops... ]}.
 An empty ops list re-trains a parent unchanged. Wire every new subgraph so it reaches node 13."""
 
 _TSHORT = {"causal_attention": "attn", "layer_norm": "ln", "linear": "lin", "activation": "act",
@@ -466,22 +504,36 @@ def build_context(gen, front, hist):
         ee = " ".join(f"{u}>{v}" for u, v in g["edges"])
         lines.append(f"  elite {i} nodes: {nn}")
         lines.append(f"  elite {i} edges: {ee}")
+    # front geometry to steer expansion (extremes to extend + biggest gap to fill)
+    if fsorted:
+        lo_loss = min(fsorted, key=lambda z: z["loss"]); li = fsorted.index(lo_loss)
+        lines.append(f"\nFront geometry: lowest-loss elite = [{li}] (loss {lo_loss['loss']:.3f} @ "
+                     f"{lo_loss['flops']/1e9:.3f}G) -> push it lower to EXTEND-LOSS; cheapest elite = [0] "
+                     f"(loss {fsorted[0]['loss']:.3f} @ {fsorted[0]['flops']/1e9:.3f}G) -> undercut it to EXTEND-FLOPS.")
+        if len(fsorted) >= 2:
+            g, gi = max((fsorted[i+1]['flops'] - fsorted[i]['flops'], i) for i in range(len(fsorted)-1))
+            lines.append(f"Biggest FLOP gap: between elite [{gi}] ({fsorted[gi]['flops']/1e9:.3f}G) and "
+                         f"[{gi+1}] ({fsorted[gi+1]['flops']/1e9:.3f}G) -> a FILL-GAP target ({g/1e9:.3f}G wide).")
     if hist:
         lines.append("\nBest loss per generation: " + ", ".join(f"{h:.3f}" for h in hist[-8:]))
-    lines.append(f"\nEmit a graph-edit program producing exactly {POP} children. Use `graft` to combine "
-                 f"features from DIFFERENT elites, not just mutate one.")
+    lines.append(f"\nEmit a graph-edit program producing exactly {POP} children that EXPAND this front "
+                 f"(dominate / extend-loss / extend-flops / fill-gap / diversify). Use `graft` to combine "
+                 f"features from DIFFERENT elites, not just mutate one. Give each child a goal + a rationale.")
     return "\n".join(lines)
 
 def ask_edits(gen, front, hist, msgs):
     msgs.append({"role": "user", "text": build_context(gen, front, hist)})
     prompt = "\n\n".join(f"===== {'REQUEST' if m['role']=='user' else 'YOUR RESPONSE'} =====\n{m['text']}"
                          for m in msgs[-10:])
-    text, thinking = claude_llm.invoke(SYSTEM.replace("{pop_size}", str(POP)), prompt,
-                                       model=os.environ["CLAUDE_MODEL"])
+    system = SYSTEM.replace("{prim_vocab}", PRIM_VOCAB).replace("{pop_size}", str(POP))
+    text, thinking = claude_llm.invoke(system, prompt, model=os.environ["CLAUDE_MODEL"])
     if thinking:
         print(f"\n  \033[32m[THINKING] {thinking.strip()[:1200]}\033[0m", flush=True)
-    msgs.append({"role": "assistant", "text": text})
     m = re.search(r"```json\s*(.*?)```", text, re.DOTALL)
+    learnings = (text[:m.start()] if m else text).strip()
+    if learnings:
+        print(f"  \033[36m[LEARNINGS]\n  " + learnings[:1600].replace("\n", "\n  ") + "\033[0m", flush=True)
+    msgs.append({"role": "assistant", "text": text})
     raw = m.group(1) if m else (text[text.find("["):text.rfind("]") + 1] if "[" in text else "")
     try:
         prog = json.loads(raw); assert isinstance(prog, list); return prog
@@ -525,28 +577,32 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
     for gen in range(generations):
         print(f"\n--- Graph-Search Generation {gen+1}/{generations} ---", flush=True)
         if gen == 0:
-            children = [(dict(g), None) for g in seed_graphs]
+            children = [(dict(g), None, "seed (initial population)") for g in seed_graphs]
         else:
             fsorted = sorted(front, key=lambda z: z["flops"])
             donors = [e["graph"] for e in fsorted]     # crossover donors (graft op indexes into this)
             prog = ask_edits(gen, front, best_hist, msgs)
             children = []
             if prog is None:
-                children = [(copy.deepcopy(e["graph"]), e["sig"]) for e in fsorted[:pop_size]]
+                children = [(copy.deepcopy(e["graph"]), e["sig"], "reuse elite (unparseable program)")
+                            for e in fsorted[:pop_size]]
             else:
                 for item in prog[:pop_size]:
                     pi = item.get("parent", -1)
                     if isinstance(pi, int) and 0 <= pi < len(fsorted):
-                        par = fsorted[pi]; pg, psig = par["graph"], par["sig"]
+                        par = fsorted[pi]; pg, psig = par["graph"], par["sig"]; pdesc = f"elite {pi}"
                     else:
-                        pg, psig = seed_graphs[np.random.randint(len(seed_graphs))], None
-                    children.append((apply_edits(pg, item.get("ops", []), donors=donors), psig))
+                        pg, psig = seed_graphs[np.random.randint(len(seed_graphs))], None; pdesc = "random seed"
+                    goal = str(item.get("goal", "?")); rat = str(item.get("rationale", "")).strip()
+                    plan = f"[{goal}] from {pdesc}: {rat}" if rat else f"[{goal}] from {pdesc}"
+                    children.append((apply_edits(pg, item.get("ops", []), donors=donors), psig, plan))
             while len(children) < pop_size and fsorted:
                 e = fsorted[len(children) % len(fsorted)]
-                children.append((copy.deepcopy(e["graph"]), e["sig"]))
+                children.append((copy.deepcopy(e["graph"]), e["sig"], "pad: reuse elite"))
 
         results = []
-        for idx, (g, psig) in enumerate(children):
+        for idx, (g, psig, plan) in enumerate(children):
+            print(f"Cand {idx+1}/{pop_size} PLAN {plan}", flush=True)
             s = summarize(g); flops = active_flops(g["nodes"])
             try:
                 params = params_of(g)

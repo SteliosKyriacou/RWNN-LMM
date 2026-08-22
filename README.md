@@ -99,6 +99,27 @@ no API key needed). Choose the model with `CLAUDE_MODEL` (default `sonnet`). You
 
 ---
 
+## Initial population (generation 0)
+
+The search is seeded with **20 graphs** (`pop_size=20`). Every seed starts as a 65-D vector decoded
+into a dense `(nodes, edges)` graph (`build_initial_population`); the gated, skip, and MoE variants
+then receive **atomic edit-program injections** (`seed_gates_and_skips`, `seed_atomic_moe`) so those
+motifs already live in the gene pool on day one — built **only from primitives**, never as blocks. All
+seeds share `d_model=768`, 12 heads, and a 4× MLP expansion; only depth and per-block placement vary.
+The search is free to keep, recombine, or discard any of them.
+
+| Group | Seeds | # | What it is | How it's built |
+|---|---|---|---|---|
+| **Dense — saved Gen-1 elites** | 0–1 | 2 | Preserved Pareto elites from the prior vector-search run (≈247.6 M @ loss 3.79 and ≈153.0 M @ 3.84): pure pre-norm GPT-2-style stacks. | Decoded from stored 65-D vectors (`seed_elites.json`). |
+| **Dense — GPT-2 variants** | 2–4 | 3 | Classic transformers with attention+MLP at (nearly) every layer: `gpt2` (12 L), `gpt2-sparse` (attention-thinned), and a dense 18-layer stack. | `_gpt2_vector(...)` + one hand-set depth-18 vector. |
+| **Gated + skip explorers** | 5–12 | 8 | Front-loaded-attention explorers augmented with an emergent **SwiGLU-style gate** *and* a **softmax gate**, plus 1–2 long-range **skip** connections — the seeds carrying gating/residual-highway motifs. | Explorer vector, then `seed_gates_and_skips` (atoms: `linear`/`activation`/`softmax`/`element_mul`/`sum`). |
+| **Atom-composed MoE** | 13–14 | 2 | Two **mixture-of-experts** (E=2 and E=4), built entirely from atoms — router `linear(d_out=E)→softmax`, then per-expert `slice(e,e+1) · (linear→activation)`, summed. A *soft* mixture (all experts run); no monolithic MoE block exists. | Explorer vector, then `seed_atomic_moe`. |
+| **Diverse explorers** | 15–19 | 5 | Unbiased random architectures: varied depth, **front-loaded attention** (first 4–10 layers attention-heavy), non-uniform MLP placement, **mixed activations** (ReLU / GELU / SiLU / random buckets), and random skips. | Explorer vector only (no injection). |
+
+Startup log line for this population: `Seeded 20 graphs; injected gates/skips into 8, atom-MoE into 2.`
+
+---
+
 ## Expressiveness: how few primitives do we really need?
 
 A feedforward network is just an **arithmetic circuit** — a DAG of math ops — so a small primitive set
