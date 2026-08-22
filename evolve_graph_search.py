@@ -20,6 +20,7 @@ import os, json, re, copy
 from collections import defaultdict, deque, Counter
 import numpy as np
 import torch
+import torch.nn.functional as F
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -29,8 +30,6 @@ os.environ.setdefault("CLAUDE_MODEL", "sonnet")
 from rwnn.graph import RWNNGraph
 from rwnn.mutator import is_valid_dag
 from agentic_optimizer import claude_llm
-from evolve_agentic import (train_and_eval_bpe_model, build_initial_population,
-                            vector_to_multilayer_graph)
 
 VOCAB, BLOCK, DMODEL = 50257, 256, 768
 LOSS_MAX, MIN_COMPUTE, MEM_BUDGET, PENALTY = 4.5, 3, 11.0e9, 10.0
@@ -58,6 +57,131 @@ PRIMS = {
     "mean_reduce":     {"dim": -1},
     "dropout":         {"dropout": 0.1},
 }
+
+
+# ----------------------------------------------------------------------------- seed encoding + trainer
+# 65-D seed vector only (0 depth | 1-16 attn | 17-32 ffn | 33-48 activation | 49-64 skip). Dense only.
+def _gpt2_vector(model_type):
+    x = np.zeros(65); x[33:49] = 0.1  # GELU
+    if model_type == "gpt2-sparse":
+        x[0] = 18 / 24; x[1:17] = [1.0, 0.0] * 8; x[17:33] = [0.0, 1.0] * 8
+    else:
+        x[0] = {"gpt2": 6 / 24, "gpt2-medium": 18 / 24, "gpt2-large": 1.0}.get(model_type, 18 / 24)
+        x[1:33] = 1.0
+    return x
+
+def vector_to_multilayer_graph(x, vocab_size=VOCAB, block_size=BLOCK, d_model=DMODEL):
+    """Decode a 65-D seed vector into a dense H-DAG (attention + dense FFN + real skips). No MoE."""
+    x = np.asarray(x)
+    L, av, mv, cv, sv = x[0], x[1:17], x[17:33], x[33:49], x[49:65]
+    n_layer = min(6 + int(L * 24), 30)
+    nodes = [{"id": 0, "type": "input", "kwargs": {}},
+             {"id": 1, "type": "token_embedding", "kwargs": {"vocab_size": vocab_size, "d_model": d_model}},
+             {"id": 2, "type": "positional_embedding", "kwargs": {"max_seq_len": block_size, "d_model": d_model}},
+             {"id": 3, "type": "sum", "kwargs": {}}]
+    edges = [(0, 1), (0, 2), (1, 3), (2, 3)]
+    cx, layer_out, final_sum, active = 3, {}, {}, []
+    for l in range(n_layer):
+        i16 = min(int(l * 16 / n_layer), 15)
+        ln1, at, sa, ln2, up, ac, dn, sm = (4 + l*10, 5 + l*10, 6 + l*10, 7 + l*10, 8 + l*10, 9 + l*10, 10 + l*10, 11 + l*10)
+        if av[i16] > 0.5:
+            nodes += [{"id": ln1, "type": "layer_norm", "kwargs": {"d_model": d_model}},
+                      {"id": at, "type": "causal_attention", "kwargs": {"n_head": 12, "d_model": d_model, "dropout": 0.1}},
+                      {"id": sa, "type": "sum", "kwargs": {}}]
+            edges += [(cx, ln1), (ln1, at), (cx, sa), (at, sa)]; attn_out = sa
+        else:
+            attn_out = cx
+        if mv[i16] > 0.5:
+            act = "gelu" if cv[i16] < 0.33 else ("silu" if cv[i16] < 0.66 else "relu")
+            nodes += [{"id": ln2, "type": "layer_norm", "kwargs": {"d_model": d_model}},
+                      {"id": up, "type": "linear", "kwargs": {"d_in": d_model, "d_out": 4 * d_model}},
+                      {"id": ac, "type": "activation", "kwargs": {"act_type": act}},
+                      {"id": dn, "type": "linear", "kwargs": {"d_in": 4 * d_model, "d_out": d_model}},
+                      {"id": sm, "type": "sum", "kwargs": {}}]
+            edges += [(attn_out, ln2), (ln2, up), (up, ac), (ac, dn), (attn_out, sm), (dn, sm)]; mlp_out = sm
+        else:
+            mlp_out = attn_out
+        if mv[i16] > 0.5: final_sum[l] = sm
+        elif av[i16] > 0.5: final_sum[l] = sa
+        if l in final_sum: active.append(l)
+        cx = mlp_out; layer_out[l] = cx
+    for i, l in enumerate(active):                       # real long-range skips (into a later SumNode)
+        i16 = min(int(l * 16 / n_layer), 15)
+        if sv[i16] > 0.5 and i + 2 < len(active):
+            edges.append((layer_out[l], final_sum[active[i + 2]]))
+    ln_f = 4 + n_layer * 10
+    nodes += [{"id": ln_f, "type": "layer_norm", "kwargs": {"d_model": d_model}},
+              {"id": 13, "type": "linear", "kwargs": {"d_in": d_model, "d_out": vocab_size}}]
+    edges += [(cx, ln_f), (ln_f, 13)]
+    ids = {n["id"] for n in nodes}
+    return nodes, [(u, v) for u, v in edges if u in ids and v in ids]
+
+def build_initial_population(pop_size, seed=1234):
+    """5 GPT-2 seeds (incl. 2 saved elites) + (pop_size-5) diverse explorers — 65-D, dense (no MoE)."""
+    rng = np.random.RandomState(seed); pop = []
+    def _pad(v):
+        v = np.asarray(v, dtype=float)
+        return np.concatenate([v, np.zeros(65 - len(v))]) if len(v) < 65 else v[:65]
+    if os.path.exists("seed_elites.json"):
+        for e in json.load(open("seed_elites.json"))[:2]:
+            pop.append(_pad(e["vector"]))
+    pop.append(_gpt2_vector("gpt2")); pop.append(_gpt2_vector("gpt2-sparse"))
+    g18 = np.zeros(65); g18[0] = 0.5; g18[1:33] = 1.0; g18[33:49] = 0.1; pop.append(g18)   # dense 18L
+    while len(pop) < 5: pop.append(_gpt2_vector("gpt2-medium"))
+    pop = pop[:5]
+    for i in range(max(0, pop_size - 5)):
+        x = np.zeros(65); x[0] = np.clip((i + 0.5) / max(1, pop_size - 5), 0.12, 0.95)
+        front = rng.randint(4, 11)
+        for s in range(16): x[1 + s] = np.clip((0.85 if s < front else 0.25) + rng.normal(0, 0.12), 0, 1)
+        md = rng.uniform(0.35, 0.8)
+        for s in range(16): x[17 + s] = np.clip((0.8 if rng.rand() < md else 0.2) + rng.normal(0, 0.1), 0, 1)
+        style = i % 4
+        for s in range(16):
+            x[33 + s] = (rng.uniform(0, 0.30) if style == 0 else rng.uniform(0.36, 0.63) if style == 1
+                         else rng.uniform(0.70, 1.0) if style == 2 else rng.uniform(0, 1.0))
+        sd = rng.uniform(0.4, 0.85)
+        for s in range(16): x[49 + s] = np.clip((0.8 if rng.rand() < sd else 0.2) + rng.normal(0, 0.1), 0, 1)
+        for s in rng.choice(16, size=3, replace=False): x[49 + s] = rng.uniform(0.6, 0.95)
+        pop.append(np.clip(x, 0, 1))
+    return np.array(pop[:pop_size])
+
+def train_and_eval_bpe_model(nodes, edges, d_model=DMODEL, max_iters=1000, batch_size=8,
+                             block_size=BLOCK, parent_state_dict=None):
+    """Train a compiled H-DAG on BPE tokens. Returns (model, val_loss, peak_mem_bytes)."""
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    if device == "cuda": torch.cuda.reset_peak_memory_stats()
+    train_data = np.memmap("train.bin", dtype=np.uint16, mode="r")
+    val_data = np.memmap("val.bin", dtype=np.uint16, mode="r")
+    model = RWNNGraph(nodes, edges, global_d_model=d_model)
+    if parent_state_dict is not None:                    # Lamarckian weight inheritance
+        cs = model.state_dict(); c = 0
+        for k, v in parent_state_dict.items():
+            if k in cs and cs[k].shape == v.shape:
+                cs[k].copy_(v); c += 1
+        if c > 0: print(f" -> Inherited {c} parameter tensors from parent weights.")
+    model.to(device)
+    def get_batch(split):
+        d = train_data if split == "train" else val_data
+        ix = torch.randint(len(d) - block_size, (batch_size,))
+        xb = torch.stack([torch.from_numpy((d[i:i + block_size]).astype(np.int64)) for i in ix])
+        yb = torch.stack([torch.from_numpy((d[i + 1:i + block_size + 1]).astype(np.int64)) for i in ix])
+        return xb.to(device), yb.to(device)
+    opt = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.1)
+    model.train()
+    for _ in range(max_iters):
+        xb, yb = get_batch("train")
+        with torch.amp.autocast(device_type=device, dtype=torch.bfloat16):
+            logits = model(xb); loss = F.cross_entropy(logits.view(-1, logits.size(-1)), yb.view(-1))
+        opt.zero_grad(set_to_none=True); loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0); opt.step()
+    model.eval(); vl = []
+    with torch.no_grad():
+        for _ in range(5):
+            X, Y = get_batch("val")
+            with torch.amp.autocast(device_type=device, dtype=torch.bfloat16):
+                logits = model(X); vl.append(F.cross_entropy(logits.view(-1, logits.size(-1)), Y.view(-1)).item())
+    peak = torch.cuda.max_memory_allocated() if device == "cuda" else 0
+    return model, float(np.mean(vl)), peak
 
 
 # ----------------------------------------------------------------------------- graph utilities
@@ -129,7 +253,7 @@ def apply_edits(parent, ops):
     pn, pe = _prune_to_live(nodes, edges)
     if pn is None or not is_valid_dag(pn, pe) or 13 not in {n["id"] for n in pn}:
         return copy.deepcopy(parent)
-    if len([n for n in pn if n["type"] in ("causal_attention", "linear", "moe_ffn", "matmul")]) < MIN_COMPUTE + 1:
+    if len([n for n in pn if n["type"] in ("causal_attention", "linear", "matmul")]) < MIN_COMPUTE + 1:
         return copy.deepcopy(parent)
     return {"nodes": pn, "edges": pe}
 
@@ -146,8 +270,6 @@ def active_flops(nodes):
             f += 2 * kw.get("d_in", DMODEL) * kw.get("d_out", DMODEL)
         elif t == "matmul":
             f += 2 * kw.get("d_in", DMODEL) * kw.get("d_out", DMODEL)
-        elif t == "moe_ffn":
-            d, h = kw["d_model"], kw["d_hidden"]; f += 2 * (d * kw["n_experts"]) + kw["top_k"] * 2 * (2 * d * h)
         elif t == "causal_batch_matmul":
             f += 2 * T * DMODEL
     return f
@@ -167,7 +289,6 @@ def summarize(g):
     compute = hist.get("causal_attention", 0) + sum(1 for n in nodes if n["type"] == "linear" and n["id"] != 13)
     return dict(attn=hist.get("causal_attention", 0),
                 linear=sum(1 for n in nodes if n["type"] == "linear" and n["id"] != 13),
-                moe=hist.get("moe_ffn", 0),
                 softmax=hist.get("softmax", 0), elemmul=hist.get("element_mul", 0),
                 gating=gating, skips=skips, compute=compute,
                 nodes=len(nodes), edges=len(edges), hist=dict(hist))
@@ -218,7 +339,7 @@ def seed_gates_and_skips(g, rng):
 
 
 def seed_atomic_moe(g, experts, rng):
-    """Seed a graph with a mixture-of-experts built ENTIRELY FROM ATOMS (no moe_ffn block):
+    """Seed a graph with a mixture-of-experts built ENTIRELY FROM ATOMS (no monolithic block):
     router linear(d_out=E) -> softmax -> per-expert [slice(e,e+1) * (linear->activation)] -> sum.
     This is a soft mixture (all E experts run); it lives in the gene pool and the agent can build
     the same thing from atoms. E is kept small since soft mixtures cost E x the FFN FLOPs."""
@@ -447,8 +568,7 @@ def _save(gen, front, all_pts, sig2state):
                    "summary": summ, "weights": wfile}, open(cfg, "w"), indent=2)
         rep.append({"rank": i + 1, "loss": a["loss"], "active_flops": a["flops"], "params": a["params"],
                     "n_nodes": summ.get("nodes"), "n_edges": summ.get("edges"),
-                    "attn": summ["attn"], "linear": summ["linear"], "moe": summ.get("moe", 0),
-                    "softmax": summ["softmax"], "gating": summ["gating"], "skips": summ["skips"],
+                    "attn": summ["attn"], "linear": summ["linear"], "softmax": summ["softmax"], "gating": summ["gating"], "skips": summ["skips"],
                     "compute": summ["compute"],
                     "config": cfg, "weights": wfile})
     json.dump(rep, open(f"{CKPT}/generation_{gen+1}_report.json", "w"), indent=2)

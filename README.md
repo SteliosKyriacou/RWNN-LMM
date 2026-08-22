@@ -1,90 +1,82 @@
-# Lamarckian Weight Inheritance in Autonomous H-DAG Large Language Models
+# Autonomous Free-Graph Architecture Search for Language Models
 
-Research codebase for **"Lamarckian Weight Inheritance in Autonomous H-DAG Large Language Models"**
-(NeurIPS 2026 draft). It performs multi-objective **neural architecture search (NAS)** for
-decoder-only language models, where each architecture is a **Heterogeneous Directed Acyclic Graph
-(H-DAG)** of primitive nodes that is compiled and trained on the fly.
+Research codebase (NeurIPS 2026 draft). It performs multi-objective **neural architecture search
+(NAS)** for decoder-only language models, where each architecture is a **Heterogeneous Directed
+Acyclic Graph (H-DAG)** of primitive nodes, compiled and trained on the fly.
+
+This branch (`real-graph-search`) runs a **fully-free atomic graph search**: an LLM agent
+(Metis, **Claude-backed**) evolves the architectures as *raw graphs of primitive atoms*. There are
+**no prescribed attention / FFN / MoE blocks** — every structure, including a mixture-of-experts, a
+gate, or a mixer nobody has tried, must **emerge from wiring atoms**. Only `causal_attention` is kept
+as a single token-mixing primitive.
 
 ---
 
 ## What we are doing
 
-An LLM agent (Metis-Agent, **Claude-backed**) drives an evolutionary search over a continuous encoding
-of language-model architectures. Every generation the agent **writes its own optimization code**
-(PCA-EA, CMA-ES, Ridge surrogate-inverse, gap-filling, …) to propose the next population of
-candidate vectors. Each candidate is decoded into a real H-DAG, compiled into a PyTorch module,
-trained for one epoch on WikiText-103, and scored. A **Pareto front** is maintained across two
-competing objectives.
+- **The genome is the graph itself** — the raw `(nodes, edges)` H-DAG (not a fixed-length vector).
+- Each generation the agent is shown the current Pareto front and emits a **graph-edit program** —
+  generic atomic operations only: `add_node` / `add_edge` / `remove_node` / `remove_edge` over the
+  primitive vocabulary. Every edited graph is pruned to the input→head live set and DAG-validated;
+  anything that still fails at runtime is rejected by the trainer.
+- **Lamarckian weight inheritance**: a child copies weight tensors in-place from its parent, so it
+  resumes training rather than restarting.
+- Only the **I/O is fixed** (token + positional embeddings in, LM head out); everything between is free.
 
-To avoid cold-start cost, new candidates copy weight tensors in-place from their nearest
-Pareto-front ancestor (**Lamarckian Weight Inheritance via continuous nearest-neighbour ancestry**),
-so offspring resume rather than restart.
-
-### Objectives (both minimized)
-
-1. **Validation cross-entropy loss.**
-2. **Active-FLOPs per token** — the *used* compute of the transformer body (attention + only the
-   `top_k` active experts of each feed-forward block). Total parameter count is **not** an
-   objective; only compute that actually runs is charged.
-
-Using active-FLOPs (rather than parameter count) is deliberate: it is the objective under which
-**Mixture-of-Experts (MoE)** becomes attractive — extra experts add capacity, parameters, and
-memory but almost no active-FLOPs — so the search is free to discover sparse, high-capacity models.
+### Objectives (both minimized) → a Pareto front
+1. **Validation cross-entropy loss** (WikiText-103, 1 epoch per candidate).
+2. **Active-FLOPs per token** — the compute that actually runs. Parameter count is *not* an objective.
 
 ### Hard constraints (a violator is rejected by design, not given a fake loss)
+- **Peak training memory < 12 GB** (measured; OOM → clean rejection).
+- **Validation loss < 4.5** (kills degenerate near-empty models).
+- **At least 3 compute atoms** (no trivial models).
 
-- **Peak training memory < 12 GB** (measured; OOM becomes a clean rejection). Large expert counts
-  inflate memory even at low FLOPs, so this is what *bounds* MoE size on a consumer GPU.
-- **Validation loss < 4.5** (rejects degenerate near-empty models).
-- **At least 3 active blocks** (no embeddings-only models).
-
-### The search space (97-D continuous encoding)
-
-`x ∈ [0,1]^97`, decoded per layer via a 16-slot control map:
-
-| Genes | Meaning |
-|-------|---------|
-| 0 | depth (6–30 layers) |
-| 1–16 | attention on/off per slot |
-| 17–32 | feed-forward on/off per slot |
-| 33–48 | activation type (GELU / SiLU / ReLU) |
-| 49–64 | genuine long-range residual **skip** (adds an earlier block's output into a later block's residual sum) |
-| 65–80 | **MoE `n_experts`** per FFN slot (1 = dense, else 2/4/8) |
-| 81–96 | **MoE `top_k`** per FFN slot (1 or 2 active experts) |
-
-Width is fixed (`d_model=768`, 12 heads, 4× FFN); an FFN slot with `n_experts>1` compiles to a fused
-**MoE block** (router → top-k sparse dispatch → gate-weighted combine, with a Switch-style
-load-balance loss). `n_experts=1` reduces exactly to a dense GPT-2 feed-forward block.
+### Mixture-of-Experts is *emergent*, not a block
+There is no `moe_ffn` node. A **real sparse MoE composes from primitives**: a router
+(`linear → softmax → top_k`), each expert a `linear`/`activation` chain run on a `gather`'d token
+subset, and `scatter_add` to recombine — so only the active experts compute and the FLOP metric is
+real. The dynamic-dispatch atoms (`top_k`, `gather`, `scatter_add`) are what make this possible; see
+the primitive tables below.
 
 ### Initial population
+20 graphs: **5 GPT-2-family seeds** (incl. two saved elites) + **15 diverse explorers**
+(front-loaded attention, non-uniform FFN placement, mixed activations, real skip connections). Several
+explorers are additionally seeded with an **emergent softmax gate** and an **atom-composed MoE**
+(built from `linear`/`softmax`/`slice`/`element_mul`/`sum`), so those structures are in the gene pool
+from the start. A per-gene **saturation monitor** injects diversity if a variable freezes across the
+population.
 
-20 individuals: **5 GPT-2-family seeds** (including the two best elites from the previous run) plus
-**15 structurally-diverse explorers** deliberately seeded with skip connections, front-loaded
-attention, non-uniform FFN placement, mixed activations, varied depth, and — for about half of them —
-real MoE variance (so `n_experts`/`top_k` are not born collapsed to "dense"). A per-gene
-**saturation monitor** reports any variable that freezes across the whole population for two
-generations and injects diversity to escape the plateau.
+### Two example graphs from the initial population
+Both are read straight from the compiled `(nodes, edges)`; nodes are colored by primitive type and
+amber edges are long-range residual skips.
+
+**Dense model** — attention (`LN→attn→+`) and dense FFN (`LN→linear→act→linear→+`) blocks with skips:
+
+![Dense model graph](assets/readme-graphs/dense_graph.png)
+
+**MoE model** — the mixture-of-experts is composed entirely from atoms (router `linear→softmax`,
+per-expert `slice→×` gating over `linear→act` experts, recombined by `+`) — no monolithic block:
+
+![MoE model graph](assets/readme-graphs/moe_graph.png)
 
 ---
 
 ## Layout
 
-- `rwnn/nodes.py` — atomic node modules (embeddings, causal attention, linear, layernorm,
-  activation, sum, **MoE feed-forward**, …).
+- `rwnn/nodes.py` — the atomic primitive modules (embeddings, causal attention, linear, layernorm,
+  activation, sum, element_mul, softmax, slice, top_k, gather, scatter_add, …).
 - `rwnn/graph.py` — `RWNNGraph`: topologically compiles `(nodes, edges)`, auto-projects on dimension
-  mismatch, executes as an `nn.Module`, and collects MoE load-balance losses.
-- `rwnn/mutator.py` — DAG validity checks, structural mutations, `get_gpt2_dag()`.
-- `evolve_agentic.py` — **main script**: `vector_to_multilayer_graph()` (decode), MoE-aware
-  `active_flops_per_token()`, `train_and_eval_bpe_model()` (train + measure peak memory),
-  `build_initial_population()`, and `run_agentic_optimization()` (the generation loop).
-- `agentic_optimizer/` — **vendored** Metis-Agent optimizer (`metis_agent.py`, `hypervolume.py`,
-  `individual.py`) backed by Claude via `claude_llm.py` (Claude Agent SDK → local `claude` CLI).
-- `calculate_agentic_hypervolume.py` — hypervolume (S-metric) + convergence plots.
-- `generate_graph_visualization.py`, `generate_all_elites_samples.py` — layouts and samples.
-- `prepare_wikitext103.py` — BPE tokenize into `train.bin` / `val.bin`.
-- `checkpoints/agentic-optim/` — per-generation outputs: `pareto_gen{G}_ind{I}_config.json`
-  (real `nodes`/`edges`, `loss`, `active_flops`, `params`, MoE stats, `vector`), weights `.pt`,
-  `generation_{G}_report.json`, and cumulative Pareto PNGs (loss vs active-FLOPs).
+  mismatch (and broadcasts width-1 inputs), executes as an `nn.Module`.
+- `rwnn/mutator.py` — DAG validity checks and structural `GraphMutator` operators.
+- `evolve_graph_search.py` — **main script**: the seed encoder/decoder + trainer (self-contained),
+  the atomic graph-edit ops, the Claude edit-program agent, and the generation loop
+  (`run_graph_search`). Objectives = loss vs active-FLOPs; the constraints above; Pareto front,
+  reports, and plots.
+- `agentic_optimizer/` — vendored Metis agent + `claude_llm.py` (Claude Agent SDK → local `claude` CLI).
+- `checkpoints/graph-search/` — per-generation outputs: `graph_gen{G}_ind{I}_config.json` (the **full**
+  `nodes`/`edges` + loss/active-FLOPs/params/summary), the current front's weight `.pt` files,
+  `generation_{G}_report.json`, and Pareto PNGs.
 
 ---
 
@@ -92,16 +84,15 @@ generations and injects diversity to escape the plateau.
 
 ```bash
 conda activate RWNNLMM
-python prepare_wikitext103.py     # once: produces train.bin / val.bin
-python evolve_agentic.py          # or: nohup python -u evolve_agentic.py > agentic_evolution.log 2>&1 &
+python evolve_graph_search.py     # or: nohup python -u evolve_graph_search.py > agentic_evolution.log 2>&1 &
 ```
 
 The agentic optimizer is **vendored** in `agentic_optimizer/` and backed by **Claude**: install the
 SDK (`pip install claude-agent-sdk`) and make sure the local `claude` CLI is logged in (subscription;
 no API key needed). Choose the model with `CLAUDE_MODEL` (default `sonnet`). You also need
-`train.bin` / `val.bin`. Set `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` before launching to
-reduce fragmentation on a 12 GB card. Note: `run_agentic_optimization()` clears
-`checkpoints/agentic-optim/` on startup.
+`train.bin` / `val.bin` (from `prepare_wikitext103.py`). Set
+`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` before launching to reduce fragmentation on a
+12 GB card. Note: `run_graph_search()` clears `checkpoints/graph-search/` on startup.
 
 ---
 
@@ -130,11 +121,12 @@ a reduction + shape/gather is what unlocks everything.
   depends on step *t-1*. Attention avoids this by being a parallel contraction; true recurrence needs
   a `scan`/loop primitive (or unrolling to a fixed length).
 
-The repo deliberately ships **"chunky" primitives** (`linear`, `causal_attention`, and a fused
-`moe_ffn`) rather than the ~12 fine-grained ones — not because the fine set is insufficient, but for
+The repo deliberately keeps a couple of **"chunky" primitives** (`linear`, `causal_attention`) rather
+than only the ~12 fine-grained ones — not because the fine set is insufficient, but for
 (a) **speed/stability** (a fused matmul/attention kernel beats one emulated from broadcast-mul+reduce)
 and (b) **searchability** (an agent will not rediscover attention from raw reductions, and most
-fine-grained random wirings aren't even shape-valid). The chunky set is a strong architectural prior.
+fine-grained random wirings aren't even shape-valid). MoE, by contrast, is *not* shipped as a block —
+it is composed from the dispatch atoms (`top_k`/`gather`/`scatter_add`), so the search owns it end to end.
 
 ## Primitive vocabulary (as implemented in `rwnn/nodes.py`)
 
@@ -171,7 +163,6 @@ head (a `linear` at node 13) are the fixed I/O anchors.
 | `subtract` | — | 2×`[B,T,C]` → `[B,T,C]` | `inputs[0] - inputs[1]` |
 | `divide` | — | 2×`[B,T,C]` → `[B,T,C]` | `inputs[0] / inputs[1]` (broadcasts) |
 | `dropout` | `dropout` | `[B,T,C]` → `[B,T,C]` | stochastic zeroing (train only) |
-| `moe_ffn` † | `d_model, n_experts, top_k, d_hidden, act_type, dropout` | `[B,T,d]` → `[B,T,d]` | fused real top-k sparse MoE (router+experts+dispatch in one node); the *reference* block — in the free graph search MoE is instead **composed** from the data primitives below |
 
 ### Data-movement & indexing primitives  (rearrange / select / route data; ⚡ = data-dependent = dynamic dispatch)
 | `type` | kwargs | inputs → output | what it is |
