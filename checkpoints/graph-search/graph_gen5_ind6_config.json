@@ -1,0 +1,907 @@
+{
+  "nodes": [
+    {
+      "id": 0,
+      "type": "input",
+      "kwargs": {}
+    },
+    {
+      "id": 1,
+      "type": "token_embedding",
+      "kwargs": {
+        "vocab_size": 50257,
+        "d_model": 768
+      }
+    },
+    {
+      "id": 2,
+      "type": "positional_embedding",
+      "kwargs": {
+        "max_seq_len": 256,
+        "d_model": 768
+      }
+    },
+    {
+      "id": 3,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 4,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 5,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 6,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 7,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 8,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 9,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "gelu"
+      }
+    },
+    {
+      "id": 10,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 11,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 14,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 15,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 16,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 17,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 18,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 19,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "gelu"
+      }
+    },
+    {
+      "id": 20,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 21,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 24,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 25,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 26,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 27,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 28,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 29,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "silu"
+      }
+    },
+    {
+      "id": 30,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 31,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 34,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 35,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 36,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 37,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 38,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 39,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "gelu"
+      }
+    },
+    {
+      "id": 40,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 41,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 44,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 45,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 46,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 47,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 48,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 49,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "gelu"
+      }
+    },
+    {
+      "id": 50,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 51,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 54,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 55,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 56,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 57,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 58,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 59,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "relu"
+      }
+    },
+    {
+      "id": 60,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 61,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 64,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 13,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 50257
+      }
+    },
+    {
+      "id": 65,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 2
+      }
+    },
+    {
+      "id": 66,
+      "type": "softmax",
+      "kwargs": {}
+    },
+    {
+      "id": 67,
+      "type": "top_k",
+      "kwargs": {
+        "k": 1
+      }
+    },
+    {
+      "id": 68,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 69,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "relu"
+      }
+    },
+    {
+      "id": 70,
+      "type": "slice",
+      "kwargs": {
+        "start": 0,
+        "end": 1
+      }
+    },
+    {
+      "id": 71,
+      "type": "element_mul",
+      "kwargs": {}
+    },
+    {
+      "id": 72,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 73,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "relu"
+      }
+    },
+    {
+      "id": 74,
+      "type": "slice",
+      "kwargs": {
+        "start": 1,
+        "end": 2
+      }
+    },
+    {
+      "id": 75,
+      "type": "element_mul",
+      "kwargs": {}
+    },
+    {
+      "id": 76,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 77,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 78,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 79,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 80,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 81,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 82,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "relu"
+      }
+    },
+    {
+      "id": 83,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 84,
+      "type": "sum",
+      "kwargs": {}
+    }
+  ],
+  "edges": [
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      3,
+      6
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6,
+      7
+    ],
+    [
+      7,
+      8
+    ],
+    [
+      8,
+      9
+    ],
+    [
+      9,
+      10
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      10,
+      11
+    ],
+    [
+      11,
+      14
+    ],
+    [
+      14,
+      15
+    ],
+    [
+      11,
+      16
+    ],
+    [
+      15,
+      16
+    ],
+    [
+      16,
+      17
+    ],
+    [
+      17,
+      18
+    ],
+    [
+      18,
+      19
+    ],
+    [
+      19,
+      20
+    ],
+    [
+      16,
+      21
+    ],
+    [
+      20,
+      21
+    ],
+    [
+      21,
+      24
+    ],
+    [
+      24,
+      25
+    ],
+    [
+      21,
+      26
+    ],
+    [
+      25,
+      26
+    ],
+    [
+      26,
+      27
+    ],
+    [
+      27,
+      28
+    ],
+    [
+      28,
+      29
+    ],
+    [
+      29,
+      30
+    ],
+    [
+      26,
+      31
+    ],
+    [
+      30,
+      31
+    ],
+    [
+      31,
+      34
+    ],
+    [
+      34,
+      35
+    ],
+    [
+      31,
+      36
+    ],
+    [
+      35,
+      36
+    ],
+    [
+      36,
+      37
+    ],
+    [
+      37,
+      38
+    ],
+    [
+      38,
+      39
+    ],
+    [
+      39,
+      40
+    ],
+    [
+      36,
+      41
+    ],
+    [
+      40,
+      41
+    ],
+    [
+      41,
+      44
+    ],
+    [
+      44,
+      45
+    ],
+    [
+      41,
+      46
+    ],
+    [
+      45,
+      46
+    ],
+    [
+      46,
+      47
+    ],
+    [
+      47,
+      48
+    ],
+    [
+      48,
+      49
+    ],
+    [
+      49,
+      50
+    ],
+    [
+      46,
+      51
+    ],
+    [
+      50,
+      51
+    ],
+    [
+      51,
+      54
+    ],
+    [
+      54,
+      55
+    ],
+    [
+      51,
+      56
+    ],
+    [
+      55,
+      56
+    ],
+    [
+      56,
+      57
+    ],
+    [
+      57,
+      58
+    ],
+    [
+      58,
+      59
+    ],
+    [
+      59,
+      60
+    ],
+    [
+      56,
+      61
+    ],
+    [
+      60,
+      61
+    ],
+    [
+      64,
+      13
+    ],
+    [
+      65,
+      66
+    ],
+    [
+      66,
+      67
+    ],
+    [
+      68,
+      69
+    ],
+    [
+      67,
+      70
+    ],
+    [
+      69,
+      71
+    ],
+    [
+      70,
+      71
+    ],
+    [
+      72,
+      73
+    ],
+    [
+      67,
+      74
+    ],
+    [
+      73,
+      75
+    ],
+    [
+      74,
+      75
+    ],
+    [
+      71,
+      76
+    ],
+    [
+      75,
+      76
+    ],
+    [
+      76,
+      64
+    ],
+    [
+      77,
+      78
+    ],
+    [
+      78,
+      79
+    ],
+    [
+      79,
+      80
+    ],
+    [
+      80,
+      81
+    ],
+    [
+      81,
+      82
+    ],
+    [
+      82,
+      83
+    ],
+    [
+      79,
+      84
+    ],
+    [
+      83,
+      84
+    ],
+    [
+      61,
+      77
+    ],
+    [
+      61,
+      79
+    ],
+    [
+      84,
+      65
+    ],
+    [
+      84,
+      68
+    ],
+    [
+      84,
+      72
+    ],
+    [
+      84,
+      76
+    ]
+  ],
+  "loss": 3.800887680053711,
+  "active_flops": 105778176.0,
+  "params": 128240979,
+  "summary": {
+    "attn": 7,
+    "linear": 17,
+    "softmax": 1,
+    "elemmul": 2,
+    "topk": 1,
+    "gather": 0,
+    "scatter": 0,
+    "concat": 0,
+    "gating": 2,
+    "skips": 1,
+    "compute": 24,
+    "nodes": 74,
+    "edges": 92
+  },
+  "weights": "checkpoints/graph-search/graph_gen5_ind6_loss3.80.pt"
+}

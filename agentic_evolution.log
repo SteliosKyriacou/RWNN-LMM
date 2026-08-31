@@ -1,6 +1,1175 @@
 === FULLY-FREE ATOMIC GRAPH SEARCH STARTED ===
-Seeded 20 graphs; injected gates/skips into 8, atom-MoE into 2.
+Seeded 20 graphs; SOTA-inspired 3, sparse top-k MoE 5, soft MoE 3, gated explorers 3.
 
 --- Graph-Search Generation 1/100 ---
 Cand 1/20 PLAN seed (initial population)
-Cand 1/20: atoms A24 L48 sm0 em0 gate0 skip0 | 248M 0.359G ...
+Cand 1/20: atoms A24 L48 sm0 em0 gate0 topk0 skip0 | 248M 0.359G ...
+   loss 4.0119, mem 7.74GB
+Cand 2/20 PLAN seed (initial population)
+Cand 2/20: atoms A12 L20 sm0 em0 gate0 topk0 skip0 | 153M 0.160G ...
+   loss 4.0652, mem 5.68GB
+Cand 3/20 PLAN seed (initial population)
+Cand 3/20: atoms A12 L24 sm0 em0 gate0 topk0 skip0 | 162M 0.179G ...
+   loss 3.9186, mem 6.53GB
+Cand 4/20 PLAN seed (initial population)
+Cand 4/20: atoms A16 L16 sm0 em0 gate0 topk0 skip0 | 153M 0.164G ...
+   loss 4.0626, mem 7.14GB
+Cand 5/20 PLAN seed (initial population)
+Cand 5/20: atoms A12 L27 sm1 em2 gate1 topk0 skip2 | 164M 0.183G ...
+   loss 3.9894, mem 7.80GB
+Cand 6/20 PLAN seed (initial population)
+Cand 6/20: atoms A8 L22 sm1 em4 gate4 topk1 skip4 | 137M 0.123G ...
+   loss 4.0168, mem 7.60GB
+Cand 7/20 PLAN seed (initial population)
+Cand 7/20: atoms A8 L33 sm1 em8 gate8 topk1 skip7 | 137M 0.121G ...
+   loss 4.0851, mem 8.18GB
+Cand 8/20 PLAN seed (initial population)
+Cand 8/20: atoms A6 L15 sm1 em2 gate2 topk1 skip1 | 121M 0.091G ...
+   loss 3.9067, mem 8.19GB
+Cand 9/20 PLAN seed (initial population)
+Cand 9/20: atoms A6 L17 sm1 em4 gate4 topk1 skip3 | 122M 0.092G ...
+   loss 3.8940, mem 8.70GB
+Cand 10/20 PLAN seed (initial population)
+Cand 10/20: atoms A6 L19 sm1 em6 gate6 topk1 skip5 | 124M 0.092G ...
+   loss 4.0357, mem 9.23GB
+Cand 11/20 PLAN seed (initial population)
+Cand 11/20: atoms A6 L15 sm1 em2 gate2 topk0 skip1 | 121M 0.092G ...
+   loss 4.0848, mem 9.65GB
+Cand 12/20 PLAN seed (initial population)
+Cand 12/20: atoms A6 L16 sm1 em3 gate3 topk0 skip2 | 122M 0.093G ...
+   loss 4.0178, mem 10.17GB
+Cand 13/20 PLAN seed (initial population)
+Cand 13/20: atoms A6 L17 sm1 em4 gate4 topk0 skip3 | 122M 0.094G ...
+   loss 3.9735, mem 10.68GB
+Cand 14/20 PLAN seed (initial population)
+Cand 14/20: atoms A8 L29 sm1 em2 gate1 topk0 skip9 | 160M 0.170G ...
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 15/20 PLAN seed (initial population)
+Cand 15/20: atoms A7 L15 sm1 em2 gate1 topk0 skip9 | 124M 0.099G ...
+   loss 3.9758, mem 11.26GB
+Cand 16/20 PLAN seed (initial population)
+Cand 16/20: atoms A7 L41 sm1 em2 gate1 topk0 skip18 | 186M 0.221G ...
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 12.00 MiB. GPU 0 has a total cap
+Cand 17/20 PLAN seed (initial population)
+Cand 17/20: atoms A11 L42 sm0 em0 gate0 topk0 skip14 | 203M 0.259G ...
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total cap
+Cand 18/20 PLAN seed (initial population)
+Cand 18/20: atoms A15 L28 sm0 em0 gate0 topk0 skip13 | 179M 0.215G ...
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total cap
+Cand 19/20 PLAN seed (initial population)
+Cand 19/20: atoms A14 L32 sm0 em0 gate0 topk0 skip15 | 186M 0.228G ...
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total cap
+Cand 20/20 PLAN seed (initial population)
+Cand 20/20: atoms A7 L28 sm0 em0 gate0 topk0 skip13 | 160M 0.171G ...
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+ -> 13/20 feasible | front 2 | best loss 3.8940 | rejects {'oom': 6, 'memory': 1}
+
+--- Graph-Search Generation 2/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Both seed elites are near-identical 6-layer attn+FFN backbones differing only in MoE width (E=2 vs E=4, k=1); the front is razor-thin (Δloss=0.013, ΔFLOPs=0.001G) — there's lots of unexplored space above/below this narrow band.
+  - No child has yet tested depth changes, FFN-internal sparsity, cross-depth routing, or removing modules entirely — these are the highest-value unexplored levers for extend-flops/extend-loss/novelty this generation.
+  - Grafting expert-compute pairs (lin+act only, re-gating downstream) is a clean way to recombine MoE capacity across elites (E=3 and E=6 variants) without dragging in the old router/slice/emul wiring.
+  - Plan: 3 dominate (cheap surgical tweaks), 4 extend-loss (deeper/wider capacity, crossover MoE), 4 extend-flops (strip layers/attn/FFN/MoE to find a new cheap floor), 3 fill-gap (E=3 intermediate MoE, extra attn-only layer), 3 diversify (SE-gate, dense cross-layer concat, post-norm hybrid), 3 novelty (soft mixture-of-depths gate, top-k cross-depth "hop selector", neuron-level sparse FFN).[0m
+Cand 1/20 PLAN [dominate] from elite 1: Swap GELU->SiLU in all 6 FFN blocks of the lowest-loss elite to test a cheap activation-only improvement at identical FLOPs.
+Cand 1/20: atoms A6 L17 sm1 em4 gate4 topk1 skip3 | 122M 0.092G ...
+ -> Inherited 88 parameter tensors from parent weights.
+   loss 3.8692, mem 4.59GB
+Cand 2/20 PLAN [dominate] from elite 0: Add a near-free per-channel scale_shift right before the LM head to calibrate final features on the cheapest elite.
+Cand 2/20: atoms A6 L15 sm1 em2 gate2 topk1 skip1 | 121M 0.091G ...
+ -> Inherited 84 parameter tensors from parent weights.
+   loss 3.8402, mem 5.04GB
+Cand 3/20 PLAN [dominate] from elite 1: Add a single cheap long-range residual skip from layer3 straight into the output sum to ease gradient flow at negligible FLOP cost.
+Cand 3/20: atoms A6 L17 sm1 em4 gate4 topk1 skip4 | 122M 0.092G ...
+ -> Inherited 88 parameter tensors from parent weights.
+   loss 4.0398, mem 5.54GB
+Cand 4/20 PLAN [extend-loss] from elite 1: Crossover: build an E=6,k=2 MoE by keeping elite1's 4 experts and grafting elite0's 2 experts under a fresh shared router, buying more capacity at a new loss point.
+Cand 4/20: atoms A6 L19 sm1 em6 gate6 topk1 skip5 | 124M 0.092G ...
+ -> Inherited 86 parameter tensors from parent weights.
+   loss 3.9263, mem 6.08GB
+Cand 5/20 PLAN [extend-loss] from elite 0: Graft an entire attn+FFN block from elite1 as a 7th layer on the cheap-MoE elite to test if extra depth buys a new lowest-loss point.
+Cand 5/20: atoms A7 L17 sm1 em2 gate2 topk1 skip1 | 128M 0.106G ...
+ -> Inherited 84 parameter tensors from parent weights.
+   loss 3.8009, mem 6.72GB
+Cand 6/20 PLAN [extend-loss] from elite 1: Stack a second sparse 4-expert MoE stage after the first (self-graft of the MoE block) to test whether two-stage sparse routing pushes loss lower.
+Cand 6/20: atoms A6 L22 sm2 em8 gate8 topk2 skip6 | 125M 0.094G ...
+ -> Inherited 88 parameter tensors from parent weights.
+   loss 3.9744, mem 7.11GB
+Cand 7/20 PLAN [extend-loss] from elite 0: Raise top_k from 1 to 2 on the E=2 MoE (both experts always active) to trade a small FLOP increase for lower loss, testing the soft-MoE limit of this elite.
+Cand 7/20: atoms A6 L15 sm1 em2 gate2 topk1 skip1 | 121M 0.092G ...
+ -> Inherited 84 parameter tensors from parent weights.
+   loss 4.0687, mem 7.51GB
+Cand 8/20 PLAN [extend-flops] from elite 0: Drop the 6th attn+FFN layer entirely (5-layer backbone) to find a new cheapest-viable point below elite0.
+Cand 8/20: atoms A5 L13 sm1 em2 gate2 topk1 skip1 | 114M 0.076G ...
+ -> Inherited 72 parameter tensors from parent weights.
+   loss 3.9603, mem 7.78GB
+Cand 9/20 PLAN [extend-flops] from elite 0: Halve FFN cost in the last 3 layers by dropping the activation+second linear (single-linear FFN) to cut FLOPs while keeping full depth.
+Cand 9/20: atoms A6 L12 sm1 em2 gate2 topk1 skip1 | 121M 0.077G ...
+ -> Inherited 78 parameter tensors from parent weights.
+   loss 4.0364, mem 8.43GB
+Cand 10/20 PLAN [extend-flops] from elite 1: Strip the MoE tail entirely (identity residual to ln_f) on the richer elite to find an extreme cheap floor point.
+Cand 10/20: atoms A6 L12 sm0 em0 gate0 topk0 skip0 | 120M 0.090G ...
+ -> Inherited 78 parameter tensors from parent weights.
+   loss 3.8716, mem 8.89GB
+Cand 11/20 PLAN [extend-flops] from elite 0: Remove attention sublayers from layers 5 and 6 (keep FFN only, identity skip for attn) to test a cheaper attention-light backbone.
+Cand 11/20: atoms A4 L15 sm1 em2 gate2 topk1 skip1 | 116M 0.080G ...
+ -> Inherited 72 parameter tensors from parent weights.
+   loss 4.0322, mem 9.20GB
+Cand 12/20 PLAN [fill-gap] from elite 0: Insert an E=3 MoE (grafting elite1's 3rd expert onto elite0's 2) to sit between the E=2 and E=4 FLOP/loss points.
+Cand 12/20: atoms A6 L16 sm1 em3 gate3 topk1 skip2 | 122M 0.091G ...
+ -> Inherited 82 parameter tensors from parent weights.
+   loss 3.8472, mem 9.90GB
+Cand 13/20 PLAN [fill-gap] from elite 1: Trim elite1's MoE from E=4 to E=3 to create an intermediate FLOP/loss point between the two current elites.
+Cand 13/20: atoms A6 L16 sm1 em3 gate3 topk1 skip2 | 122M 0.092G ...
+ -> Inherited 84 parameter tensors from parent weights.
+   loss 4.0857, mem 10.38GB
+Cand 14/20 PLAN [fill-gap] from elite 0: Add a lightweight attention-only extra layer (no FFN) after layer6, cheaper than a full attn+FFN layer, to fill the depth/FLOP gap between 6- and 7-layer variants.
+Cand 14/20: atoms A7 L15 sm1 em2 gate2 topk1 skip1 | 124M 0.096G ...
+ -> Inherited 84 parameter tensors from parent weights.
+   loss 3.9851, mem 10.97GB
+Cand 15/20 PLAN [diversify] from elite 1: Add a squeeze-and-excite style global context gate (mean_reduce over sequence -> linear/act -> element_mul) at the output, a channel-recalibration motif not present in either elite.
+Cand 15/20: atoms A6 L18 sm1 em5 gate4 topk1 skip3 | 123M 0.093G ...
+ -> Inherited 88 parameter tensors from parent weights.
+   loss 3.8251, mem 11.39GB
+Cand 16/20 PLAN [diversify] from elite 0: Feed the router and experts with a densely concatenated multi-depth feature (layers 2,5,6 projected down) instead of just the last layer, a DenseNet-style cross-layer routing signal distinct from both elites' local gating.
+Cand 16/20: atoms A6 L16 sm1 em2 gate2 topk1 skip1 | 123M 0.094G ...
+ -> Inherited 84 parameter tensors from parent weights.
+   loss 3.9014, mem 11.39GB
+Cand 17/20 PLAN [diversify] from elite 1: Convert layer1 to a post-norm variant (attention on raw stream, norm after residual sum) to diversify normalization placement within the lineage.
+Cand 17/20: atoms A6 L17 sm1 em4 gate4 topk1 skip3 | 122M 0.092G ...
+ -> Inherited 86 parameter tensors from parent weights.
+   loss 4.0169, mem 11.37GB
+Cand 18/20 PLAN [novelty] from elite 0: NEW: a continuous 'mixture-of-depths' gate (softmax->slice acting as a learned keep-probability) scales layer3's FFN contribution to the residual per-token, letting the network softly skip FFN compute for some tokens -- distinct from standard top_k MoE since it gates the residual branch itself rather than routing among parallel experts.
+Cand 18/20: atoms A6 L16 sm2 em3 gate3 topk1 skip1 | 121M 0.091G ...
+ -> Inherited 84 parameter tensors from parent weights.
+   loss 3.8838, mem 11.36GB
+Cand 19/20 PLAN [novelty] from elite 0: NEW: a sparse 'hop selector' concatenates outputs from 3 different depths (layers 2,4,6), runs a top_k(1) router over them, and injects the single chosen depth's representation directly into the output -- a token-wise dynamic cross-depth routing mechanism (unlike static residual skips or expert-MoE) that lets each token pick which past depth's features matter most.
+Cand 19/20: atoms A6 L16 sm2 em5 gate5 topk2 skip3 | 121M 0.072G ...
+ -> Inherited 84 parameter tensors from parent weights.
+   loss 3.9679, mem 11.37GB
+Cand 20/20 PLAN [novelty] from elite 0: NEW: a 'neuron-level MoE' inside the FFN -- a per-channel top_k gate (softmax over 768 channels then top_k=128) multiplies the FFN activation before the down-projection, sparsifying which hidden neurons fire per token, unlike expert-level MoE which routes whole sub-networks.
+Cand 20/20: atoms A6 L16 sm2 em3 gate3 topk2 skip1 | 124M 0.088G ...
+ -> Inherited 84 parameter tensors from parent weights.
+   loss 3.8978, mem 11.45GB
+ -> 14/20 feasible | front 4 | best loss 3.8009 | rejects {'memory': 6}
+
+--- Graph-Search Generation 3/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Pure-backbone elite 1 (6 layers, zero MoE, 3.872@0.090G) now edges out the MoE-augmented elite 0/2 lineage at comparable FLOPs — depth+plain FFN is currently pulling more weight than sparse-MoE width, so extra layers deserve more budget this generation.
+  - Elite 2's post-ln `scale_shift` (0.091G, 3.840) clearly helped vs elite 0's plain MoE tail at nearly the same FLOPs — a cheap, transferable trick worth grafting onto the other lineages for dominate moves.
+  - Elite 3 (7 layers + MoE, 3.801@0.106G) is now the best-loss point and the biggest FLOP gap (0.091→0.106G) sits right next to it — good targets for both extend-loss (push deeper/wider) and fill-gap (partial-depth layer).
+  - Plan: 3 dominate (scale_shift/silu transplant onto cheaper elites), 4 extend-loss (deepen/widen elite 3 via crossover with elites 1 & 2), 4 extend-flops (strip MoE/layers from elites 0 & 1 for new cheap floors), 3 fill-gap (partial attn-only or FFN-stripped extra layers), 3 diversify (SE-gate, dense-concat router, post-norm), 3 novelty (mixture-of-depths gate, cross-depth hop selector, neuron-level sparse FFN).[0m
+Cand 1/20 PLAN [dominate] from elite 1: Transplant elite2's cheap post-ln scale_shift onto elite1's plain 6-layer backbone to test if it lowers loss at nearly identical FLOPs.
+Cand 1/20: atoms A6 L12 sm0 em0 gate0 topk0 skip0 | 120M 0.090G ...
+ -> Inherited 78 parameter tensors from parent weights.
+   loss 3.8351, mem 5.46GB
+Cand 2/20 PLAN [dominate] from elite 2: Swap all 6 main FFN activations from gelu to silu on elite2 (currently the 2nd-best loss) at zero extra FLOPs.
+Cand 2/20: atoms A6 L15 sm1 em2 gate2 topk1 skip1 | 121M 0.091G ...
+ -> Inherited 86 parameter tensors from parent weights.
+   loss 3.8462, mem 6.00GB
+Cand 3/20 PLAN [dominate] from elite 0: Add elite2's post-ln scale_shift trick to the cheapest elite0 to try to lower loss at nearly the same FLOPs.
+Cand 3/20: atoms A5 L13 sm1 em2 gate2 topk1 skip1 | 114M 0.076G ...
+ -> Inherited 72 parameter tensors from parent weights.
+   loss 3.9411, mem 6.26GB
+Cand 4/20 PLAN [extend-loss] from elite 3: Crossover: graft elite2's post-ln scale_shift onto the current best-loss elite3 to test a cheap loss reduction on top of depth+MoE.
+Cand 4/20: atoms A7 L17 sm1 em2 gate2 topk1 skip1 | 128M 0.106G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.9644, mem 7.15GB
+Cand 5/20 PLAN [extend-loss] from elite 3: Crossover: graft elite1's 6th attn+FFN block as an 8th layer onto elite3, testing if further depth beyond the current best pushes loss to a new low.
+Cand 5/20: atoms A8 L19 sm1 em2 gate2 topk1 skip1 | 135M 0.121G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.8708, mem 7.87GB
+Cand 6/20 PLAN [extend-loss] from elite 3: Raise elite3's MoE top_k from 1 to 2 (E=2, so both experts always active) to test a soft-MoE upgrade of the best-loss architecture.
+Cand 6/20: atoms A7 L17 sm1 em2 gate2 topk1 skip1 | 128M 0.107G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.7588, mem 8.20GB
+Cand 7/20 PLAN [extend-loss] from elite 3: Crossover: widen elite3's MoE from E=2 to E=4 by grafting elite2's expert pair alongside a new 4-way router, adding capacity to the best-loss lineage under sparse top-1 routing.
+Cand 7/20: atoms A7 L19 sm1 em4 gate4 topk1 skip3 | 129M 0.106G ...
+ -> Inherited 94 parameter tensors from parent weights.
+   loss 3.9491, mem 8.74GB
+Cand 8/20 PLAN [extend-flops] from elite 0: Strip elite0's 5th attn+FFN layer entirely (4-layer backbone + MoE) to find a new cheapest-viable point below elite0.
+Cand 8/20: atoms A4 L11 sm1 em2 gate2 topk1 skip1 | 107M 0.061G ...
+ -> Inherited 60 parameter tensors from parent weights.
+   loss 4.0406, mem 8.56GB
+Cand 9/20 PLAN [extend-flops] from elite 0: Remove the MoE tail entirely from elite0's 5-layer backbone (pure residual to ln_f) to find an even cheaper floor than the current MoE-augmented cheapest elite.
+Cand 9/20: atoms A5 L10 sm0 em0 gate0 topk0 skip0 | 113M 0.075G ...
+ -> Inherited 66 parameter tensors from parent weights.
+   loss 3.9989, mem 9.18GB
+Cand 10/20 PLAN [extend-flops] from elite 1: Strip elite1's plain 6-layer backbone down to 4 layers (remove layers 5 and 6) for a substantially cheaper new floor with no MoE.
+Cand 10/20: atoms A4 L8 sm0 em0 gate0 topk0 skip0 | 106M 0.060G ...
+ -> Inherited 54 parameter tensors from parent weights.
+   loss 3.9839, mem 9.39GB
+Cand 11/20 PLAN [extend-flops] from elite 0: Halve FFN cost in all 5 layers of elite0 (drop act+second linear, single-linear FFN) while keeping full depth and MoE, to cut FLOPs further.
+Cand 11/20: atoms A5 L8 sm1 em2 gate2 topk1 skip1 | 114M 0.052G ...
+ -> Inherited 62 parameter tensors from parent weights.
+   loss 4.1473, mem 10.03GB
+Cand 12/20 PLAN [fill-gap] from elite 2: Add a lightweight attention-only 7th layer (no FFN) before elite2's MoE, cheaper than a full attn+FFN layer, to sit between elite2 (0.091G) and elite3 (0.106G).
+Cand 12/20: atoms A7 L15 sm1 em2 gate2 topk1 skip1 | 124M 0.096G ...
+ -> Inherited 86 parameter tensors from parent weights.
+   loss 3.8975, mem 10.89GB
+Cand 13/20 PLAN [fill-gap] from elite 3: Strip the FFN half of elite3's extra 7th layer (keep attn-only) to reduce FLOPs from 0.106G toward the 0.091-0.106G gap while retaining most of the depth benefit.
+Cand 13/20: atoms A7 L15 sm1 em2 gate2 topk1 skip1 | 124M 0.096G ...
+ -> Inherited 90 parameter tensors from parent weights.
+   loss 3.8831, mem 11.37GB
+Cand 14/20 PLAN [fill-gap] from elite 1: Crossover: graft elite0's full sparse E=2 MoE tail onto elite1's plain 6-layer backbone to land an intermediate FLOP/loss point via a differently-sourced MoE.
+Cand 14/20: atoms A6 L15 sm1 em2 gate2 topk1 skip1 | 121M 0.091G ...
+ -> Inherited 78 parameter tensors from parent weights.
+   loss 3.7221, mem 11.25GB
+Cand 15/20 PLAN [diversify] from elite 3: Add a squeeze-and-excite global context gate (mean_reduce->linear->act->element_mul) on the best-loss elite, a channel-recalibration motif not present in this lineage.
+Cand 15/20: atoms A7 L18 sm1 em3 gate2 topk1 skip1 | 129M 0.107G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.5955, mem 11.50GB
+Cand 16/20 PLAN [diversify] from elite 2: Feed elite2's MoE router and experts with a densely concatenated multi-depth signal (layers 2,5,6) instead of just the last layer, a DenseNet-style routing input distinct from local gating.
+Cand 16/20: atoms A6 L16 sm1 em2 gate2 topk1 skip1 | 123M 0.094G ...
+ -> Inherited 86 parameter tensors from parent weights.
+   loss 3.8838, mem 11.30GB
+Cand 17/20 PLAN [diversify] from elite 1: Convert elite1's layer1 to post-norm (attention on raw stream, norm applied after the residual sum, before FFN) to diversify normalization placement in the pure-backbone lineage.
+Cand 17/20: atoms A6 L12 sm0 em0 gate0 topk0 skip0 | 120M 0.090G ...
+ -> Inherited 76 parameter tensors from parent weights.
+   loss 3.6928, mem 11.21GB
+Cand 18/20 PLAN [novelty] from elite 3: NEW: a continuous mixture-of-depths gate (softmax->slice as a learned keep-probability) scales layer4's FFN contribution to the residual per-token on the best-loss elite, letting the network softly skip FFN compute for some tokens -- gates the residual branch itself rather than routing among parallel experts.
+Cand 18/20: atoms A7 L18 sm2 em3 gate3 topk1 skip1 | 128M 0.106G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.7647, mem 11.49GB
+Cand 19/20 PLAN [novelty] from elite 2: NEW: a sparse cross-depth 'hop selector' concatenates outputs from 3 depths (layers 2,4,6), runs a top_k(1) router over them, and injects the single chosen depth's representation into the output sum -- token-wise dynamic routing across depths, distinct from static residual skips or expert-MoE.
+Cand 19/20: atoms A6 L16 sm2 em5 gate5 topk2 skip3 | 121M 0.072G ...
+ -> Inherited 86 parameter tensors from parent weights.
+   loss 3.7407, mem 11.28GB
+Cand 20/20 PLAN [novelty] from elite 1: NEW: a 'neuron-level MoE' inside layer6's FFN -- a per-channel top_k gate (softmax over 768 channels then top_k=128) multiplies the activation before the down-projection, sparsifying which hidden neurons fire per token, unlike expert-level MoE which routes whole sub-networks; tested on the MoE-free elite1 backbone as a clean testbed.
+Cand 20/20: atoms A6 L13 sm1 em1 gate1 topk1 skip0 | 123M 0.087G ...
+ -> Inherited 78 parameter tensors from parent weights.
+   loss 3.9839, mem 11.31GB
+ -> 12/20 feasible | front 6 | best loss 3.7588 | rejects {'memory': 8}
+
+--- Graph-Search Generation 4/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Elites 4 & 5 (7-layer + E=2 top-1 MoE) now hold the best-loss region (3.759–3.801 @ ~0.106G), but neither has the `scale_shift` tail trick that already proved a clean dominate move on elites 2 & 3 — highest-leverage cheap win this gen.
+  - The "halve-FFN" (single-linear, no act) and "drop-a-layer" mutations from last gen produced the new cheapest elite (0.052G) at a real loss cost (4.147) — extend-flops still has headroom below that by stripping MoE/layers further, but returns are diminishing so I'll spread fewer children there.
+  - The 0.090G→0.106G gap (elite3 plain+scale_shift vs elite4/5 7-layer+MoE) is the widest — grafting MoE onto elite3 or adding an attn-only partial layer are natural gap-fillers.
+  - All MoE variants so far use dense slice+element_mul gating (compute-all-then-mask); no elite has tried true gather/scatter_add token-level routing, mid-stack MoE placement, or cross-depth soft blending — prioritizing these as this gen's novelty slate.[0m
+Cand 1/20 PLAN [dominate] from elite 5: Transplant the proven post-ln scale_shift trick onto the current best-loss elite5 to push it lower at negligible extra FLOPs.
+Cand 1/20: atoms A7 L17 sm1 em2 gate2 topk1 skip1 | 128M 0.107G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.8202, mem 6.64GB
+Cand 2/20 PLAN [dominate] from elite 4: Same scale_shift transplant onto elite4 (twin of elite5) to test if it also dominates the 0.106G point.
+Cand 2/20: atoms A7 L17 sm1 em2 gate2 topk1 skip1 | 128M 0.106G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.9371, mem 7.15GB
+Cand 3/20 PLAN [dominate] from elite 3: Swap all 6 FFN activations from gelu to silu on elite3 (plain backbone + scale_shift, 3.835@0.090G) for a zero-extra-FLOP loss test.
+Cand 3/20: atoms A6 L12 sm0 em0 gate0 topk0 skip0 | 120M 0.090G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   loss 3.9467, mem 7.42GB
+Cand 4/20 PLAN [extend-loss] from elite 5: Crossover: graft elite2's layer5 (attn+FFN block) as an 8th layer onto elite5, then feed the MoE from this deeper representation to push past the current best loss.
+Cand 4/20: atoms A8 L19 sm1 em2 gate2 topk1 skip1 | 135M 0.122G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.8967, mem 8.36GB
+Cand 5/20 PLAN [extend-loss] from elite 5: Raise elite5's top_k from 1 to 2 (E=2, both experts always active) as a soft-MoE upgrade of the best-loss lineage.
+Cand 5/20: atoms A7 L17 sm1 em2 gate2 topk2 skip1 | 128M 0.107G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.8910, mem 8.68GB
+Cand 6/20 PLAN [extend-loss] from elite 4: Crossover: widen elite4's MoE from E=2 to E=4 by grafting elite2's expert pair under a new 4-way top-1 router, adding capacity to the best-loss lineage at low extra FLOP cost.
+Cand 6/20: atoms A7 L19 sm1 em4 gate4 topk1 skip3 | 129M 0.106G ...
+ -> Inherited 94 parameter tensors from parent weights.
+   loss 3.8172, mem 9.22GB
+Cand 7/20 PLAN [extend-loss] from elite 5: Add a lightweight attn-only 8th layer before the MoE (extra representational capacity at lower cost than a full attn+FFN layer) aiming for a new lowest-loss point.
+Cand 7/20: atoms A8 L17 sm1 em2 gate2 topk1 skip1 | 131M 0.112G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.8520, mem 9.82GB
+Cand 8/20 PLAN [extend-flops] from elite 0: Strip the MoE tail entirely from the cheapest elite0's 5-layer halved-FFN backbone (pure residual to ln_f) to find an even cheaper floor.
+Cand 8/20: atoms A5 L5 sm0 em0 gate0 topk0 skip0 | 113M 0.051G ...
+ -> Inherited 61 parameter tensors from parent weights.
+   loss 4.0464, mem 9.69GB
+Cand 9/20 PLAN [extend-flops] from elite 1: Strip elite1's plain 4-layer backbone down to 3 layers for a new, cheaper no-MoE floor point.
+Cand 9/20: atoms A3 L6 sm0 em0 gate0 topk0 skip0 | 99M 0.045G ...
+ -> Inherited 42 parameter tensors from parent weights.
+   loss 4.0737, mem 9.75GB
+Cand 10/20 PLAN [extend-flops] from elite 0: Remove elite0's 5th (halved-FFN) layer, keeping the sparse MoE tail fed by layer4's output, to further reduce FLOPs below the current cheapest point.
+Cand 10/20: atoms A4 L7 sm1 em2 gate2 topk1 skip1 | 107M 0.042G ...
+ -> Inherited 56 parameter tensors from parent weights.
+   loss 4.1195, mem 10.36GB
+Cand 11/20 PLAN [extend-flops] from elite 1: Halve FFN cost in all 4 layers of the plain elite1 (drop act+2nd linear, single-linear FFN) to cut FLOPs further while keeping depth and no-MoE simplicity.
+Cand 11/20: atoms A4 L4 sm0 em0 gate0 topk0 skip0 | 106M 0.041G ...
+ -> Inherited 46 parameter tensors from parent weights.
+   loss 4.2115, mem 10.75GB
+Cand 12/20 PLAN [fill-gap] from elite 3: Crossover: graft elite2's full sparse E=2 MoE tail onto elite3's plain-backbone+scale_shift stream, landing an intermediate point in the 0.090-0.106G gap with a differently-sourced MoE.
+Cand 12/20: atoms A6 L15 sm1 em2 gate2 topk1 skip1 | 121M 0.091G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   loss 3.9623, mem 11.70GB
+Cand 13/20 PLAN [fill-gap] from elite 3: Crossover: graft only elite4's attn-only extra-layer piece (ln+attn) onto elite3, cheaper than a full attn+FFN layer, to sit between elite3 (0.090G) and elite4 (0.106G).
+Cand 13/20: atoms A7 L12 sm0 em0 gate0 topk0 skip0 | 122M 0.095G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 14/20 PLAN [fill-gap] from elite 2: Add a lightweight attn-only 6th layer before elite2's MoE to push its FLOPs up from 0.076G toward the gap, a lower-side intermediate point.
+Cand 14/20: atoms A6 L13 sm1 em2 gate2 topk1 skip1 | 116M 0.081G ...
+ -> Inherited 74 parameter tensors from parent weights.
+   loss 3.8700, mem 11.61GB
+Cand 15/20 PLAN [diversify] from elite 3: Give layer1's FFN a parallel narrower branch (concat two different-width paths then project) instead of a single linear-act-linear path -- a branchy topology not used in any current elite.
+Cand 15/20: atoms A6 L15 sm0 em0 gate0 topk0 skip0 | 122M 0.093G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   loss 3.9893, mem 11.71GB
+Cand 16/20 PLAN [diversify] from elite 2: Convert elite2's layer1 to post-norm (attention on raw stream, norm applied after the residual sum) to diversify normalization placement within the MoE lineage.
+Cand 16/20: atoms A5 L13 sm1 em2 gate2 topk1 skip1 | 114M 0.076G ...
+ -> Inherited 72 parameter tensors from parent weights.
+   loss 3.8854, mem 11.50GB
+Cand 17/20 PLAN [diversify] from elite 4: Insert per-layer learned scale_shift after the first 3 residual sums (instead of only at the final tail) to diversify where affine recalibration happens in the network.
+Cand 17/20: atoms A7 L17 sm1 em2 gate2 topk1 skip1 | 128M 0.106G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 18/20 PLAN [novelty] from elite 4: NEW: a genuinely sparse token-level expert via gather/scatter_add -- router picks a top-1 token subset, gathers only those rows for a small extra expert linear, and scatter_adds the result back into the residual, unlike every current MoE which densely computes both experts then masks via element_mul. This tests true per-token compute sparsity, not just FLOP-accounting sparsity.
+Cand 18/20: atoms A7 L19 sm2 em2 gate2 topk2 skip2 | 129M 0.107G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 36.00 GiB. GPU 0 has a total cap
+Cand 19/20 PLAN [novelty] from elite 5: NEW: a learned soft blend between two distant residual streams (layer3 output and layer6 output) via a 2-way softmax gate, injecting a cross-depth interpolated representation into the final merge -- distinct from static skip connections or FFN gating, letting the model learn how much shallow vs deep processing each token needs.
+Cand 19/20: atoms A7 L18 sm2 em4 gate4 topk1 skip2 | 128M 0.107G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 20/20 PLAN [novelty] from elite 3: NEW: a mid-stack sparse top-1 MoE inserted after layer3 (instead of only at the tail, where every current MoE elite places it) -- tests whether early sparse expert injection changes what the deeper layers learn, a novel placement rather than novel mechanism.
+Cand 20/20: atoms A6 L15 sm1 em2 gate2 topk1 skip1 | 121M 0.091G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   loss 3.8508, mem 11.71GB
+ -> 11/20 feasible | front 9 | best loss 3.7588 | rejects {'memory': 5, 'oom': 4}
+
+--- Graph-Search Generation 5/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Best loss has plateaued at 3.759 for two generations — depth-stacking, top_k widening, and scale_shift transplants on the 7-layer+MoE lineage aren't breaking through, so this gen tries structurally different levers (SwiGLU gating, head-count increase, wider sparse MoE, cross-path fusion) rather than more of the same.
+  - The extend-flops push last gen was very productive (5 new cheap elites 0.041–0.076G) — diminishing returns now, so fewer children go there, focused on undercutting the new 0.041G floor.
+  - The 0.090→0.106G gap persists as the widest despite fill-gap attempts; this gen tries a full extra full-FFN layer, an attn-only-only increment, and a distinct MoE graft to bracket it more finely.
+  - Graftable node listings are only given for elites 0-4 this generation — all `graft` ops source from {0,1,2,3,4} only; deeper elites (6/7/8) are mutated via direct ops using their inferred standard node-id skeleton.[0m
+Cand 1/20 PLAN [dominate] from elite 2: Add the proven post-ln scale_shift tail to elite2's cheap 3-layer plain backbone to test a free loss reduction at same FLOPs.
+Cand 1/20: atoms A3 L6 sm0 em0 gate0 topk0 skip0 | 99M 0.045G ...
+ -> Inherited 42 parameter tensors from parent weights.
+   loss 3.9119, mem 6.95GB
+Cand 2/20 PLAN [dominate] from elite 0: Add scale_shift to the extreme-cheap elite0 (0.041G) to see if the trick still buys loss at the very bottom of the FLOP range.
+Cand 2/20: atoms A4 L4 sm0 em0 gate0 topk0 skip0 | 106M 0.041G ...
+ -> Inherited 50 parameter tensors from parent weights.
+   loss 4.0440, mem 7.52GB
+Cand 3/20 PLAN [dominate] from elite 1: Swap elite1's two MoE expert activations from gelu to silu (zero extra FLOPs) to test a free loss improvement on the cheap-MoE point.
+Cand 3/20: atoms A4 L7 sm1 em2 gate2 topk1 skip1 | 107M 0.042G ...
+ -> Inherited 56 parameter tensors from parent weights.
+   loss 7.4020, mem 7.98GB
+Cand 4/20 PLAN [extend-loss] from elite 8: Replace layer7's plain FFN in the best-loss elite with a SwiGLU-style gated FFN (up-project to 1536, split into value+gate, silu-gate, down-project) to test if gated mixing breaks the 3.759 loss plateau.
+Cand 4/20: atoms A7 L17 sm1 em3 gate2 topk1 skip1 | 125M 0.101G ...
+ -> Inherited 92 parameter tensors from parent weights.
+   loss 3.8567, mem 8.64GB
+Cand 5/20 PLAN [extend-loss] from elite 8: Widen the best-loss elite's MoE from E=2/k=1 to E=8/k=2 (6 new plain experts + new router) to add sparse capacity without proportionally increasing FLOPs, aiming for a new lowest-loss point.
+Cand 5/20: atoms A7 L23 sm1 em8 gate8 topk2 skip7 | 132M 0.107G ...
+ -> Inherited 94 parameter tensors from parent weights.
+   loss 3.8384, mem 9.31GB
+Cand 6/20 PLAN [extend-loss] from elite 8: Increase layer7's attention head count from 12 to 16 on the best-loss elite (splits d_model finer, roughly free in FLOPs) to test if more attention heads buy extra loss reduction.
+Cand 6/20: atoms A7 L17 sm1 em2 gate2 topk1 skip1 | 128M 0.107G ...
+ -> Inherited 92 parameter tensors from parent weights.
+   loss 3.8201, mem 9.73GB
+Cand 7/20 PLAN [extend-loss] from elite 8: Crossover: graft elite3's halved-FFN attn layer as a new 8th layer inserted before the MoE on the best-loss elite, adding depth from a different lineage to try to push past the 3.759 plateau.
+Cand 7/20: atoms A8 L18 sm1 em2 gate2 topk1 skip1 | 135M 0.117G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.8663, mem 10.45GB
+Cand 8/20 PLAN [extend-flops] from elite 0: Strip elite0's 4th layer (3-layer halved-FFN backbone) to undercut the current cheapest 0.041G floor.
+Cand 8/20: atoms A3 L3 sm0 em0 gate0 topk0 skip0 | 99M 0.031G ...
+ -> Inherited 39 parameter tensors from parent weights.
+   loss 4.2456, mem 9.82GB
+Cand 9/20 PLAN [extend-flops] from elite 2: Strip all FFN sublayers from elite2's 3-layer backbone, leaving a pure attn-only stack, for an extreme cheap floor point.
+Cand 9/20: atoms A3 L0 sm0 em0 gate0 topk0 skip0 | 85M 0.017G ...
+ -> Inherited 24 parameter tensors from parent weights.
+   loss 4.3930, mem 9.95GB
+Cand 10/20 PLAN [extend-flops] from elite 3: Strip elite3's 5th layer down to 4 layers (still halved-FFN) for a slightly cheaper alternative to elite0/elite2 in the sub-0.045G region.
+Cand 10/20: atoms A4 L4 sm0 em0 gate0 topk0 skip0 | 106M 0.041G ...
+ -> Inherited 50 parameter tensors from parent weights.
+   loss 4.2531, mem 10.75GB
+Cand 11/20 PLAN [extend-flops] from elite 1: Remove elite1's small MoE tail entirely, leaving the plain 4-layer halved-FFN backbone, to test if the MoE overhead was worth it at this FLOP tier or if a leaner point dominates.
+Cand 11/20: atoms A4 L4 sm0 em0 gate0 topk0 skip0 | 106M 0.041G ...
+ -> Inherited 50 parameter tensors from parent weights.
+   loss 4.0049, mem 11.17GB
+Cand 12/20 PLAN [fill-gap] from elite 6: Crossover: graft elite4's full-FFN layer4 block as a 7th layer onto elite6's plain 6-layer backbone, adding depth to land between elite6 (0.090G) and elite7 (0.106G).
+Cand 12/20: atoms A7 L14 sm0 em0 gate0 topk0 skip0 | 127M 0.105G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 13/20 PLAN [fill-gap] from elite 6: Add a cheaper attn-only (no FFN) 7th layer to elite6, a smaller FLOP increment than a full layer, to finely fill the gap toward elite7.
+Cand 13/20: atoms A7 L12 sm0 em0 gate0 topk0 skip0 | 122M 0.095G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 14/20 PLAN [fill-gap] from elite 6: Crossover: graft elite1's sparse E=2/k=1 MoE tail onto elite6's scale_shift output, adding sparse capacity to bridge the 0.090-0.106G gap with a lightweight expert source.
+Cand 14/20: atoms A6 L15 sm1 em2 gate2 topk1 skip1 | 121M 0.091G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   loss 3.9224, mem 11.70GB
+Cand 15/20 PLAN [diversify] from elite 6: Give elite6's layer6 FFN a parallel narrower branch (concat two different-width paths then project) for a branchy topology not present in this lineage.
+Cand 15/20: atoms A6 L15 sm0 em0 gate0 topk0 skip0 | 122M 0.093G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   loss 4.0151, mem 11.71GB
+Cand 16/20 PLAN [diversify] from elite 4: Convert elite4's layer1 to post-norm (attention on raw stream, norm after the residual sum) to diversify normalization placement in this full-FFN lineage.
+Cand 16/20: atoms A4 L8 sm0 em0 gate0 topk0 skip0 | 106M 0.060G ...
+ -> Inherited 52 parameter tensors from parent weights.
+   loss 3.9155, mem 11.21GB
+Cand 17/20 PLAN [diversify] from elite 2: Feed elite2's final ln_f from a dense concat of all 3 layer outputs (DenseNet-style) instead of just the last layer, a cross-layer aggregation motif not tried on this lineage.
+Cand 17/20: atoms A3 L7 sm0 em0 gate0 topk0 skip0 | 100M 0.048G ...
+ -> Inherited 42 parameter tensors from parent weights.
+   loss 3.9365, mem 11.03GB
+Cand 18/20 PLAN [novelty] from elite 8: NEW: fuse attention and FFN paths directly -- layer7's raw attention output element-wise gates the FFN's hidden activation before down-projection, instead of the two paths only meeting via separate additive residuals as in every current elite. This creates a genuine cross-path interaction (attention magnitude modulates which FFN channels fire per token) not present in any elite so far.
+Cand 18/20: atoms A7 L17 sm1 em3 gate2 topk1 skip1 | 133M 0.107G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 19/20 PLAN [novelty] from elite 8: NEW: a hard top-1 mixture-of-depths gate decides per-token whether to use the new 7th-layer representation or fall back to the pre-layer7 stream before entering the MoE, unlike the earlier soft blend -- this is a genuine binary depth-skip decision (via top_k) at the whole-block level rather than a continuous scalar gate on a sub-component.
+Cand 19/20: atoms A7 L18 sm2 em4 gate4 topk2 skip1 | 128M 0.098G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 20/20 PLAN [novelty] from elite 8: NEW crossover: graft elite2's shallow layer2-FFN representation and fuse it (concat+project) directly into the best-loss elite's final output sum, injecting a low-level shallow feature alongside the deep 7-layer+MoE processed one -- a shallow-to-final shortcut fusion between two structurally distinct lineages that no current elite has.
+Cand 20/20: atoms A7 L20 sm1 em2 gate2 topk1 skip2 | 134M 0.119G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+ -> 9/20 feasible | front 7 | best loss 3.7588 | rejects {'loss': 1, 'memory': 5, 'oom': 5}
+
+--- Graph-Search Generation 6/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Best loss has plateaued at 3.759 for 3 straight generations on the same 7-layer+MoE motif — surface tweaks (scale_shift, top_k width, head count) aren't moving it, so this gen attacks real under-capacity: FFN hidden dims and expert hidden dims are only 768→768 (no standard 4x expansion) and MoE experts are single-linear — widening these is the untested lever.
+  - Discovered elites 5/6's actual topology: MoE sits AFTER the 7th attn+FFN layer (not before) — several earlier-generation grafts assumed the wrong order; this generation's ops are corrected to the true wiring (84→MoE→76→ln_f).
+  - Fill-gap has widened to 0.045→0.090G (biggest yet) — spending extra children here: stacking two more plain layers onto the 0.045G elite, and grafting the proven MoE tail onto it, to bracket the gap from both sides.
+  - Cheap floor (elite0, 0.017G, attn-only no linears) is worth undercutting by one more layer-strip; elite1/elite2 give two more halved-FFN floor variants to test.[0m
+Cand 1/20 PLAN [dominate] from elite 0: Add the proven post-ln scale_shift to the cheapest attn-only elite0 to test a free loss reduction at same FLOPs.
+Cand 1/20: atoms A3 L0 sm0 em0 gate0 topk0 skip0 | 85M 0.017G ...
+ -> Inherited 24 parameter tensors from parent weights.
+   loss 4.2434, mem 5.63GB
+Cand 2/20 PLAN [dominate] from elite 1: Add scale_shift to elite1's 3-layer attn+FFN backbone (lacks it) for a near-free loss test.
+Cand 2/20: atoms A3 L3 sm0 em0 gate0 topk0 skip0 | 99M 0.031G ...
+ -> Inherited 39 parameter tensors from parent weights.
+   loss 4.2941, mem 6.24GB
+Cand 3/20 PLAN [dominate] from elite 2: Elite2's FFN is a single linear with no nonlinearity; insert a cheap pointwise silu activation after each layer's linear to test if lost expressivity was capping this elite's loss, at near-zero extra FLOPs.
+Cand 3/20: atoms A4 L4 sm0 em0 gate0 topk0 skip0 | 106M 0.041G ...
+ -> Inherited 48 parameter tensors from parent weights.
+   loss 4.0316, mem 6.88GB
+Cand 4/20 PLAN [extend-loss] from elite 6: Widen FFN hidden dim from 768 to 3072 (standard 4x expansion) in layers 6 and 7 of the best-loss elite — every current elite's FFN is under-parameterized at 1x width, likely the real cause of the 3.759 plateau.
+Cand 4/20: atoms A7 L19 sm1 em2 gate2 topk1 skip1 | 138M 0.116G ...
+ -> Inherited 92 parameter tensors from parent weights.
+/home/stelios/repos/RWNN-LMM/evolve_graph_search.py:797: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  try: sig2state[a["sig"]] = torch.load(wf, map_location="cpu")
+=== RESUMING GRAPH SEARCH at generation 6/100 (front 7, best loss 3.7588, 7 weight sets restored; re-injecting 2 mem-rejected novel structures) ===
+
+--- Graph-Search Generation 6/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Memory budget was raised 11.0→11.8GB — several strong architectures (SE global-context gate reaching **~3.60 loss**, cross-depth hop-selector at ~3.74/low-FLOPs, mid-stack MoE, DenseNet concat, branchy FFN, post-norm) were wrongly discarded on the old budget and must be resubmitted now; this is the top priority this generation.
+  - Best loss has been stuck at 3.759 for 3 straight gens using depth/width/top_k tweaks alone — the SE gate result (~3.60) suggests global-context recalibration is the real unlock, so it gets applied to multiple front points (best-loss, mid-tier, cheap-tier) simultaneously.
+  - The 0.045G→0.090G gap is now huge (0.045G wide, the biggest yet) — filling it needs multiple graft-based intermediate depths, not just one attempt.
+  - Plan: 4 dominate (SE-gate + scale_shift + silu transplants), 3 extend-loss (SE-gate on best lineage, hop-selector resubmit, head-count), 2 extend-flops (undercut the 0.017G floor), 4 fill-gap (SE-gate + graft-based intermediate depths across the wide gap), 3 novelty (hop-selector resubmit, mid-stack MoE resubmit, new attention-gated long-skip), 4 diversify (DenseNet concat, branchy FFN, post-norm ×2).[0m
+Cand 1/20 PLAN [extend-loss] from elite 6: RESUBMIT: Squeeze-Excite global-context gate (mean_reduce->linear->silu->element_mul on the pre-ln_f stream) reached ~3.60 loss last gen but was discarded only for exceeding the OLD mem budget; applying it to the current best-loss elite6 under the new 11.8GB budget.
+Cand 1/20: atoms A7 L18 sm1 em3 gate2 topk1 skip1 | 129M 0.108G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.4811, mem 3.80GB
+Cand 2/20 PLAN [dominate] from elite 5: RESUBMIT SE gate on the twin second-best elite5, aiming to dominate its own FLOP tier with the previously-discarded global-context recalibration trick.
+Cand 2/20: atoms A7 L18 sm1 em3 gate2 topk1 skip1 | 129M 0.107G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.7304, mem 4.32GB
+Cand 3/20 PLAN [dominate] from elite 4: RESUBMIT SE gate on the mid-tier plain-backbone elite4 (0.090G, 3.835), a cheaper testbed for the global-context trick to dominate this FLOP tier.
+Cand 3/20: atoms A6 L13 sm0 em1 gate0 topk0 skip0 | 121M 0.091G ...
+ -> Inherited 80 parameter tensors from parent weights.
+/home/stelios/repos/RWNN-LMM/evolve_graph_search.py:809: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  try: sig2state[a["sig"]] = torch.load(wf, map_location="cpu")
+=== RESUMING GRAPH SEARCH at generation 6/100 (front 7, best loss 3.7588, 7 weight sets restored; re-injecting 2 mem-rejected novel structures) ===
+
+--- Graph-Search Generation 6/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Six high-value structures (SE global-context gate ~3.60 loss, cross-depth hop-selector ~3.74@low-FLOPs, mid-stack MoE, DenseNet concat, branchy FFN, post-norm) were wrongly discarded only for the OLD 11.0GB mem cap — top priority this gen is re-submitting them now that the cap is 11.8GB, especially SE-gate on the best-loss lineage since it already demonstrated a genuine new best (~3.60 < 3.759).
+  - Best loss has been stuck at 3.759 for 3 straight gens via depth/MoE-width tweaks alone — the SE-gate result proves a channel-recalibration mechanism is the real unlock, so it gets first-class budget this time instead of being a single diversify child.
+  - Extend-flops is hitting diminishing returns (elite0 already near-minimal 3-layer attn-only @0.017G) — only light further stripping needed; the 0.045→0.090G gap is now the dominant unfilled region and gets 4 children via layer-grafting crossovers.
+  - Continue crossbreeding structurally distinct lineages (halved-FFN elites 1-3, plain elite4, MoE+extra-layer elites 5-6) rather than self-mutating one elite repeatedly.[0m
+Cand 1/20 PLAN [dominate] from elite 6: RESUBMIT: squeeze-excite global-context gate previously reached ~3.60 loss but was rejected only for old mem budget; retry on current best-loss elite now that cap is 11.8GB.
+Cand 1/20: atoms A7 L18 sm1 em3 gate2 topk1 skip1 | 129M 0.108G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.8374, mem 3.80GB
+Cand 2/20 PLAN [dominate] from elite 5: RESUBMIT SE global-context gate on twin elite5 (0.106G,3.801) to test if it dominates this point too now that mem budget allows it.
+Cand 2/20: atoms A7 L18 sm1 em3 gate2 topk1 skip1 | 129M 0.107G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.6289, mem 4.32GB
+Cand 3/20 PLAN [dominate] from elite 4: Swap all 6 FFN activations from gelu to silu on elite4 (0.090G,3.835) for a zero-extra-FLOP loss test.
+Cand 3/20: atoms A6 L12 sm0 em0 gate0 topk0 skip0 | 120M 0.090G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   loss 3.7593, mem 4.58GB
+Cand 4/20 PLAN [extend-loss] from elite 6: Crossover: widen elite6's MoE from E=2/k=1 to E=4/k=2 by grafting two lin+act expert pairs from elite4's early layers under a new 4-way top-2 router, adding capacity from a different lineage to push past the 3.759 plateau.
+Cand 4/20: atoms A7 L19 sm1 em4 gate4 topk2 skip3 | 138M 0.110G ...
+ -> Inherited 94 parameter tensors from parent weights.
+   loss 3.8373, mem 5.54GB
+Cand 5/20 PLAN [extend-loss] from elite 6: Crossover: graft elite4's layer6 block (plain attn+FFN) as an 8th layer inserted between elite6's layer7 and its MoE, adding depth sourced from a structurally distinct lineage.
+Cand 5/20: atoms A8 L19 sm1 em2 gate2 topk1 skip1 | 135M 0.122G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.8676, mem 6.08GB
+Cand 6/20 PLAN [extend-loss] from elite 6: Increase elite6's layer7 attention heads from 12 to 16 (finer head split, roughly free FLOPs) to test if more attention granularity buys extra loss reduction on the best-loss lineage.
+Cand 6/20: atoms A7 L17 sm1 em2 gate2 topk1 skip1 | 128M 0.107G ...
+ -> Inherited 92 parameter tensors from parent weights.
+   loss 3.8958, mem 6.40GB
+Cand 7/20 PLAN [extend-loss] from elite 3: RESUBMIT mid-stack sparse top-1 MoE (inserted after layer2 instead of only at the tail) on elite3 (3.912@0.045G), now under the higher mem budget, to test if early expert injection meaningfully lowers loss.
+Cand 7/20: atoms A3 L9 sm1 em2 gate2 topk1 skip1 | 100M 0.046G ...
+ -> Inherited 44 parameter tensors from parent weights.
+   loss 4.1058, mem 6.02GB
+Cand 8/20 PLAN [extend-flops] from elite 0: Strip elite0 (already 3-layer attn-only, 0.017G) down to 2 layers for a new cheaper floor.
+Cand 8/20: atoms A3 L0 sm0 em0 gate0 topk0 skip0 | 85M 0.017G ...
+ -> Inherited 24 parameter tensors from parent weights.
+   loss 4.2657, mem 6.09GB
+Cand 9/20 PLAN [extend-flops] from elite 1: Strip elite1's 3-layer halved-FFN backbone down to 2 layers for a new cheap point between elite0 and elite1.
+Cand 9/20: atoms A2 L2 sm0 em0 gate0 topk0 skip0 | 92M 0.020G ...
+ -> Inherited 28 parameter tensors from parent weights.
+   loss 4.3213, mem 6.50GB
+Cand 10/20 PLAN [extend-flops] from elite 3: Halve FFN cost in all 3 layers of elite3 (drop act+2nd linear, keeping scale_shift) to undercut its current 0.045G FLOPs while retaining full depth.
+Cand 10/20: atoms A3 L3 sm0 em0 gate0 topk0 skip0 | 99M 0.031G ...
+ -> Inherited 38 parameter tensors from parent weights.
+   loss 4.2753, mem 7.06GB
+Cand 11/20 PLAN [fill-gap] from elite 3: Crossover: graft elite4's layer4 block onto elite3, adding a 4th layer to land an intermediate FLOP/loss point in the wide 0.045-0.090G gap.
+Cand 11/20: atoms A4 L8 sm0 em0 gate0 topk0 skip0 | 106M 0.060G ...
+ -> Inherited 44 parameter tensors from parent weights.
+   loss 4.0623, mem 7.69GB
+Cand 12/20 PLAN [fill-gap] from elite 2: Crossover: graft elite4's layers 5&6 (full FFN, 2 extra layers) onto elite2's cheaper 4-layer halved-FFN backbone, landing a mid-gap point cheaper than a full 6-layer elite4.
+Cand 12/20: atoms A6 L8 sm0 em0 gate0 topk0 skip0 | 120M 0.071G ...
+ -> Inherited 52 parameter tensors from parent weights.
+   loss 3.9718, mem 8.53GB
+Cand 13/20 PLAN [fill-gap] from elite 3: Add a lightweight attn-only 4th layer to elite3 (cheaper increment than a full attn+FFN layer) to nudge FLOPs partway into the 0.045-0.090G gap.
+Cand 13/20: atoms A4 L6 sm0 em0 gate0 topk0 skip0 | 101M 0.050G ...
+ -> Inherited 44 parameter tensors from parent weights.
+   loss 4.0308, mem 8.48GB
+Cand 14/20 PLAN [fill-gap] from elite 4: Strip elite4's 6th layer (5-layer plain backbone) to bracket the 0.045-0.090G gap from above with a slightly cheaper alternative.
+Cand 14/20: atoms A5 L10 sm0 em0 gate0 topk0 skip0 | 113M 0.075G ...
+ -> Inherited 68 parameter tensors from parent weights.
+   loss 3.9537, mem 9.22GB
+Cand 15/20 PLAN [diversify] from elite 3: RESUBMIT DenseNet-style dense concat aggregation (all 3 layer outputs projected together) feeding the final norm, now under the higher mem budget.
+Cand 15/20: atoms A3 L7 sm0 em0 gate0 topk0 skip0 | 100M 0.048G ...
+ -> Inherited 44 parameter tensors from parent weights.
+   loss 4.0090, mem 9.27GB
+Cand 16/20 PLAN [diversify] from elite 2: RESUBMIT post-norm placement on elite2's layer1 (attention on raw stream, norm after residual sum), now under the higher mem budget.
+Cand 16/20: atoms A4 L4 sm0 em0 gate0 topk0 skip0 | 106M 0.041G ...
+ -> Inherited 50 parameter tensors from parent weights.
+   loss 4.1150, mem 9.82GB
+Cand 17/20 PLAN [diversify] from elite 4: RESUBMIT branchy multi-width FFN (parallel narrow 384-dim path concat'd with main FFN output) on elite4's layer6, now under the higher mem budget.
+Cand 17/20: atoms A6 L15 sm0 em0 gate0 topk0 skip0 | 122M 0.093G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   loss 3.9583, mem 10.77GB
+Cand 18/20 PLAN [novelty] from elite 2: RESUBMIT cross-depth hop-selector (top_k(1) router over concatenated depths 11/21/41, injecting the winning depth's features) which previously reached ~3.74 at low FLOPs but was rejected only for old mem budget; retry on elite2.
+Cand 18/20: atoms A4 L5 sm1 em3 gate3 topk1 skip1 | 106M 0.031G ...
+ -> Inherited 52 parameter tensors from parent weights.
+   loss 4.2399, mem 10.74GB
+Cand 19/20 PLAN [novelty] from elite 6: RESUBMIT true token-level sparse expert via gather/scatter_add (top-1 router selects a token subset, gathers only those rows for an extra expert linear, scatter_adds back) which was previously discarded on mem grounds; retry on the best-loss elite now that budget allows it -- genuine per-token compute sparsity, not just FLOP-accounting sparsity.
+Cand 19/20: atoms A7 L19 sm2 em2 gate2 topk2 skip2 | 129M 0.108G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 36.00 GiB. GPU 0 has a total cap
+Cand 20/20 PLAN [novelty] from elite 4: NEW placement: mid-stack sparse top-1 MoE inserted after layer3 of elite4 (a plain non-MoE lineage that has never had any expert routing), testing whether early expert injection helps a lineage that currently relies purely on depth+scale_shift.
+Cand 20/20: atoms A6 L15 sm1 em2 gate2 topk1 skip1 | 121M 0.091G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   loss 3.8269, mem 11.68GB
+Cand 21/20 PLAN [novelty-reinject] SE-gate global-context recalibration (was mem-rejected under old 11GB budget)
+Cand 21/20: atoms A7 L18 sm1 em3 gate2 topk1 skip1 | 129M 0.108G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 198.00 MiB. GPU 0 has a total ca
+Cand 22/20 PLAN [novelty-reinject] cross-depth hop-selector [NOVEL] (was mem-rejected under old 11GB budget)
+Cand 22/20: atoms A7 L18 sm2 em5 gate5 topk2 skip3 | 128M 0.101G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 198.00 MiB. GPU 0 has a total ca
+ -> 19/20 feasible | front 7 | best loss 3.6289 | rejects {'oom': 3}
+
+--- Graph-Search Generation 7/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - The SE global-context gate (resubmitted last gen under the raised mem cap) is confirmed as the run's biggest win: best-loss elite jumped 3.759→3.629 at the SAME FLOPs — this mechanism gets first-class budget again this gen (transplant to elites 3/4/5, plus a stacked second SE stage on the champion).
+  - The hop-selector (cross-depth top_k router) also survived onto the front (elite2, 4.240@0.031G) proving cross-depth routing is viable structure — worth extending with a genuinely new splice (global-context bias feeding the router logits) rather than re-submitting unchanged.
+  - Post-norm, DenseNet-concat, branchy-FFN, mid-stack-MoE, gather/scatter novelty children did NOT make this front despite the raised budget — they're not being resubmitted verbatim; instead diversify/novelty children this gen try fresh variants (post-norm on a different elite, branchy-FFN on halved-FFN lineage, and two brand-new intra-block splices: router→SE-gate coupling and inter-expert cross-wiring).
+  - The 0.045→0.090G gap is still the widest; this gen fills it with a full extra half-FFN layer grafted cross-lineage, a cheap attn-only increment, a post-hop-selector extra layer, and a stripped-down elite5 — bracketing from both sides.[0m
+Cand 1/20 PLAN [dominate] from elite 5: Transplant the proven SE global-context gate onto elite5 (0.090G,3.759) to test if it dominates this point the way it did the 0.107G elite (3.759->3.629).
+Cand 1/20: atoms A6 L13 sm0 em1 gate0 topk0 skip0 | 121M 0.091G ...
+ -> Inherited 80 parameter tensors from parent weights.
+   loss 3.7089, mem 5.33GB
+Cand 2/20 PLAN [dominate] from elite 4: Transplant SE-gate onto elite4 (0.045G,3.912), a cheaper testbed, to see if channel recalibration helps at lower FLOPs too.
+Cand 2/20: atoms A3 L7 sm0 em1 gate0 topk0 skip0 | 99M 0.046G ...
+ -> Inherited 44 parameter tensors from parent weights.
+   loss 3.8437, mem 5.12GB
+Cand 3/20 PLAN [dominate] from elite 3: Transplant SE-gate onto the even cheaper elite3 (0.041G,4.044) to test if the mechanism still buys loss near the FLOP floor.
+Cand 3/20: atoms A4 L5 sm0 em1 gate0 topk0 skip0 | 106M 0.042G ...
+ -> Inherited 52 parameter tensors from parent weights.
+   loss 3.9967, mem 5.69GB
+Cand 4/20 PLAN [extend-loss] from elite 6: Stack a second SE-gate on top of the existing one on the champion elite6, testing if compounded channel recalibration pushes below 3.629.
+Cand 4/20: atoms A7 L19 sm1 em4 gate2 topk1 skip1 | 129M 0.108G ...
+ -> Inherited 98 parameter tensors from parent weights.
+   loss 3.6573, mem 6.88GB
+Cand 5/20 PLAN [extend-loss] from elite 6: Crossover: widen elite6's MoE from E=2/k=1 to E=4/k=2 by grafting two lin+act expert pairs from elite4's full-FFN layers, adding capacity from a different lineage to the champion.
+Cand 5/20: atoms A7 L20 sm1 em5 gate4 topk1 skip3 | 138M 0.112G ...
+ -> Inherited 96 parameter tensors from parent weights.
+   loss 3.6053, mem 7.62GB
+Cand 6/20 PLAN [extend-loss] from elite 6: Crossover: graft elite1's halved-FFN layer3 block as a new 8th layer inserted before the MoE on the champion, adding depth from a structurally distinct (lean) lineage.
+Cand 6/20: atoms A8 L19 sm1 em3 gate2 topk1 skip1 | 136M 0.117G ...
+ -> Inherited 98 parameter tensors from parent weights.
+   loss 3.5666, mem 8.15GB
+Cand 7/20 PLAN [extend-loss] from elite 6: Increase champion elite6's layer7 attention heads 12->16 (near-free FLOPs) to test if finer attention granularity buys extra loss reduction beyond 3.629.
+Cand 7/20: atoms A7 L18 sm1 em3 gate2 topk1 skip1 | 129M 0.107G ...
+ -> Inherited 94 parameter tensors from parent weights.
+   loss 3.5742, mem 8.50GB
+Cand 8/20 PLAN [extend-flops] from elite 0: Strip elite0 (already 3-layer attn-only, 0.017G) down to 2 layers for a new cheaper floor.
+Cand 8/20: atoms A3 L0 sm0 em0 gate0 topk0 skip0 | 85M 0.017G ...
+ -> Inherited 24 parameter tensors from parent weights.
+   loss 4.1994, mem 7.76GB
+Cand 9/20 PLAN [extend-flops] from elite 1: Strip elite1's 3-layer halved-FFN backbone down to 2 layers for a new cheap point between elite0 and elite1.
+Cand 9/20: atoms A2 L2 sm0 em0 gate0 topk0 skip0 | 92M 0.020G ...
+ -> Inherited 28 parameter tensors from parent weights.
+   loss 4.3801, mem 8.18GB
+Cand 10/20 PLAN [extend-flops] from elite 3: Strip elite3's 4th layer (down to 3-layer halved-FFN + scale_shift) for a new intermediate-cheap point below its current 0.041G.
+Cand 10/20: atoms A3 L3 sm0 em0 gate0 topk0 skip0 | 99M 0.031G ...
+ -> Inherited 41 parameter tensors from parent weights.
+   loss 4.1848, mem 8.74GB
+Cand 11/20 PLAN [fill-gap] from elite 4: Crossover: graft elite3's halved-FFN layer4 block onto elite4's full-FFN 3-layer backbone, adding a cheaper 4th layer to land an intermediate point in the wide 0.045-0.090G gap.
+Cand 11/20: atoms A4 L7 sm0 em0 gate0 topk0 skip0 | 106M 0.055G ...
+ -> Inherited 44 parameter tensors from parent weights.
+   loss 4.0227, mem 9.36GB
+Cand 12/20 PLAN [fill-gap] from elite 3: Add a lightweight attn-only 5th layer to elite3 (cheaper increment than a full attn+FFN layer) to nudge FLOPs partway into the 0.045-0.090G gap.
+Cand 12/20: atoms A5 L4 sm0 em0 gate0 topk0 skip0 | 108M 0.046G ...
+ -> Inherited 52 parameter tensors from parent weights.
+   loss 4.1941, mem 9.87GB
+Cand 13/20 PLAN [fill-gap] from elite 2: Crossover: graft elite1's halved-FFN layer3 as an extra 5th layer after elite2's hop-selector merge point, adding depth from a distinct lineage to land in the FLOP gap.
+Cand 13/20: atoms A5 L6 sm1 em3 gate3 topk1 skip1 | 113M 0.042G ...
+ -> Inherited 54 parameter tensors from parent weights.
+   loss 4.2056, mem 10.42GB
+Cand 14/20 PLAN [fill-gap] from elite 5: Strip elite5's 6th layer (5-layer variant) to bracket the FLOP gap from above with a slightly cheaper alternative near 0.075G.
+Cand 14/20: atoms A5 L10 sm0 em0 gate0 topk0 skip0 | 113M 0.075G ...
+ -> Inherited 68 parameter tensors from parent weights.
+   loss 3.9203, mem 10.92GB
+Cand 15/20 PLAN [diversify] from elite 4: Convert elite4's layer1 to post-norm (attention on raw stream, norm applied after the residual sum) to diversify normalization placement on the full-FFN+scale_shift lineage.
+Cand 15/20: atoms A3 L6 sm0 em0 gate0 topk0 skip0 | 99M 0.045G ...
+ -> Inherited 42 parameter tensors from parent weights.
+   loss 4.0022, mem 10.92GB
+Cand 16/20 PLAN [diversify] from elite 1: DenseNet-style dense concat of all 3 layer outputs feeding the final norm on elite1's lean halved-FFN backbone, a cross-layer aggregation motif not tried on this lineage.
+Cand 16/20: atoms A3 L4 sm0 em0 gate0 topk0 skip0 | 100M 0.034G ...
+ -> Inherited 39 parameter tensors from parent weights.
+   loss 4.2476, mem 11.31GB
+Cand 17/20 PLAN [diversify] from elite 3: Give elite3's layer2 halved-FFN a parallel narrow branch (concat two different-width paths then project) for a branchy topology not present in this halved-FFN lineage.
+Cand 17/20: atoms A4 L7 sm0 em0 gate0 topk0 skip0 | 111M 0.044G ...
+ -> Inherited 51 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 18/20 PLAN [novelty] from elite 2: NEW splice: feed a whole-sequence global-context signal (mean over the deepest layer) as an additive bias into the hop-selector's router LOGITS before softmax, so depth-choice becomes conditioned on sequence-level statistics instead of only per-token features -- a genuine fusion of the SE-gate's global-context idea with the hop-selector's routing mechanism, splicing directly into the router's internals.
+Cand 18/20: atoms A4 L6 sm1 em3 gate3 topk1 skip1 | 106M 0.031G ...
+ -> Inherited 54 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 19/20 PLAN [novelty] from elite 6: NEW splice: the MoE router's raw logits (mean-pooled, a magnitude proxy for routing decisiveness) modulate the strength of the champion's SE global-context activation before it gates the residual -- routing confidence now controls channel recalibration strength, coupling two previously-separate gating mechanisms that never interact in any current elite.
+Cand 19/20: atoms A7 L18 sm1 em4 gate2 topk1 skip1 | 129M 0.107G ...
+ -> Inherited 98 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total cap
+Cand 20/20 PLAN [novelty] from elite 6: NEW splice: cross-wire the champion's MoE experts -- expert2's input linear now also sees expert1's activated hidden state (concat with the shared residual input), so expert2's computation is conditioned on expert1's features instead of both experts being independent parallel functions, a genuine inter-expert information path not present in any current MoE elite.
+Cand 20/20: atoms A7 L19 sm1 em3 gate2 topk1 skip1 | 130M 0.108G ...
+ -> Inherited 98 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total cap
+ -> 16/20 feasible | front 10 | best loss 3.5666 | rejects {'oom': 4}
+
+--- Graph-Search Generation 8/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Depth-extension via cross-lineage graft (inserting a halved-FFN layer from a *different* elite before the champion's MoE) produced this generation's new best loss (3.629→3.567) — confirms crossover-depth-stacking is the strongest current lever; repeating it once more on the new champion (elite9) plus trying a cheaper attn-only variant on elite8 to bracket the FLOP cost of that move.
+  - SE global-context gate transplants keep winning cleanly wherever applied (elite2→elite3 3.997, elite4→elite5 3.844, elite6→elite7 3.709) — the only backbones still missing it are elite0 (pure-attn) and elite1 (halved-FFN); filling those two gaps this gen.
+  - The 0.046→0.090G gap is still the widest despite fill attempts — bridging it now from BOTH sides: adding depth to elite5 (cheap side) and stripping a layer from elite6/elite7 (expensive side).
+  - Router-confidence↔gate coupling and inter-expert cross-wiring novelty children didn't make last front but weren't resubmitted verbatim; retrying refined versions on the new champion (elite9) plus a genuine gather/scatter token-sparse expert path, since true novelty needs repeated tries under the now-larger structural budget.[0m
+Cand 1/20 PLAN [dominate] from elite 0: Elite0 (pure-attn 3-layer, cheapest useful point) still lacks the proven SE global-context gate; add it for a near-free loss drop at 0.017G.
+Cand 1/20: atoms A3 L1 sm0 em1 gate0 topk0 skip0 | 85M 0.018G ...
+ -> Inherited 24 parameter tensors from parent weights.
+   loss 4.1451, mem 6.16GB
+Cand 2/20 PLAN [dominate] from elite 1: Elite1 (halved-FFN 3-layer+scale_shift) is the last remaining cheap backbone without an SE-gate; add it before ln_f to test the same reliable win.
+Cand 2/20: atoms A3 L4 sm0 em1 gate0 topk0 skip0 | 99M 0.032G ...
+ -> Inherited 41 parameter tensors from parent weights.
+   loss 3.8390, mem 6.77GB
+Cand 3/20 PLAN [dominate] from elite 9: Swap champion elite9's two MoE expert activations gelu->silu at zero extra FLOPs to test a free loss reduction on the current best point.
+Cand 3/20: atoms A8 L19 sm1 em3 gate2 topk1 skip1 | 136M 0.117G ...
+ -> Inherited 109 parameter tensors from parent weights.
+   loss 7.4624, mem 8.34GB
+Cand 4/20 PLAN [dominate] from elite 7: Increase elite7's final attention layer heads 12->16 (near-free FLOPs) to test if finer head granularity buys extra loss reduction on this SE-gated backbone.
+Cand 4/20: atoms A6 L13 sm0 em1 gate0 topk0 skip0 | 121M 0.091G ...
+ -> Inherited 78 parameter tensors from parent weights.
+   loss 3.6588, mem 7.90GB
+Cand 5/20 PLAN [extend-loss] from elite 9: Repeat the winning move that created elite9: graft another cross-lineage halved-FFN layer (from elite3) as a 9th layer before the MoE, further compounding the depth-extension trick that just set the new best loss.
+Cand 5/20: atoms A9 L20 sm1 em3 gate2 topk1 skip1 | 143M 0.127G ...
+ -> Inherited 109 parameter tensors from parent weights.
+   loss 3.5835, mem 9.04GB
+Cand 6/20 PLAN [extend-loss] from elite 9: Crossover: widen champion's MoE E=2->E=4 by grafting two lin+act expert pairs from elite4 under a new 4-way top-2 router, adding capacity from a different lineage to push past 3.567.
+Cand 6/20: atoms A8 L21 sm1 em5 gate4 topk1 skip3 | 145M 0.122G ...
+ -> Inherited 107 parameter tensors from parent weights.
+   loss 3.3678, mem 9.63GB
+Cand 7/20 PLAN [extend-loss] from elite 9: Stack a second SE global-context gate after the champion's existing one, testing if compounded channel recalibration pushes loss further below 3.567.
+Cand 7/20: atoms A8 L20 sm1 em4 gate2 topk1 skip1 | 137M 0.118G ...
+ -> Inherited 109 parameter tensors from parent weights.
+   loss 3.5501, mem 9.99GB
+Cand 8/20 PLAN [extend-loss] from elite 8: Test a cheaper depth-extension than elite9's full FFN layer: insert an attn-only 8th layer (no FFN) before the MoE on elite8, to see if most of elite9's gain comes from just the extra attention.
+Cand 8/20: atoms A8 L18 sm1 em3 gate2 topk1 skip1 | 131M 0.112G ...
+ -> Inherited 98 parameter tensors from parent weights.
+   loss 3.6010, mem 10.43GB
+Cand 9/20 PLAN [extend-flops] from elite 0: Strip elite0's 3rd attn-only layer down to 2 layers for a new cheaper floor below 0.017G.
+Cand 9/20: atoms A3 L0 sm0 em0 gate0 topk0 skip0 | 85M 0.017G ...
+ -> Inherited 24 parameter tensors from parent weights.
+   loss 4.2041, mem 9.59GB
+Cand 10/20 PLAN [extend-flops] from elite 1: Strip elite1's halved-FFN 3-layer backbone down to 2 layers for a new intermediate-cheap point below elite0's undercut.
+Cand 10/20: atoms A2 L2 sm0 em0 gate0 topk0 skip0 | 92M 0.020G ...
+ -> Inherited 30 parameter tensors from parent weights.
+   loss 4.2282, mem 10.01GB
+Cand 11/20 PLAN [fill-gap] from elite 5: Crossover: graft elite2's halved-FFN layer4 block onto elite5 (3-layer+SE, 0.046G), inserted before the SE-gate, to land an intermediate point toward the wide 0.046-0.090G gap.
+Cand 11/20: atoms A4 L8 sm0 em1 gate0 topk0 skip0 | 106M 0.056G ...
+ -> Inherited 46 parameter tensors from parent weights.
+   loss 3.6506, mem 10.81GB
+Cand 12/20 PLAN [fill-gap] from elite 5: Add a lightweight attn-only extra layer to elite5 before its SE-gate (cheaper increment than a full FFN layer) to nudge FLOPs partway into the gap.
+Cand 12/20: atoms A4 L7 sm0 em1 gate0 topk0 skip0 | 102M 0.052G ...
+ -> Inherited 46 parameter tensors from parent weights.
+   loss 3.7013, mem 11.13GB
+Cand 13/20 PLAN [fill-gap] from elite 6: Strip elite6's 6th layer (plain backbone, no SE) down to 5 layers to bracket the FLOP gap from above with a cheaper alternative near 0.075G.
+Cand 13/20: atoms A5 L10 sm0 em0 gate0 topk0 skip0 | 113M 0.075G ...
+ -> Inherited 68 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 14/20 PLAN [fill-gap] from elite 7: Strip elite7's 6th layer down to 5 layers, rewiring the SE-gate to read from layer5's output, giving a cheaper SE-gated alternative bridging the gap with lower loss than the plain elite6 variant.
+Cand 14/20: atoms A6 L13 sm0 em1 gate0 topk0 skip0 | 121M 0.091G ...
+ -> Inherited 82 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 15/20 PLAN [diversify] from elite 4: Convert elite4's layer1 to post-norm (attention on raw stream, norm applied after the residual sum) to diversify normalization placement on the scale_shift lineage.
+Cand 15/20: atoms A3 L6 sm0 em0 gate0 topk0 skip0 | 99M 0.045G ...
+ -> Inherited 42 parameter tensors from parent weights.
+   loss 4.0525, mem 11.42GB
+Cand 16/20 PLAN [diversify] from elite 2: DenseNet-style dense concat of all 4 layer outputs feeding the final norm on elite2's plain halved-FFN backbone, a cross-layer aggregation motif not yet present on this lineage.
+Cand 16/20: atoms A4 L5 sm0 em0 gate0 topk0 skip0 | 108M 0.046G ...
+ -> Inherited 52 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 17/20 PLAN [diversify] from elite 3: Give elite3's layer2 a parallel narrower branch (concat two different-width paths then project) alongside its existing SE-gate, a branchy topology not present in this lineage.
+Cand 17/20: atoms A4 L8 sm0 em1 gate0 topk0 skip0 | 112M 0.046G ...
+ -> Inherited 53 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 18/20 PLAN [novelty] from elite 9: NEW splice: the MoE router's raw logit magnitude (mean-pooled, a routing-confidence proxy) directly modulates the SE-gate's activation strength before it recalibrates the residual on the champion -- coupling two previously-independent gating mechanisms via an intra-block splice into the SE-gate's internals.
+Cand 18/20: atoms A8 L19 sm1 em4 gate2 topk1 skip1 | 136M 0.117G ...
+ -> Inherited 109 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 12.00 MiB. GPU 0 has a total cap
+Cand 19/20 PLAN [novelty] from elite 9: NEW splice: cross-wire the champion's two MoE experts -- expert2's input linear now also sees expert1's activated hidden state (concat with the shared residual input before projecting), so expert2's computation is conditioned on expert1's features instead of both being independent parallel functions -- a genuine inter-expert information path not present in any MoE elite so far.
+Cand 19/20: atoms A8 L20 sm1 em3 gate2 topk1 skip1 | 137M 0.118G ...
+ -> Inherited 109 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 24.00 MiB. GPU 0 has a total cap
+Cand 20/20 PLAN [novelty] from elite 9: NEW: add a genuinely sparse token-level expert via gather/scatter_add alongside the champion's existing dense-then-mask MoE -- a top-1 router selects a token subset, gathers only those rows for an extra expert linear, and scatter_adds the result back, testing true per-token compute sparsity layered on top of the current best architecture.
+Cand 20/20: atoms A8 L21 sm2 em3 gate2 topk2 skip2 | 137M 0.118G ...
+ -> Inherited 109 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 36.00 GiB. GPU 0 has a total cap
+ -> 12/20 feasible | front 9 | best loss 3.3678 | rejects {'loss': 1, 'oom': 7}
+
+--- Graph-Search Generation 9/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Elite8's big jump (3.567→3.368) came from compounded gating/skip structure (gates 4, skips 3) — since only elites 0-4 have explicit node listings this gen, I lean on the UNIVERSAL (tail, ln_f) anchor pair given for every elite to safely append SE-gates / extra layers / grafts to elites 5-8 without guessing unlisted internal ids, avoiding wasted evals from bad references.
+  - SE-gate transplant keeps paying off everywhere it's tried (elite0 still lacks it — highest-priority dominate target); stacking a 2nd/3rd SE-gate on already-gated elites (4,5,6,7,8) is a cheap, low-risk way to test further compounding since it never regressed before.
+  - Cross-lineage depth grafts (inserting a fully-specified elite0-4 layer block into the deep MoE lineage via tail-rewiring) produced the current champion — repeating this pattern from elite3/elite4's blocks onto elite6/elite8 is the strongest extend-loss lever again this gen.
+  - The 0.056→0.107G gap is still wide; bridging with graft-inserted extra layers on elite2/3/4 (cheap side) since elites 5-8's internals aren't specified enough to safely strip layers from the expensive side this generation.[0m
+Cand 1/20 PLAN [dominate] from elite 0: Elite0 (cheapest, 4.199@0.017G) is the only front point still lacking the proven SE global-context gate; add it for a near-free loss drop.
+Cand 1/20: atoms A3 L1 sm0 em1 gate0 topk0 skip0 | 85M 0.018G ...
+ -> Inherited 24 parameter tensors from parent weights.
+   loss 4.0636, mem 6.68GB
+Cand 2/20 PLAN [dominate] from elite 5: Stack a second SE gate on elite5 (3.574@0.107G) to test if compounded channel recalibration pushes it below the cheaper elite8's territory.
+Cand 2/20: atoms A7 L19 sm1 em4 gate2 topk1 skip1 | 129M 0.108G ...
+ -> Inherited 98 parameter tensors from parent weights.
+   loss 3.5839, mem 8.27GB
+Cand 3/20 PLAN [dominate] from elite 7: Add SE global-context gate to elite7 (3.550@0.118G, second-best) to test the same reliable win on this variant.
+Cand 3/20: atoms A8 L21 sm1 em5 gate2 topk1 skip1 | 137M 0.120G ...
+ -> Inherited 111 parameter tensors from parent weights.
+   loss 3.4567, mem 9.01GB
+Cand 4/20 PLAN [dominate] from elite 1: Add a cheap extra attn-only layer to elite1 (already SE-gated, 4.145@0.018G) to push loss down further at near-identical FLOPs.
+Cand 4/20: atoms A4 L1 sm0 em1 gate0 topk0 skip0 | 87M 0.023G ...
+ -> Inherited 26 parameter tensors from parent weights.
+   loss 3.8080, mem 8.19GB
+Cand 5/20 PLAN [extend-loss] from elite 8: Stack a 3rd compounding SE gate on the champion elite8 to test if further channel recalibration pushes below 3.368.
+Cand 5/20: atoms A8 L22 sm1 em6 gate4 topk1 skip3 | 146M 0.123G ...
+ -> Inherited 115 parameter tensors from parent weights.
+   loss 3.5277, mem 10.13GB
+Cand 6/20 PLAN [extend-loss] from elite 8: Crossover: graft elite4's full-FFN layer2 block as extra depth on champion elite8, repeating the cross-lineage depth-insertion trick that produced the current best loss.
+Cand 6/20: atoms A9 L23 sm1 em5 gate4 topk1 skip3 | 152M 0.137G ...
+ -> Inherited 115 parameter tensors from parent weights.
+   loss 3.2840, mem 10.93GB
+Cand 7/20 PLAN [extend-loss] from elite 6: Crossover: graft elite2's SE-gate implementation (mean_reduce/lin/act/emul) as a second, differently-sourced gate on elite6 to test if a distinct gate formulation compounds better than a repeated identical one.
+Cand 7/20: atoms A8 L20 sm1 em4 gate2 topk1 skip1 | 137M 0.118G ...
+ -> Inherited 109 parameter tensors from parent weights.
+   loss 3.5861, mem 11.08GB
+Cand 8/20 PLAN [extend-loss] from elite 8: Add a fresh 16-head attn-only layer to champion elite8 (near-free FLOPs, finer head granularity) to test additional loss reduction via depth+head-count.
+Cand 8/20: atoms A9 L21 sm1 em5 gate4 topk1 skip3 | 148M 0.127G ...
+ -> Inherited 115 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 9/20 PLAN [extend-loss] from elite 6: Crossover: graft elite4's full-FFN layer3 block onto elite6, adding depth from a distinct lineage to try to surpass the champion at similar FLOPs.
+Cand 9/20: atoms A9 L21 sm1 em3 gate2 topk1 skip1 | 143M 0.132G ...
+ -> Inherited 109 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 10/20 PLAN [extend-flops] from elite 0: Strip elite0's 3rd attn-only layer down to 2 layers for a new cheaper floor below 0.017G.
+Cand 10/20: atoms A3 L0 sm0 em0 gate0 topk0 skip0 | 85M 0.017G ...
+ -> Inherited 24 parameter tensors from parent weights.
+   loss 4.1367, mem 10.16GB
+Cand 11/20 PLAN [extend-flops] from elite 1: Strip elite1's 3rd attn-only+SE layer down to 2 layers, redirecting the SE-gate input to the shallower residual, for a new cheap point near 0.017-0.018G.
+Cand 11/20: atoms A2 L1 sm0 em1 gate0 topk0 skip0 | 83M 0.012G ...
+ -> Inherited 20 parameter tensors from parent weights.
+   loss 4.0043, mem 10.41GB
+Cand 12/20 PLAN [fill-gap] from elite 4: Add a lightweight fresh attn-only layer to elite4 (0.056G) to nudge FLOPs partway into the wide 0.056-0.107G gap.
+Cand 12/20: atoms A5 L8 sm0 em1 gate0 topk0 skip0 | 109M 0.062G ...
+ -> Inherited 57 parameter tensors from parent weights.
+   loss 3.5490, mem 11.45GB
+Cand 13/20 PLAN [fill-gap] from elite 4: Crossover: graft elite3's extra attn-only layer block onto elite4 (different lineage's depth increment) to land a distinct intermediate point in the FLOP gap.
+Cand 13/20: atoms A5 L8 sm0 em1 gate0 topk0 skip0 | 109M 0.062G ...
+ -> Inherited 57 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 14/20 PLAN [fill-gap] from elite 3: Crossover: graft elite4's full-FFN layer3 block onto elite3 (0.052G) to move it further into the wide FLOP gap with a full extra FFN layer.
+Cand 14/20: atoms A5 L9 sm0 em1 gate0 topk0 skip0 | 109M 0.066G ...
+ -> Inherited 52 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 15/20 PLAN [fill-gap] from elite 2: Crossover: graft elite4's full-FFN layer2 block onto elite2 (0.032G, cheap) to land a new intermediate point bridging toward the gap from below.
+Cand 15/20: atoms A4 L6 sm0 em1 gate0 topk0 skip0 | 106M 0.047G ...
+ -> Inherited 43 parameter tensors from parent weights.
+   loss 3.8051, mem 11.77GB
+Cand 16/20 PLAN [diversify] from elite 2: DenseNet-style dense concat of all 3 layer outputs feeding the SE-gate inputs on elite2, replacing the raw last-layer-only signal with a cross-layer aggregation not tried on this lineage.
+Cand 16/20: atoms A3 L5 sm0 em1 gate0 topk0 skip0 | 101M 0.035G ...
+ -> Inherited 43 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 17/20 PLAN [diversify] from elite 4: Convert elite4's layer1 to post-norm (attention on raw stream, norm applied after the residual sum) to diversify normalization placement on this SE-gated lineage.
+Cand 17/20: atoms A4 L8 sm0 em1 gate0 topk0 skip0 | 106M 0.056G ...
+ -> Inherited 55 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 18/20 PLAN [novelty] from elite 2: NEW splice: reuse elite2's SE-gate post-activation (node68) as a confidence signal that gates a FRESH parallel branch computed from the raw last-layer residual, merged via concat before the final affine -- instead of directly multiplying the residual (existing SE pattern), the gate now controls a separate auxiliary path, a genuine new coupling not present in any elite.
+Cand 18/20: atoms A3 L6 sm0 em2 gate0 topk0 skip0 | 101M 0.035G ...
+ -> Inherited 43 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 19/20 PLAN [novelty] from elite 8: NEW: a hard top-1 mixture-of-depths gate at the very output stage of the champion elite8 -- per-token binary choice between the raw tail representation and a freshly transformed version, a genuine discrete depth-selection decision at the final merge point rather than a continuous multiplicative gate.
+Cand 19/20: atoms A8 L23 sm2 em7 gate6 topk2 skip3 | 146M 0.122G ...
+ -> Inherited 115 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 20/20 PLAN [novelty] from elite 6: NEW crossover splice: graft elite2's SE-gate context-extraction stem (mean_reduce+lin+act, without its final multiply) into elite6, then use it to gate a FRESH auxiliary branch merged via concat -- combining a distinct lineage's global-context extractor with a novel merge-not-multiply coupling pattern.
+Cand 20/20: atoms A8 L22 sm1 em4 gate2 topk1 skip1 | 138M 0.122G ...
+ -> Inherited 109 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+ -> 11/20 feasible | front 9 | best loss 3.2840 | rejects {'oom': 9}
+
+--- Graph-Search Generation 10/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - The post-SE-gate extra-attention-layer motif (mean_reduce→lin→act→emul, THEN an additional ln→attn→sum before ln_f) is confirmed as a huge cheap win: it turned a 2-attn/0.012G net into elite1 at 3.808/0.023G and elite3-4 chains keep extending it — repeating this exact recipe on elite0/elite1/champion again this gen.
+  - Elites 2/3/4 all carry a "pre-SE-gate extra attn+FFN sub-block" (nodes 70-77) whose attention component may not be earning its FLOPs (elite2 barely beats elite1 despite 2x cost) — testing removal of just the attn sub-part (keep FFN/passthrough) as cheap dominate/fill-gap candidates.
+  - The 0.062→0.120G gap (elite5→elite6) is now the widest and totally unbridged — spending dedicated fill-gap children here via generic tail/ln_f anchor wiring (safe since elites 5-8's internals aren't fully listed) plus a cross-lineage FFN graft.
+  - Only tail/ln_f/sum_ids are given for elites 5-8; confirmed the generic "remove_edge(tail,ln_f); insert new subgraph; add_edge(new_tail,ln_f)" pattern works regardless of tail's underlying op type — using this plus safe sum-node skip-edge injection (DenseNet-style) for novelty/diversify on the deep MoE lineage without needing internal ids.[0m
+Cand 1/20 PLAN [dominate] from elite 0: Add the proven post-SE-gate extra-attention-layer recipe (that turned elite0-like nets into elite1) directly onto the current cheapest elite0 to test if it reproduces the same efficient gain.
+Cand 1/20: atoms A3 L1 sm0 em1 gate0 topk0 skip0 | 85M 0.018G ...
+ -> Inherited 20 parameter tensors from parent weights.
+   loss 4.0263, mem 6.70GB
+Cand 2/20 PLAN [dominate] from elite 1: Stack a second SE-gate cycle after elite1's existing post-gate extra attn layer to test compounded channel recalibration at low FLOPs.
+Cand 2/20: atoms A4 L2 sm0 em2 gate0 topk0 skip0 | 88M 0.024G ...
+ -> Inherited 32 parameter tensors from parent weights.
+   loss 3.7129, mem 7.15GB
+Cand 3/20 PLAN [fill-gap] from elite 2: Remove the attn sub-part (nodes 70,71) of elite2's pre-block, keeping only the FFN half, to see if the extra attn was unnecessary for its marginal loss gain over elite1 -- lands a cheaper intermediate point in the 0.023-0.047G gap.
+Cand 3/20: atoms A3 L6 sm0 em1 gate0 topk0 skip0 | 104M 0.041G ...
+ -> Inherited 49 parameter tensors from parent weights.
+   loss 3.8833, mem 7.77GB
+Cand 4/20 PLAN [fill-gap] from elite 4: Same simplification on elite4: drop its pre-SE-gate extra attn sub-part (70,71), testing if a cheaper variant retains most of the loss benefit and fills the gap from below elite4's 0.056G.
+Cand 4/20: atoms A3 L8 sm0 em1 gate0 topk0 skip0 | 104M 0.051G ...
+ -> Inherited 51 parameter tensors from parent weights.
+   loss 3.7096, mem 8.20GB
+Cand 5/20 PLAN [dominate] from elite 3: Remove elite3's pre-SE-gate extra attn layer (70,71) entirely, hoping to retain near-3.7 loss at substantially lower FLOPs, dominating its own current position.
+Cand 5/20: atoms A3 L7 sm0 em1 gate0 topk0 skip0 | 99M 0.046G ...
+ -> Inherited 46 parameter tensors from parent weights.
+   loss 3.5207, mem 8.52GB
+Cand 6/20 PLAN [fill-gap] from elite 5: Add a fresh post-tail attention layer to elite5 (0.062G, cheap side of the widest gap) using the generic tail/ln_f anchor pattern, pushing FLOPs partway toward elite6 while adding depth.
+Cand 6/20: atoms A6 L8 sm0 em1 gate0 topk0 skip0 | 111M 0.067G ...
+ -> Inherited 63 parameter tensors from parent weights.
+   loss 3.3213, mem 9.34GB
+Cand 7/20 PLAN [fill-gap] from elite 4: Crossover: graft elite2's post-block FFN sub-part (ln/lin/act/lin, nodes 73-76) onto elite4's tail, adding cross-lineage capacity to bridge further into the 0.056-0.120G gap.
+Cand 7/20: atoms A4 L10 sm0 em1 gate0 topk0 skip0 | 111M 0.066G ...
+ -> Inherited 57 parameter tensors from parent weights.
+   loss 3.6147, mem 9.68GB
+Cand 8/20 PLAN [fill-gap] from elite 3: Crossover: graft elite1's post-SE-gate extra attn layer (ln/attn/sum, nodes 69-71) onto elite3's tail, adding cross-lineage depth to land an intermediate FLOP/loss point in the wide gap.
+Cand 8/20: atoms A5 L7 sm0 em1 gate0 topk0 skip0 | 104M 0.057G ...
+ -> Inherited 52 parameter tensors from parent weights.
+   loss 3.5568, mem 10.01GB
+Cand 9/20 PLAN [extend-loss] from elite 8: Add a fresh post-tail attention layer to the champion elite8 using the generic tail/ln_f anchor pattern, testing if more depth pushes loss below 3.284.
+Cand 9/20: atoms A10 L23 sm1 em5 gate4 topk1 skip3 | 155M 0.142G ...
+ -> Inherited 127 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 10/20 PLAN [extend-loss] from elite 7: Add a post-tail SE global-context gate to elite7 (second-best, 3.368@0.122G) using the generic anchor pattern, testing further channel recalibration on this deep MoE lineage.
+Cand 10/20: atoms A8 L22 sm1 em6 gate4 topk1 skip3 | 146M 0.123G ...
+ -> Inherited 115 parameter tensors from parent weights.
+   loss 3.5294, mem 11.62GB
+Cand 11/20 PLAN [extend-flops] from elite 0: Strip elite0's second attention layer (nodes 14,15,16,21) down to a single-attn+SE-gate net for a new cheaper floor below 0.012G.
+Cand 11/20: atoms A2 L1 sm0 em1 gate0 topk0 skip0 | 83M 0.012G ...
+ -> Inherited 20 parameter tensors from parent weights.
+   loss 3.8688, mem 10.41GB
+Cand 12/20 PLAN [extend-flops] from elite 1: Strip elite1's 3rd attention layer (nodes 24,25,26,31) leaving 3 attn+SE-gate+extra-layer, for a new intermediate-cheap point below elite1's 0.023G.
+Cand 12/20: atoms A3 L1 sm0 em1 gate0 topk0 skip0 | 85M 0.018G ...
+ -> Inherited 26 parameter tensors from parent weights.
+   loss 3.9044, mem 10.84GB
+Cand 13/20 PLAN [diversify] from elite 4: Convert elite4's layer1 to post-norm (attention on raw stream, norm applied after residual sum) to diversify normalization placement on this newer SE+post-block lineage.
+Cand 13/20: atoms A4 L8 sm0 em1 gate0 topk0 skip0 | 106M 0.056G ...
+ -> Inherited 55 parameter tensors from parent weights.
+   loss 3.4541, mem 11.67GB
+Cand 14/20 PLAN [diversify] from elite 8: Add DenseNet-style long-range skip edges from early residual sums into late residual sums on the champion lineage, a cross-layer aggregation pattern not yet present here.
+Cand 14/20: atoms A9 L23 sm1 em5 gate4 topk1 skip5 | 152M 0.137G ...
+ -> Inherited 127 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 15/20 PLAN [diversify] from elite 6: Give elite6 a parallel narrow-width branch (concat with the main tail before ln_f) -- a branchy multi-width topology not present on this MoE lineage.
+Cand 15/20: atoms A8 L24 sm1 em5 gate2 topk1 skip1 | 139M 0.123G ...
+ -> Inherited 113 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 24.00 MiB. GPU 0 has a total cap
+Cand 16/20 PLAN [novelty] from elite 6: NEW: inject two long-range cross-depth skip edges (early sum -> distant late sum) on elite6, a genuinely un-published dense residual pattern testing if bypassing many intermediate layers helps gradient flow / representation reuse.
+Cand 16/20: atoms A8 L21 sm1 em5 gate2 topk1 skip3 | 137M 0.120G ...
+ -> Inherited 113 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 12.00 MiB. GPU 0 has a total cap
+Cand 17/20 PLAN [novelty] from elite 8: NEW: hard top-1 mixture-of-depths gate at the champion's output stage -- a discrete per-token choice between the raw tail representation and a freshly transformed alternative, replacing the usual continuous multiplicative SE-gate with a genuine binary depth-selection decision.
+Cand 17/20: atoms A9 L25 sm2 em7 gate6 topk2 skip3 | 153M 0.133G ...
+ -> Inherited 127 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 18/20 PLAN [novelty] from elite 4: NEW crossover splice: graft elite1's SE-gate context stem (mean_reduce/lin/act) into elite4, ADDITIVELY fusing its act output with elite4's OWN SE-gate act before a single shared multiply -- combining two differently-sourced global-context signals to gate one residual, a coupling not present in any elite.
+Cand 18/20: atoms A4 L9 sm0 em1 gate0 topk0 skip0 | 107M 0.057G ...
+ -> Inherited 57 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 19/20 PLAN [novelty] from elite 2: NEW intra-block splice: feed the SE-gate's global-context vector (mean_reduce output) as an additive bias into the POST-BLOCK's layer_norm input, conditioning the subsequent attention layer's normalization on sequence-level statistics from a different block -- exactly the mandated 'inject mid-stack signal into an earlier/later layer_norm input' splice, not tried before.
+Cand 19/20: atoms A4 L7 sm0 em1 gate0 topk0 skip0 | 107M 0.048G ...
+ -> Inherited 55 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 20/20 PLAN [novelty] from elite 3: NEW: add a genuinely sparse token-level expert via gather/scatter_add on elite3's tail (top-1 router selects a token subset, gathers rows for an extra expert linear, scatter_adds back), testing true per-token compute sparsity on this lineage which has never had gather/scatter routing.
+Cand 20/20: atoms A4 L9 sm1 em1 gate0 topk1 skip0 | 102M 0.053G ...
+ -> Inherited 52 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 36.00 GiB. GPU 0 has a total cap
+ -> 12/20 feasible | front 7 | best loss 3.2840 | rejects {'oom': 8}
+
+--- Graph-Search Generation 11/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - The "sandwich" double-SE-gate pattern discovered last gen (gate1→attn→gate2, elite2: 65-75) is a major win — cheap (+0.001G) yet dropped loss 3.808→3.713 — this is now the highest-priority transplant target onto the champion (elite6) and elite5, and worth extending with a 3rd cycle where cheap.
+  - Stripping the "extra attn sub-block" tested last gen partly worked (elite2 now cheaper AND better than old elite2), confirming some added attention layers weren't earning their FLOPs — applying the same strip logic to elite1's post-SE extra-attn layer this gen for a new extend-flops point.
+  - Best loss stuck at 3.284 for 2 gens straight — champion elite6 needs stronger interventions (cross-lineage graft of the proven sandwich-gate mechanism, not just repeated depth/gate stacking) since generic tail-only edits haven't been tried on it yet this gen.
+  - The 0.067→0.137G gap is now the widest ever (0.070G) — dedicating 5 children to bridge it from both directions using full-node-listed elites (3,4) as graft donors into elite4/5's known tail points.[0m
+Cand 1/20 PLAN [dominate] from elite 0: Stack a second SE global-context gate cycle after elite0's existing gate to test compounded channel recalibration at the cheapest FLOP point.
+Cand 1/20: atoms A2 L2 sm0 em2 gate0 topk0 skip0 | 83M 0.013G ...
+ -> Inherited 20 parameter tensors from parent weights.
+   loss 4.0869, mem 5.41GB
+Cand 2/20 PLAN [dominate] from elite 1: Add a third attn-only layer after elite1's tail (post its post-SE extra-attn layer) to test if more depth further lowers loss at modest FLOP cost.
+Cand 2/20: atoms A5 L1 sm0 em1 gate0 topk0 skip0 | 90M 0.029G ...
+ -> Inherited 32 parameter tensors from parent weights.
+   loss 3.7957, mem 6.03GB
+Cand 3/20 PLAN [dominate] from elite 5: Add an SE global-context gate to elite5 (0.067G) using the generic tail/ln_f anchor, testing the reliably-winning mechanism on a lineage that appears to lack it.
+Cand 3/20: atoms A6 L9 sm0 em2 gate0 topk0 skip0 | 112M 0.068G ...
+ -> Inherited 69 parameter tensors from parent weights.
+   loss 3.2679, mem 6.92GB
+Cand 4/20 PLAN [extend-loss] from elite 6: Add a fresh post-tail attention layer to the champion elite6 (generic tail/ln_f pattern) to test if more depth pushes loss below the 2-generation plateau of 3.284.
+Cand 4/20: atoms A10 L23 sm1 em5 gate4 topk1 skip3 | 155M 0.142G ...
+ -> Inherited 127 parameter tensors from parent weights.
+   loss 3.4590, mem 8.65GB
+Cand 5/20 PLAN [extend-loss] from elite 6: Add a fresh SE global-context gate cycle to champion elite6 (generic tail/ln_f) to test further channel recalibration beyond its existing internal gates.
+Cand 5/20: atoms A9 L24 sm1 em6 gate4 topk1 skip3 | 153M 0.138G ...
+ -> Inherited 127 parameter tensors from parent weights.
+   loss 3.1327, mem 9.18GB
+Cand 6/20 PLAN [extend-loss] from elite 6: Crossover: graft elite2's proven sandwich double-SE-gate+attn block (65-75, which turned elite1 into elite2 cheaply) onto champion elite6's tail, transplanting a different lineage's cheap winning mechanism to break the loss plateau.
+Cand 6/20: atoms A10 L25 sm1 em7 gate4 topk1 skip3 | 156M 0.145G ...
+ -> Inherited 127 parameter tensors from parent weights.
+   loss 3.1739, mem 9.92GB
+Cand 7/20 PLAN [extend-loss] from elite 5: Crossover: graft elite2's sandwich double-SE-gate+attn block onto cheaper elite5 (0.067G), testing if this mechanism buys champion-level loss at a fraction of elite6's FLOPs.
+Cand 7/20: atoms A7 L10 sm0 em3 gate0 topk0 skip0 | 115M 0.075G ...
+ -> Inherited 69 parameter tensors from parent weights.
+   loss 3.2017, mem 9.35GB
+Cand 8/20 PLAN [extend-flops] from elite 0: Strip elite0 down to a single attn layer + SE-gate (remove its 2nd attn layer) for a new cheaper floor below 0.012G.
+Cand 8/20: atoms A2 L1 sm0 em1 gate0 topk0 skip0 | 83M 0.012G ...
+ -> Inherited 20 parameter tensors from parent weights.
+   loss 4.0786, mem 8.85GB
+Cand 9/20 PLAN [extend-flops] from elite 1: Remove elite1's post-SE extra attn layer (69-71) to fall back to a 3-attn+single-gate cheaper point below its current 0.023G, testing if that layer was worth its FLOPs.
+Cand 9/20: atoms A3 L1 sm0 em1 gate0 topk0 skip0 | 85M 0.018G ...
+ -> Inherited 26 parameter tensors from parent weights.
+   loss 3.9232, mem 9.28GB
+Cand 10/20 PLAN [fill-gap] from elite 5: Add a lightweight extra attn-only layer to elite5 (0.067G, cheap side of the widest-ever 0.070G gap) to nudge FLOPs partway toward elite6.
+Cand 10/20: atoms A7 L8 sm0 em1 gate0 topk0 skip0 | 113M 0.073G ...
+ -> Inherited 69 parameter tensors from parent weights.
+   loss 3.3959, mem 10.45GB
+Cand 11/20 PLAN [fill-gap] from elite 5: Crossover: graft elite4's cheap post-block FFN (ln/lin/sum, nodes 73-75) onto elite5's tail, adding a small amount of cross-lineage capacity to land a slightly-more-expensive gap point.
+Cand 11/20: atoms A6 L9 sm0 em1 gate0 topk0 skip0 | 118M 0.072G ...
+ -> Inherited 69 parameter tensors from parent weights.
+   loss 3.5195, mem 10.94GB
+Cand 12/20 PLAN [fill-gap] from elite 4: Crossover: graft elite3's full attn+FFN layer4 block onto elite4's tail, adding a distinct lineage's depth to push elite4 (0.056G) further into the wide gap.
+Cand 12/20: atoms A5 L10 sm0 em1 gate0 topk0 skip0 | 113M 0.071G ...
+ -> Inherited 57 parameter tensors from parent weights.
+   loss 3.4054, mem 11.27GB
+Cand 13/20 PLAN [fill-gap] from elite 3: Crossover: graft elite4's two full-FFN layers (layer2+layer3, nodes 14-21 & 24-31) onto elite3's tail, jumping elite3 (0.046G) substantially into the FLOP gap with proven full-FFN capacity from a different lineage.
+Cand 13/20: atoms A5 L11 sm0 em1 gate0 topk0 skip0 | 113M 0.076G ...
+ -> Inherited 46 parameter tensors from parent weights.
+   loss 3.5236, mem 11.74GB
+Cand 14/20 PLAN [fill-gap] from elite 5: Crossover: graft elite3's full attn+FFN layer4 block onto elite5's tail (generic anchor), a heavier bridge than the attn-only/mini-FFN gap-fillers, targeting a point closer to elite6's FLOP range.
+Cand 14/20: atoms A7 L10 sm0 em1 gate0 topk0 skip0 | 118M 0.082G ...
+ -> Inherited 69 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 198.00 MiB. GPU 0 has a total ca
+Cand 15/20 PLAN [diversify] from elite 3: Convert elite3's layer1 to post-norm (attention on raw stream, norm applied after the residual sum) to diversify normalization placement on this SE-gated lineage.
+Cand 15/20: atoms A3 L7 sm0 em1 gate0 topk0 skip0 | 99M 0.046G ...
+ -> Inherited 44 parameter tensors from parent weights.
+   loss 3.6406, mem 11.75GB
+Cand 16/20 PLAN [diversify] from elite 4: Give elite4 a parallel narrow-width branch (384-dim path concat'd with the main SE-gated output before final projection) for a branchy multi-width topology not present on this lineage.
+Cand 16/20: atoms A4 L11 sm0 em1 gate0 topk0 skip0 | 108M 0.060G ...
+ -> Inherited 57 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 17/20 PLAN [diversify] from elite 2: Add DenseNet-style long-range skip edges between early and mid residual sums on elite2's sandwich-gate lineage, a cross-layer aggregation pattern not yet present here.
+Cand 17/20: atoms A4 L2 sm0 em2 gate0 topk0 skip1 | 88M 0.024G ...
+ -> Inherited 34 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 18/20 PLAN [novelty] from elite 2: NEW intra-block splice: feed the FIRST SE-gate's global-context vector (node65) as an additive bias into the SECOND SE-gate's activation before its multiply -- coupling two previously-independent gating stages within the same sandwich block, a genuine new intra-block information path.
+Cand 18/20: atoms A4 L3 sm0 em2 gate0 topk0 skip0 | 89M 0.026G ...
+ -> Inherited 34 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 19/20 PLAN [novelty] from elite 6: NEW: hard top-1 mixture-of-depths gate at the champion's output stage -- a discrete per-token choice between the raw tail representation and a freshly transformed alternative, replacing continuous multiplicative gating with a genuine binary depth-selection decision, not yet tried on this generation's champion lineage.
+Cand 19/20: atoms A9 L25 sm2 em7 gate6 topk2 skip3 | 153M 0.133G ...
+ -> Inherited 127 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 20/20 PLAN [novelty] from elite 4: NEW: add a genuinely sparse token-level expert via gather/scatter_add on elite4's tail (top-1 router selects a token subset, gathers only those rows for an extra expert linear, scatter_adds back) -- true per-token compute sparsity on a lineage that has never had gather/scatter routing.
+Cand 20/20: atoms A4 L10 sm1 em1 gate0 topk1 skip0 | 107M 0.057G ...
+ -> Inherited 57 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 36.00 GiB. GPU 0 has a total cap
+ -> 14/20 feasible | front 9 | best loss 3.1327 | rejects {'oom': 6}
+
+--- Graph-Search Generation 12/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Last gen's sandwich-double-gate grafts (from elite2) onto elite5/elite4 lineages produced elite6 (3.268@0.068G) and elite7 (3.202@0.075G) — this transplant is now validated twice; spreading it wider this gen (elites 0,1,3,4,7) since it's cheap and reliably wins.
+  - The 0.075→0.138G gap is now the widest ever (0.063G) and champion internals aren't listed, so bridging must build UP from elite7/5/6 using full-node-listed elites (3,4) as graft donors rather than stripping the champion.
+  - Champion (elite8) improved 3.284→3.133 last gen, confirming generic tail/ln_f-anchored additions (extra attn, extra gate) keep working even without internal node visibility; repeating plus a genuine cross-lineage FFN-sandwich graft.
+  - Extend-flops attempts to strip elite0/elite1 down further were rejected two gens running — trying a different lever this time (removing the gate's nonlinearity / removing the gate entirely) instead of removing whole attn layers.[0m
+Cand 1/20 PLAN [dominate] from elite 0: Graft elite2's proven sandwich second-gate segment (attn+SE cycle) onto the cheapest elite0's tail, replicating the mechanism that turned elite1 into elite2 cheaply.
+Cand 1/20: atoms A3 L2 sm0 em2 gate0 topk0 skip0 | 86M 0.019G ...
+ -> Inherited 20 parameter tensors from parent weights.
+   loss 3.6535, mem 6.42GB
+Cand 2/20 PLAN [dominate] from elite 1: Add the same sandwich second-gate graft onto elite1's tail, testing if it compounds with elite1's existing extra-attn layer.
+Cand 2/20: atoms A5 L2 sm0 em2 gate0 topk0 skip0 | 90M 0.030G ...
+ -> Inherited 32 parameter tensors from parent weights.
+   loss 3.6155, mem 6.96GB
+Cand 3/20 PLAN [dominate] from elite 3: Add a second sandwich SE-gate+attn cycle to elite3 (scale_shift lineage, already has one gate) to test compounded recalibration on this backbone.
+Cand 3/20: atoms A4 L8 sm0 em2 gate0 topk0 skip0 | 102M 0.053G ...
+ -> Inherited 46 parameter tensors from parent weights.
+   loss 3.3667, mem 7.52GB
+Cand 4/20 PLAN [dominate] from elite 4: Add a second sandwich SE-gate+attn cycle to elite4 to test if the proven mechanism further improves this already-gated lineage.
+Cand 4/20: atoms A5 L9 sm0 em2 gate0 topk0 skip0 | 109M 0.063G ...
+ -> Inherited 57 parameter tensors from parent weights.
+   loss 3.4022, mem 8.14GB
+Cand 5/20 PLAN [extend-loss] from elite 8: Add a fresh post-tail attention layer to the champion elite8 (generic tail/ln_f anchor) to test if more depth pushes loss below 3.133.
+Cand 5/20: atoms A10 L24 sm1 em6 gate4 topk1 skip3 | 155M 0.144G ...
+ -> Inherited 129 parameter tensors from parent weights.
+   loss 3.2086, mem 9.99GB
+Cand 6/20 PLAN [extend-loss] from elite 8: Add a fresh SE global-context gate cycle to champion elite8 (generic anchor) to test further channel recalibration beyond its existing internal gates.
+Cand 6/20: atoms A9 L25 sm1 em7 gate4 topk1 skip3 | 154M 0.139G ...
+ -> Inherited 129 parameter tensors from parent weights.
+   loss 3.1135, mem 10.52GB
+Cand 7/20 PLAN [extend-loss] from elite 7: Graft elite2's proven sandwich double-gate onto elite7 (second-best, 3.202@0.075G) to try pushing it past the champion's territory cheaply.
+Cand 7/20: atoms A8 L11 sm0 em4 gate0 topk0 skip0 | 118M 0.082G ...
+ -> Inherited 79 parameter tensors from parent weights.
+   loss 5.4583, mem 10.18GB
+Cand 8/20 PLAN [extend-loss] from elite 8: Crossover: graft elite4's post-block attn+FFN sandwich (nodes 70-75) onto champion elite8's tail, adding a different lineage's extra-depth mechanism to break the loss plateau.
+Cand 8/20: atoms A10 L25 sm1 em6 gate4 topk1 skip3 | 160M 0.148G ...
+ -> Inherited 129 parameter tensors from parent weights.
+   loss 3.0468, mem 11.33GB
+Cand 9/20 PLAN [fill-gap] from elite 7: Crossover: graft elite4's two full FFN layers onto elite7's tail, a large capacity increase to bridge the wide 0.075-0.138G gap from below.
+Cand 9/20: atoms A9 L14 sm0 em3 gate0 topk0 skip0 | 129M 0.105G ...
+ -> Inherited 79 parameter tensors from parent weights.
+   loss 3.0516, mem 11.15GB
+Cand 10/20 PLAN [fill-gap] from elite 7: Crossover: graft elite3's single full attn+FFN layer4 block onto elite7's tail, a lighter bridge into the gap than the two-layer graft.
+Cand 10/20: atoms A8 L12 sm0 em3 gate0 topk0 skip0 | 122M 0.090G ...
+ -> Inherited 79 parameter tensors from parent weights.
+   loss 3.0319, mem 11.44GB
+Cand 11/20 PLAN [fill-gap] from elite 7: Crossover: graft elite4's post-block attn+FFN sandwich onto elite7's tail as a medium-cost bridge alternative structure into the gap.
+Cand 11/20: atoms A8 L11 sm0 em3 gate0 topk0 skip0 | 122M 0.085G ...
+ -> Inherited 79 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 12/20 PLAN [fill-gap] from elite 5: Crossover: graft elite4's two full FFN layers onto elite5's tail, building up from the cheap side of the gap with proven capacity from a different lineage.
+Cand 12/20: atoms A8 L12 sm0 em1 gate0 topk0 skip0 | 125M 0.097G ...
+ -> Inherited 69 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 13/20 PLAN [fill-gap] from elite 6: Crossover: graft elite3's full attn+FFN layer4 block onto elite6's tail, another intermediate bridge point building up from a slightly higher base than elite5.
+Cand 13/20: atoms A7 L11 sm0 em2 gate0 topk0 skip0 | 119M 0.083G ...
+ -> Inherited 71 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 14/20 PLAN [extend-flops] from elite 0: Remove elite0's SE-gate entirely (mean_reduce/lin/act/emul), keeping only the 2 attn layers, to test if a leaner minimal net finds a new cheapest floor.
+Cand 14/20: atoms A2 L1 sm0 em1 gate0 topk0 skip0 | 83M 0.012G ...
+ -> Inherited 20 parameter tensors from parent weights.
+   loss 3.9752, mem 10.73GB
+Cand 15/20 PLAN [extend-flops] from elite 1: Simplify elite1's gate by removing its activation nonlinearity (feed the linear output directly into the multiply), shaving a small amount of complexity/FLOPs while testing if loss holds.
+Cand 15/20: atoms A4 L1 sm0 em1 gate0 topk0 skip0 | 87M 0.023G ...
+ -> Inherited 32 parameter tensors from parent weights.
+   loss 3.8150, mem 11.27GB
+Cand 16/20 PLAN [diversify] from elite 4: Convert elite4's layer2 to post-norm (attention on raw stream, norm applied after the residual sum) to diversify normalization placement, distinct from elite4's already-atypical pre-norm-less layer1.
+Cand 16/20: atoms A4 L8 sm0 em1 gate0 topk0 skip0 | 106M 0.056G ...
+ -> Inherited 55 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 17/20 PLAN [diversify] from elite 6: Add DenseNet-style long-range skip edges connecting early residual sums to distant late sums on elite6, a cross-layer aggregation pattern not yet present on this lineage.
+Cand 17/20: atoms A6 L9 sm0 em2 gate0 topk0 skip2 | 112M 0.068G ...
+ -> Inherited 71 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 18/20 PLAN [diversify] from elite 2: Give elite2 a parallel narrow-width branch (384-dim path concat'd with the sandwich-gated output before final projection) for a branchy multi-width topology not present on this lineage.
+Cand 18/20: atoms A4 L5 sm0 em2 gate0 topk0 skip0 | 90M 0.028G ...
+ -> Inherited 34 parameter tensors from parent weights.
+   loss 3.5810, mem 11.67GB
+Cand 19/20 PLAN [novelty] from elite 7: NEW: hard top-1 mixture-of-depths gate at elite7's output stage -- a discrete per-token choice between the raw tail representation and a freshly transformed alternative, replacing continuous multiplicative gating with a genuine binary depth-selection decision.
+Cand 19/20: atoms A7 L12 sm1 em5 gate2 topk1 skip0 | 115M 0.075G ...
+ -> Inherited 79 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 12.00 MiB. GPU 0 has a total cap
+Cand 20/20 PLAN [novelty] from elite 4: NEW: add a genuinely sparse token-level expert via gather/scatter_add on elite4's tail (top-1 router selects a token subset, gathers rows for an extra expert linear, scatter_adds back) -- true per-token compute sparsity on a lineage that has never had gather/scatter routing.
+Cand 20/20: atoms A4 L10 sm1 em1 gate0 topk1 skip0 | 107M 0.057G ...
+ -> Inherited 57 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 36.00 GiB. GPU 0 has a total cap
+ -> 12/20 feasible | front 9 | best loss 3.0319 | rejects {'loss': 1, 'oom': 7}
+
+--- Graph-Search Generation 13/100 ---
+  [36m[LEARNINGS]
+  ## LEARNINGS
+  - Champion leapt from 3.133@0.138G → 3.032@0.090G this gen (built on old elite7 lineage), confirming that small incremental additions (extra attn/gate) to a strong mid-cost backbone beat piling more onto an already-heavy champion — repeating that recipe on the NEW champion (elite8) rather than assuming bigger is better.
+  - The elite1 "sandwich second-gate" segment (nodes 69-75: ln→attn→sum→mean_reduce→lin→act→emul) is now a 3x-validated cheap winner (produced elite1,2,4,6,7 lineages) — extending it to the remaining ungated/single-gated backbones (elite0, elite3, elite5) this gen.
+  - Front has densified a lot (gaps now 0.015-0.02G instead of 0.06-0.07G) — fill-gap needs finer surgical moves (single extra gate, or stripping one FFN layer) rather than big cross-lineage FFN dumps.
+  - Extend-flops attempts on elite0 haven't yet produced a new cheapest point in 2 gens — trying a structurally different lever this time (collapse to single attn layer entirely) instead of gate-removal tweaks.[0m
+Cand 1/20 PLAN [dominate] from elite 0: Graft elite1's proven sandwich second-gate segment onto cheapest elite0's tail, replicating the 3x-validated mechanism that turned plain nets into much lower-loss ones.
+Cand 1/20: atoms A3 L2 sm0 em2 gate0 topk0 skip0 | 86M 0.019G ...
+ -> Inherited 20 parameter tensors from parent weights.
+   loss 3.7743, mem 6.28GB
+Cand 2/20 PLAN [dominate] from elite 3: Add the sandwich second-gate segment to elite3's scale_shift lineage (currently only 1 gate) to test the reliable mechanism on this backbone.
+Cand 2/20: atoms A4 L8 sm0 em2 gate0 topk0 skip0 | 102M 0.053G ...
+ -> Inherited 46 parameter tensors from parent weights.
+   loss 3.4417, mem 7.02GB
+Cand 3/20 PLAN [dominate] from elite 5: Add the sandwich second-gate segment to elite5 (single-gate, 6 attn layers) to compound gating on a deeper backbone that hasn't received it yet.
+Cand 3/20: atoms A7 L9 sm0 em2 gate0 topk0 skip0 | 114M 0.074G ...
+ -> Inherited 69 parameter tensors from parent weights.
+   loss 3.3094, mem 7.86GB
+Cand 4/20 PLAN [dominate] from elite 2: Add a fresh attn-only layer to elite2 after its existing cat-lin routing block, testing if more depth further improves this already-competitive point.
+Cand 4/20: atoms A5 L5 sm0 em2 gate0 topk0 skip0 | 92M 0.033G ...
+ -> Inherited 40 parameter tensors from parent weights.
+   loss 3.5654, mem 7.72GB
+Cand 5/20 PLAN [extend-loss] from elite 8: Add a fresh post-tail attention layer to the new champion elite8 to test if more depth pushes loss below 3.032.
+Cand 5/20: atoms A9 L12 sm0 em3 gate0 topk0 skip0 | 124M 0.096G ...
+ -> Inherited 91 parameter tensors from parent weights.
+   loss 2.9820, mem 9.04GB
+Cand 6/20 PLAN [extend-loss] from elite 8: Add a fresh SE global-context gate cycle to champion elite8 to test further channel recalibration beyond its existing 3 gates.
+Cand 6/20: atoms A8 L13 sm0 em4 gate0 topk0 skip0 | 122M 0.091G ...
+ -> Inherited 91 parameter tensors from parent weights.
+   loss 7.4270, mem 9.45GB
+Cand 7/20 PLAN [extend-loss] from elite 8: Crossover: graft elite2's cat-lin concat-routing block (a distinct info-mixing mechanism not present on champion) onto elite8's tail to break new ground below 3.032.
+Cand 7/20: atoms A8 L15 sm0 em3 gate0 topk0 skip0 | 124M 0.094G ...
+ -> Inherited 91 parameter tensors from parent weights.
+   loss 3.1543, mem 9.47GB
+Cand 8/20 PLAN [extend-loss] from elite 7: Graft elite1's sandwich second-gate segment onto elite7 (second-best, 3.202@0.075G) to try surpassing champion territory cheaply from a different lineage base.
+Cand 8/20: atoms A8 L11 sm0 em4 gate0 topk0 skip0 | 118M 0.082G ...
+ -> Inherited 79 parameter tensors from parent weights.
+   loss 3.0367, mem 9.82GB
+Cand 9/20 PLAN [extend-flops] from elite 0: Collapse elite0 to a single attn layer (strip its 2nd attn layer entirely) for a new cheapest floor below 0.012G.
+Cand 9/20: atoms A2 L1 sm0 em1 gate0 topk0 skip0 | 83M 0.012G ...
+ -> Inherited 20 parameter tensors from parent weights.
+   loss 3.8785, mem 9.20GB
+Cand 10/20 PLAN [extend-flops] from elite 1: Strip elite1's 2nd backbone attn layer (keeping its sandwich double-gate) for a cheaper variant that tests if the sandwich mechanism alone can hold most of the loss gain.
+Cand 10/20: atoms A2 L2 sm0 em2 gate0 topk0 skip0 | 83M 0.013G ...
+ -> Inherited 22 parameter tensors from parent weights.
+   loss 3.7254, mem 9.54GB
+Cand 11/20 PLAN [extend-flops] from elite 2: Remove elite2's middle attn layer inside its sandwich (between the two gates) to test if a leaner directly-stacked double-gate is cheaper without losing much loss.
+Cand 11/20: atoms A3 L5 sm0 em2 gate0 topk0 skip0 | 87M 0.022G ...
+ -> Inherited 34 parameter tensors from parent weights.
+   loss 3.9474, mem 10.02GB
+Cand 12/20 PLAN [fill-gap] from elite 2: Add a lightweight SE gate (cheaper than a full attn layer) after elite2's cat-lin block to nudge FLOPs partway into the narrow 0.028-0.046G gap.
+Cand 12/20: atoms A4 L6 sm0 em3 gate0 topk0 skip0 | 90M 0.029G ...
+ -> Inherited 40 parameter tensors from parent weights.
+   loss 3.5707, mem 10.48GB
+Cand 13/20 PLAN [fill-gap] from elite 3: Strip elite3's 3rd attn+FFN layer down to 2 layers, landing a cheaper intermediate point that bridges the gap from the expensive side downward.
+Cand 13/20: atoms A2 L5 sm0 em1 gate0 topk0 skip0 | 92M 0.031G ...
+ -> Inherited 34 parameter tensors from parent weights.
+   loss 3.8065, mem 10.77GB
+Cand 14/20 PLAN [diversify] from elite 2: Convert elite2's layer1 to post-norm (attention on raw stream, norm applied after the residual sum) to diversify normalization placement on this cat-routing lineage.
+Cand 14/20: atoms A4 L5 sm0 em2 gate0 topk0 skip0 | 90M 0.028G ...
+ -> Inherited 38 parameter tensors from parent weights.
+   loss 3.6752, mem 11.20GB
+Cand 15/20 PLAN [diversify] from elite 7: Add DenseNet-style long-range skip edges connecting early residual sums to distant late sums on elite7, a cross-layer aggregation pattern not yet present here.
+Cand 15/20: atoms A7 L10 sm0 em3 gate0 topk0 skip2 | 115M 0.075G ...
+ -> Inherited 79 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 16/20 PLAN [diversify] from elite 6: Give elite6 a parallel narrow-width branch (384-dim path concat'd with the main gated output before final projection) for a branchy multi-width topology not present on this lineage.
+Cand 16/20: atoms A6 L12 sm0 em2 gate0 topk0 skip0 | 113M 0.072G ...
+ -> Inherited 71 parameter tensors from parent weights.
+   REJECT (runtime/oom): CUDA out of memory. Tried to allocate 394.00 MiB. GPU 0 has a total ca
+Cand 17/20 PLAN [novelty] from elite 2: NEW: hard top-1 mixture-of-depths gate at elite2's output stage -- a discrete per-token choice between the raw tail and a freshly transformed alternative, replacing continuous multiplicative gating with a genuine binary depth-selection decision, tried here for the first time on the cat-routing lineage.
+Cand 17/20: atoms A4 L7 sm1 em4 gate2 topk1 skip0 | 90M 0.027G ...
+ -> Inherited 40 parameter tensors from parent weights.

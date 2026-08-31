@@ -1,0 +1,36 @@
+[
+  {
+    "rank": 1,
+    "loss": 3.906671333312988,
+    "active_flops": 90835968.0,
+    "params": 121153107,
+    "n_nodes": 66,
+    "n_edges": 82,
+    "attn": 6,
+    "linear": 15,
+    "softmax": 1,
+    "topk": 1,
+    "gating": 2,
+    "skips": 1,
+    "compute": 21,
+    "config": "checkpoints/graph-search/graph_gen1_ind1_config.json",
+    "weights": "checkpoints/graph-search/graph_gen1_ind1_loss3.91.pt"
+  },
+  {
+    "rank": 2,
+    "loss": 3.8939679145812987,
+    "active_flops": 92018688.0,
+    "params": 122335829,
+    "n_nodes": 74,
+    "n_edges": 94,
+    "attn": 6,
+    "linear": 17,
+    "softmax": 1,
+    "topk": 1,
+    "gating": 4,
+    "skips": 3,
+    "compute": 23,
+    "config": "checkpoints/graph-search/graph_gen1_ind2_config.json",
+    "weights": "checkpoints/graph-search/graph_gen1_ind2_loss3.89.pt"
+  }
+]

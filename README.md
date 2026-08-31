@@ -113,7 +113,7 @@ The search is free to keep, recombine, or discard any of them.
 | **Dense — saved Gen-1 elites** | 0–1 | 2 | Preserved Pareto elites from the prior vector-search run (≈247.6 M @ loss 3.79 and ≈153.0 M @ 3.84): pure pre-norm GPT-2-style stacks. | Decoded from stored 65-D vectors (`seed_elites.json`). |
 | **Dense — GPT-2 variants** | 2–4 | 3 | Classic transformers with attention+MLP at (nearly) every layer: `gpt2` (12 L), `gpt2-sparse` (attention-thinned), and a dense 18-layer stack. | `_gpt2_vector(...)` + one hand-set depth-18 vector. |
 | **Gated + skip explorers** | 5–12 | 8 | Front-loaded-attention explorers augmented with an emergent **SwiGLU-style gate** *and* a **softmax gate**, plus 1–2 long-range **skip** connections — the seeds carrying gating/residual-highway motifs. | Explorer vector, then `seed_gates_and_skips` (atoms: `linear`/`activation`/`softmax`/`element_mul`/`sum`). |
-| **Atom-composed MoE** | 13–14 | 2 | Two **mixture-of-experts** (E=2 and E=4), built entirely from atoms — router `linear(d_out=E)→softmax`, then per-expert `slice(e,e+1) · (linear→activation)`, summed. A *soft* mixture (all experts run); no monolithic MoE block exists. | Explorer vector, then `seed_atomic_moe`. |
+| **Atom-composed sparse MoE** | 13–14 | 2 | Two **sparse top-k mixture-of-experts** (E=4/k=2 and E=2/k=1), built entirely from atoms — router `linear(d_out=E)→softmax→top_k(k)`, then per-expert `slice(e,e+1) · (linear→activation)`, summed. `top_k` keeps only the k largest gates (rest 0, renormalized), so each token uses k of E experts and **active-FLOPs charges the experts k/E**. No monolithic MoE block. | Explorer vector, then `seed_atomic_moe(k=…)`. |
 | **Diverse explorers** | 15–19 | 5 | Unbiased random architectures: varied depth, **front-loaded attention** (first 4–10 layers attention-heavy), non-uniform MLP placement, **mixed activations** (ReLU / GELU / SiLU / random buckets), and random skips. | Explorer vector only (no injection). |
 
 Startup log line for this population: `Seeded 20 graphs; injected gates/skips into 8, atom-MoE into 2.`
@@ -150,7 +150,11 @@ than only the ~12 fine-grained ones — not because the fine set is insufficient
 (a) **speed/stability** (a fused matmul/attention kernel beats one emulated from broadcast-mul+reduce)
 and (b) **searchability** (an agent will not rediscover attention from raw reductions, and most
 fine-grained random wirings aren't even shape-valid). MoE, by contrast, is *not* shipped as a block —
-it is composed from the dispatch atoms (`top_k`/`gather`/`scatter_add`), so the search owns it end to end.
+it is composed from atoms (a `top_k` router gate over per-expert `linear→activation` branches), so the
+search owns it end to end. Because the engine is a static circuit it *masks* rather than truly
+dispatches — all experts still execute — but the **active-FLOPs objective charges a top-k MoE only k/E
+of its expert cost** (the FLOPs a real sparse kernel would use), so the search is *rewarded* for
+discovering sparsity even though this prototype does not yet skip the masked experts at runtime.
 
 ## Primitive vocabulary (as implemented in `rwnn/nodes.py`)
 
