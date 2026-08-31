@@ -64,11 +64,11 @@ PRIM_DOC = {
     "linear":          "affine map; the compiler AUTO-PROJECTS mismatched dims, so wiring is forgiving",
     "layer_norm":      "normalize over the feature dim",
     "activation":      "pointwise nonlinearity (act_type: gelu|silu|relu)",
-    "softmax":         "over the last dim (a router: linear(d_out=E)->softmax gives E gate weights)",
+    "softmax":         "over dim; a router linear(d_out=E)->softmax; over tokens (dim:1) it is a CAUSAL prefix softmax",
     "slice":           "take channels [start:end] of the last dim (extract one gate: slice(i,i+1))",
     "top_k":           "keep the k largest gate weights (others 0), renormalized -> sparse routing",
-    "gather":          "select rows by integer indices along dim (route a token subset to an expert)",
-    "scatter_add":     "add gathered/expert outputs back to their positions (recombine routed tokens)",
+    "gather":          "index-select along the FEATURE axis only (token-axis gather is rejected: acausal)",
+    "scatter_add":     "scatter-add along the FEATURE axis only (token-axis scatter is rejected: acausal)",
     "element_mul":     "elementwise product (a width-1 input broadcasts over d_model) -> apply a gate",
     "sum":             "elementwise add of ALL inputs -> residual/merge; extra inputs = skip connections",
     "concat":          "concatenate inputs along the given dim",
@@ -76,7 +76,7 @@ PRIM_DOC = {
     "matmul":          "learned matrix multiply d_in->d_out",
     "scale_shift":     "per-channel affine (gamma*x + beta)",
     "add_bias":        "per-channel learned bias",
-    "mean_reduce":     "average over the given dim",
+    "mean_reduce":     "mean over dim; over the token axis (dim:1) it is a CAUSAL prefix mean (tokens <= t)",
     "dropout":         "stochastic feature zeroing (regularization)",
 }
 
@@ -178,6 +178,26 @@ def build_initial_population(pop_size, seed=1234):
         pop.append(np.clip(x, 0, 1))
     return np.array(pop[:pop_size])
 
+def _is_causal(model, device, T=16, B=2, vocab=1000):
+    """Numerical causality guard (op-agnostic backstop): perturb the FUTURE half of the input and
+    assert no EARLIER position's logits move. Catches any future->past leak from any op, including
+    ones the token-axis validator didn't foresee. A truly causal model gives an exact 0 here."""
+    was_training = model.training
+    model.eval()
+    try:
+        with torch.no_grad():
+            x = torch.randint(0, vocab, (B, T), device=device)
+            y0 = model(x)
+            h = T // 2
+            x2 = x.clone()
+            x2[:, h:] = torch.randint(0, vocab, (B, T - h), device=device)   # change only the future
+            y1 = model(x2)
+            diff = (y0[:, :h].float() - y1[:, :h].float()).abs().max().item()  # past must be identical
+    finally:
+        if was_training: model.train()
+    return diff < 1e-3
+
+
 def train_and_eval_bpe_model(nodes, edges, d_model=DMODEL, max_iters=1000, batch_size=8,
                              block_size=BLOCK, parent_state_dict=None):
     """Train a compiled H-DAG on BPE tokens. Returns (model, val_loss, peak_mem_bytes)."""
@@ -193,6 +213,8 @@ def train_and_eval_bpe_model(nodes, edges, d_model=DMODEL, max_iters=1000, batch
                 cs[k].copy_(v); c += 1
         if c > 0: print(f" -> Inherited {c} parameter tensors from parent weights.")
     model.to(device)
+    if not _is_causal(model, device):                    # backstop: reject ANY future->past leakage
+        raise RuntimeError("CAUSALITY_LEAK")
     def get_batch(split):
         d = train_data if split == "train" else val_data
         ix = torch.randint(len(d) - block_size, (batch_size,))
@@ -242,6 +264,24 @@ def _prune_to_live(nodes, edges):
         return None, None
     return ([n for n in nodes if n["id"] in live],
             [(u, v) for u, v in edges if u in live and v in live])
+
+# --- Causality invariant -----------------------------------------------------------------------
+# Cross-token ops are allowed on the token axis ONLY when they keep "token index == time":
+#   causal_attention (tril-masked), mean_reduce (causal prefix mean), softmax (causal prefix softmax).
+# The ops below RESTRUCTURE/REORDER the token axis (concat stacks it, gather/scatter permute it), which
+# breaks the index==time invariant that makes the prefix ops safe -> they must stay FEATURE-axis only.
+# A candidate that points any of them at the token axis (dim 1 / -2) is rejected as acausal.
+_TOKEN_MIXERS = {"gather", "scatter_add", "concat"}
+
+def _causal_ok(nodes):
+    """False if any op could move information across the TOKEN axis acausally (dim not the feature axis)."""
+    for n in nodes:
+        if n["type"] in _TOKEN_MIXERS:
+            d = n.get("kwargs", {}).get("dim", -1)
+            if d not in (-1, 2):                          # only the feature axis of a [B,T,D] tensor is safe
+                return False
+    return True
+
 
 def apply_edits(parent, ops, donors=None):
     """Apply a list of atomic edits to a copy of parent; revert entirely if the result is invalid.
@@ -308,6 +348,8 @@ def apply_edits(parent, ops, donors=None):
     edges[:] = [(u, v) for u, v in edges if u in ids and v in ids]
     pn, pe = _prune_to_live(nodes, edges)
     if pn is None or not is_valid_dag(pn, pe) or 13 not in {n["id"] for n in pn}:
+        return copy.deepcopy(parent)
+    if not _causal_ok(pn):                                # reject acausal token-axis mixing (future leak)
         return copy.deepcopy(parent)
     if len([n for n in pn if n["type"] in ("causal_attention", "linear", "matmul")]) < MIN_COMPUTE + 1:
         return copy.deepcopy(parent)
@@ -545,6 +587,14 @@ features from DIFFERENT elites rather than only mutating one.
 ## Fixed anchors (never remove): 0 input, 1 token_emb, 2 pos_emb, 3 emb_sum, 13 LM head.
 Everything between node 3 and node 13 is yours to (re)build. For each elite you are given its
 current head-feeding node (`tail`), its final layer-norm id (`ln_f`), and its residual sum-node ids.
+
+## CAUSALITY (hard invariant, enforced): this is an autoregressive LM — position t may depend ONLY on
+tokens <= t. Ops that ACT on the token axis are causal-by-construction and free to use there:
+`causal_attention` (masked), `mean_reduce` (causal prefix mean, tokens <= t), `softmax` (causal prefix
+softmax). Everything else is per-position. But `concat`/`gather`/`scatter_add` RESTRUCTURE the token
+axis (stack/permute it), which breaks "index == time" — pointing them at the token axis (dim 1/-2) is
+REJECTED; use them on the FEATURE axis (dim -1). A numeric guard also rejects any graph where a future
+token changes an earlier position's output. Innovate freely — you cannot build something that sees the future.
 
 ## Emergence, not templates
 Nothing is pre-built. If you want a feed-forward, wire linear->activation->linear and a `sum` for
@@ -814,19 +864,9 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
         msgs = st.get("msgs", [])
         start_gen = int(st["gen"]) + 1
         _b = min((a["loss"] for a in front), default=float("nan"))
-        # tell the agent the budget was raised and to re-submit the novel structures it previously lost
-        msgs.append({"role": "user", "text":
-            "NOTE: the peak-memory budget has been RAISED (11.0GB -> 11.8GB). Several high-value structures "
-            "you proposed were discarded ONLY for exceeding the OLD budget, not for poor loss — including a "
-            "Squeeze-Excite global-context gate (reached the run's best loss ~3.60), a cross-depth hop-selector "
-            "(top_k over concatenated depths, ~3.74 at low FLOPs), mid-stack MoE placement, DenseNet-style "
-            "cross-layer concat aggregation, branchy multi-width FFN, and post-norm placement. RE-SUBMIT these "
-            "now: several beat the current front (best 3.759) and should pass the new budget. Keep pushing novelty."})
-        # one-time: re-inject the two standout novel structures as guaranteed candidates this generation
-        pending_novel = _reinjection(front, np.random.RandomState(7))
+        pending_novel = []                                # resume cleanly: no injected notes or candidates
         print(f"=== RESUMING GRAPH SEARCH at generation {start_gen+1}/{generations} "
-              f"(front {len(front)}, best loss {_b:.4f}, {len(sig2state)} weight sets restored; "
-              f"re-injecting {len(pending_novel)} mem-rejected novel structures) ===", flush=True)
+              f"(front {len(front)}, best loss {_b:.4f}, {len(sig2state)} weight sets restored) ===", flush=True)
     else:                                                 # fresh run
         if os.path.exists(CKPT): shutil.rmtree(CKPT)
         os.makedirs(CKPT, exist_ok=True)
@@ -891,8 +931,10 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
                 else: results.append((g, loss, flops, params, s, "ok", model.state_dict()))
                 del model; gc.collect(); torch.cuda.empty_cache()
             except Exception as ex:
-                print(f"   REJECT (runtime/oom): {str(ex)[:70]}", flush=True)
-                results.append((g, PENALTY, flops, params, s, "oom", None))
+                reason = "leak" if "CAUSALITY_LEAK" in str(ex) else "oom"
+                label = "causality leak (future affects past)" if reason == "leak" else f"runtime/oom: {str(ex)[:60]}"
+                print(f"   REJECT ({label})", flush=True)
+                results.append((g, PENALTY, flops, params, s, reason, None))
 
         for (g, l, f, p, s, r, st) in results:
             if st is not None: sig2state[graph_sig(g)] = st

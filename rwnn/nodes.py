@@ -213,12 +213,22 @@ class DropoutNode(RWNNNode):
 
 
 class MeanReduceNode(RWNNNode):
+    """Mean over `dim`. Over the FEATURE axis it is a plain per-token mean. Over the TOKEN axis
+    (dim==1) it is a CAUSAL prefix/running mean — position t averages only tokens <= t — so it can
+    never pool information from the future into the present (no autoregressive leakage)."""
     def __init__(self, node_id, dim=-1):
         super().__init__(node_id, "mean_reduce")
         self.dim = dim
 
     def forward(self, inputs):
-        return inputs[0].mean(dim=self.dim, keepdim=True)
+        x = inputs[0]
+        d = self.dim if self.dim >= 0 else x.dim() + self.dim
+        if d == 1 and x.dim() >= 2:                       # token axis -> causal prefix mean (no future leak)
+            csum = x.cumsum(dim=1)
+            cnt = torch.arange(1, x.size(1) + 1, device=x.device, dtype=x.dtype)
+            cnt = cnt.view([1, x.size(1)] + [1] * (x.dim() - 2))
+            return csum / cnt
+        return x.mean(dim=self.dim, keepdim=True)
 
 
 class SquareNode(RWNNNode):
@@ -330,13 +340,20 @@ class CausalBatchMatMulNode(RWNNNode):
 
 
 class SoftmaxNode(RWNNNode):
-    """Softmax over the last dimension. A primitive atom (e.g. for emergent gating/routing)."""
+    """Softmax over `dim`. Over the FEATURE axis it is an ordinary softmax. Over the TOKEN axis (dim==1)
+    it is a CAUSAL PREFIX softmax: position t is normalized only over tokens <= t (the denominator is a
+    running sum), so it can never depend on future tokens. Safe because it keeps token-index == time."""
     def __init__(self, node_id, dim=-1):
         super().__init__(node_id, "softmax")
         self.dim = dim
 
     def forward(self, inputs):
-        return F.softmax(inputs[0], dim=self.dim)
+        x = inputs[0]
+        d = self.dim if self.dim >= 0 else x.dim() + self.dim
+        if d == 1 and x.dim() >= 2:                       # token axis -> causal prefix softmax (no future leak)
+            e = torch.exp(x.clamp(-30.0, 30.0))
+            return e / (e.cumsum(dim=1) + 1e-9)
+        return F.softmax(x, dim=self.dim)
 
 
 class SliceNode(RWNNNode):
