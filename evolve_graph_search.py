@@ -390,6 +390,10 @@ def active_flops(nodes, edges):
             return 2 * kw.get("d_in", DMODEL) * kw.get("d_out", DMODEL)
         if t == "causal_batch_matmul":
             return 2 * T * DMODEL
+        if t == "conv1d":                                    # depthwise causal conv: k MACs/channel/token
+            return 2 * kw.get("d_model", DMODEL) * kw.get("kernel", 4)
+        if t == "scan":                                      # gated recurrence: ~4 elementwise ops/channel/token
+            return 4 * kw.get("d_model", DMODEL)
         return 0.0
 
     cost = {n["id"]: base(n) for n in nodes}
