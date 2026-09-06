@@ -1,0 +1,378 @@
+{
+  "nodes": [
+    {
+      "id": 0,
+      "type": "input",
+      "kwargs": {}
+    },
+    {
+      "id": 1,
+      "type": "token_embedding",
+      "kwargs": {
+        "vocab_size": 50257,
+        "d_model": 768
+      }
+    },
+    {
+      "id": 2,
+      "type": "positional_embedding",
+      "kwargs": {
+        "max_seq_len": 256,
+        "d_model": 768
+      }
+    },
+    {
+      "id": 3,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 4,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 5,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 6,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 7,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 8,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 9,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "gelu"
+      }
+    },
+    {
+      "id": 10,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 11,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 64,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 13,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 50257
+      }
+    },
+    {
+      "id": 65,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 2
+      }
+    },
+    {
+      "id": 66,
+      "type": "softmax",
+      "kwargs": {}
+    },
+    {
+      "id": 67,
+      "type": "top_k",
+      "kwargs": {
+        "k": 1
+      }
+    },
+    {
+      "id": 68,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 69,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "relu"
+      }
+    },
+    {
+      "id": 70,
+      "type": "slice",
+      "kwargs": {
+        "start": 0,
+        "end": 1
+      }
+    },
+    {
+      "id": 71,
+      "type": "element_mul",
+      "kwargs": {}
+    },
+    {
+      "id": 72,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 73,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "relu"
+      }
+    },
+    {
+      "id": 74,
+      "type": "slice",
+      "kwargs": {
+        "start": 1,
+        "end": 2
+      }
+    },
+    {
+      "id": 75,
+      "type": "element_mul",
+      "kwargs": {}
+    },
+    {
+      "id": 76,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 77,
+      "type": "mean_reduce",
+      "kwargs": {
+        "dim": 1
+      }
+    },
+    {
+      "id": 78,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 79,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "gelu"
+      }
+    },
+    {
+      "id": 80,
+      "type": "element_mul",
+      "kwargs": {}
+    }
+  ],
+  "edges": [
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      3,
+      6
+    ],
+    [
+      6,
+      7
+    ],
+    [
+      7,
+      8
+    ],
+    [
+      8,
+      9
+    ],
+    [
+      9,
+      10
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      10,
+      11
+    ],
+    [
+      64,
+      13
+    ],
+    [
+      65,
+      66
+    ],
+    [
+      66,
+      67
+    ],
+    [
+      68,
+      69
+    ],
+    [
+      67,
+      70
+    ],
+    [
+      69,
+      71
+    ],
+    [
+      70,
+      71
+    ],
+    [
+      72,
+      73
+    ],
+    [
+      67,
+      74
+    ],
+    [
+      73,
+      75
+    ],
+    [
+      74,
+      75
+    ],
+    [
+      71,
+      76
+    ],
+    [
+      75,
+      76
+    ],
+    [
+      76,
+      64
+    ],
+    [
+      11,
+      65
+    ],
+    [
+      11,
+      68
+    ],
+    [
+      11,
+      72
+    ],
+    [
+      11,
+      76
+    ],
+    [
+      3,
+      77
+    ],
+    [
+      77,
+      78
+    ],
+    [
+      78,
+      79
+    ],
+    [
+      5,
+      80
+    ],
+    [
+      79,
+      80
+    ],
+    [
+      80,
+      6
+    ]
+  ],
+  "loss": 4.266138553619385,
+  "active_flops": 17304576.0,
+  "params": 86304339,
+  "summary": {
+    "attn": 1,
+    "linear": 6,
+    "softmax": 1,
+    "elemmul": 3,
+    "topk": 1,
+    "gather": 0,
+    "scatter": 0,
+    "concat": 0,
+    "gating": 2,
+    "skips": 1,
+    "compute": 7,
+    "nodes": 30,
+    "edges": 37
+  },
+  "weights": "checkpoints/graph-search/graph_gen7_ind4_loss4.27.pt"
+}

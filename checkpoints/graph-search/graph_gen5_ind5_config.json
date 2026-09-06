@@ -1,0 +1,577 @@
+{
+  "nodes": [
+    {
+      "id": 0,
+      "type": "input",
+      "kwargs": {}
+    },
+    {
+      "id": 1,
+      "type": "token_embedding",
+      "kwargs": {
+        "vocab_size": 50257,
+        "d_model": 768
+      }
+    },
+    {
+      "id": 2,
+      "type": "positional_embedding",
+      "kwargs": {
+        "max_seq_len": 256,
+        "d_model": 768
+      }
+    },
+    {
+      "id": 3,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 4,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 5,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 6,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 7,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 8,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 9,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "gelu"
+      }
+    },
+    {
+      "id": 10,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 11,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 24,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 25,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 26,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 27,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 28,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 29,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "silu"
+      }
+    },
+    {
+      "id": 30,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 31,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 54,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 55,
+      "type": "causal_attention",
+      "kwargs": {
+        "n_head": 12,
+        "d_model": 768,
+        "dropout": 0.1
+      }
+    },
+    {
+      "id": 56,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 57,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 58,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 3072
+      }
+    },
+    {
+      "id": 59,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "relu"
+      }
+    },
+    {
+      "id": 60,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 3072,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 61,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 64,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 13,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 50257
+      }
+    },
+    {
+      "id": 65,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 2
+      }
+    },
+    {
+      "id": 66,
+      "type": "softmax",
+      "kwargs": {}
+    },
+    {
+      "id": 67,
+      "type": "top_k",
+      "kwargs": {
+        "k": 1
+      }
+    },
+    {
+      "id": 68,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 69,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "relu"
+      }
+    },
+    {
+      "id": 70,
+      "type": "slice",
+      "kwargs": {
+        "start": 0,
+        "end": 1
+      }
+    },
+    {
+      "id": 71,
+      "type": "element_mul",
+      "kwargs": {}
+    },
+    {
+      "id": 72,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 768
+      }
+    },
+    {
+      "id": 73,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "relu"
+      }
+    },
+    {
+      "id": 74,
+      "type": "slice",
+      "kwargs": {
+        "start": 1,
+        "end": 2
+      }
+    },
+    {
+      "id": 75,
+      "type": "element_mul",
+      "kwargs": {}
+    },
+    {
+      "id": 76,
+      "type": "sum",
+      "kwargs": {}
+    },
+    {
+      "id": 77,
+      "type": "layer_norm",
+      "kwargs": {
+        "d_model": 768
+      }
+    },
+    {
+      "id": 78,
+      "type": "mean_reduce",
+      "kwargs": {
+        "dim": 1
+      }
+    },
+    {
+      "id": 79,
+      "type": "linear",
+      "kwargs": {
+        "d_in": 768,
+        "d_out": 1
+      }
+    },
+    {
+      "id": 80,
+      "type": "activation",
+      "kwargs": {
+        "act_type": "silu"
+      }
+    },
+    {
+      "id": 81,
+      "type": "element_mul",
+      "kwargs": {}
+    }
+  ],
+  "edges": [
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      3,
+      6
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6,
+      7
+    ],
+    [
+      7,
+      8
+    ],
+    [
+      8,
+      9
+    ],
+    [
+      9,
+      10
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      10,
+      11
+    ],
+    [
+      24,
+      25
+    ],
+    [
+      25,
+      26
+    ],
+    [
+      26,
+      27
+    ],
+    [
+      27,
+      28
+    ],
+    [
+      28,
+      29
+    ],
+    [
+      29,
+      30
+    ],
+    [
+      26,
+      31
+    ],
+    [
+      30,
+      31
+    ],
+    [
+      54,
+      55
+    ],
+    [
+      55,
+      56
+    ],
+    [
+      56,
+      57
+    ],
+    [
+      57,
+      58
+    ],
+    [
+      58,
+      59
+    ],
+    [
+      59,
+      60
+    ],
+    [
+      56,
+      61
+    ],
+    [
+      60,
+      61
+    ],
+    [
+      64,
+      13
+    ],
+    [
+      61,
+      65
+    ],
+    [
+      65,
+      66
+    ],
+    [
+      66,
+      67
+    ],
+    [
+      61,
+      68
+    ],
+    [
+      68,
+      69
+    ],
+    [
+      67,
+      70
+    ],
+    [
+      69,
+      71
+    ],
+    [
+      70,
+      71
+    ],
+    [
+      61,
+      72
+    ],
+    [
+      72,
+      73
+    ],
+    [
+      67,
+      74
+    ],
+    [
+      73,
+      75
+    ],
+    [
+      74,
+      75
+    ],
+    [
+      61,
+      76
+    ],
+    [
+      71,
+      76
+    ],
+    [
+      75,
+      76
+    ],
+    [
+      76,
+      64
+    ],
+    [
+      31,
+      54
+    ],
+    [
+      11,
+      24
+    ],
+    [
+      11,
+      77
+    ],
+    [
+      77,
+      78
+    ],
+    [
+      78,
+      79
+    ],
+    [
+      79,
+      80
+    ],
+    [
+      25,
+      81
+    ],
+    [
+      80,
+      81
+    ],
+    [
+      81,
+      26
+    ]
+  ],
+  "loss": 3.940765905380249,
+  "active_flops": 46010880.0,
+  "params": 99891796,
+  "summary": {
+    "attn": 3,
+    "linear": 10,
+    "softmax": 1,
+    "elemmul": 3,
+    "topk": 1,
+    "gather": 0,
+    "scatter": 0,
+    "concat": 0,
+    "gating": 2,
+    "skips": 1,
+    "compute": 13,
+    "nodes": 47,
+    "edges": 57
+  },
+  "weights": "checkpoints/graph-search/graph_gen5_ind5_loss3.94.pt"
+}
