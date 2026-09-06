@@ -410,3 +410,35 @@ class ScatterAddNode(RWNNNode):
         out.index_add_(self.dim, idx, src)
         return out
 
+
+class ScanNode(RWNNNode):
+    """Causal gated linear SCAN — the recurrence / STATE primitive (the SSM / linear-attention / RWKV /
+    Mamba family). Sweeps left-to-right maintaining a running state:
+        h_t = f_t * h_{t-1} + (1 - f_t) * x_t ,   y_t = h_t
+    The forget gate f_t = sigmoid(gate) is DATA-DEPENDENT when a 2nd input is provided (a *selective*
+    state like Mamba/GRU); with a single input it uses a learned per-channel decay (an EMA / fixed
+    linear-attention). CAUSAL by construction — h_t depends only on x_{<=t}, so no future can leak.
+    Sequential over the token axis (slower than a parallel op), which is the honest cost of recurrence."""
+    def __init__(self, node_id, d_model=768):
+        super().__init__(node_id, "scan")
+        self.d_model = d_model
+        self.log_decay = nn.Parameter(torch.zeros(d_model))   # learned per-channel decay (1-input case)
+
+    def expected_input_dim(self, input_index=0):
+        return self.d_model
+
+    def forward(self, inputs):
+        x = inputs[0]
+        B, T, D = x.shape
+        if len(inputs) >= 2:
+            f = torch.sigmoid(inputs[1])                      # data-dependent forget gate in (0,1) -> selective state
+        else:
+            f = torch.sigmoid(self.log_decay).view(1, 1, D).expand(B, T, D)   # learned decay -> EMA/linear-attention
+        i = 1.0 - f
+        h = torch.zeros(B, D, device=x.device, dtype=x.dtype)
+        outs = []
+        for t in range(T):                                    # causal sequential scan
+            h = f[:, t] * h + i[:, t] * x[:, t]
+            outs.append(h)
+        return torch.stack(outs, dim=1)                       # [B, T, D]
+

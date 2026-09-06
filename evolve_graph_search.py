@@ -56,6 +56,7 @@ PRIMS = {
     "add_bias":        {"d_model": DMODEL},
     "mean_reduce":     {"dim": -1},
     "dropout":         {"dropout": 0.1},
+    "scan":            {"d_model": DMODEL},
 }
 
 # One-line docs per primitive. The prompt's "Primitive vocabulary" block is GENERATED from PRIMS
@@ -78,6 +79,7 @@ PRIM_DOC = {
     "add_bias":        "per-channel learned bias",
     "mean_reduce":     "mean over dim; over the token axis (dim:1) it is a CAUSAL prefix mean (tokens <= t)",
     "dropout":         "stochastic feature zeroing (regularization)",
+    "scan":            "CAUSAL gated running STATE (SSM/linear-attn/Mamba): h_t=f_t*h_{t-1}+(1-f_t)*x_t; a 2nd input = data-dependent SELECTIVE gate",
 }
 
 def _fmt_kwargs(kw):
@@ -591,7 +593,9 @@ current head-feeding node (`tail`), its final layer-norm id (`ln_f`), and its re
 ## CAUSALITY (hard invariant, enforced): this is an autoregressive LM — position t may depend ONLY on
 tokens <= t. Ops that ACT on the token axis are causal-by-construction and free to use there:
 `causal_attention` (masked), `mean_reduce` (causal prefix mean, tokens <= t), `softmax` (causal prefix
-softmax). Everything else is per-position. But `concat`/`gather`/`scatter_add` RESTRUCTURE the token
+softmax), and `scan` (a causal gated running STATE: h_t=f_t*h_{t-1}+(1-f_t)*x_t, tokens <= t; give it a
+2nd data-dependent input as a SELECTIVE gate to get an SSM/linear-attention/Mamba-style recurrence).
+Everything else is per-position. But `concat`/`gather`/`scatter_add` RESTRUCTURE the token
 axis (stack/permute it), which breaks "index == time" — pointing them at the token axis (dim 1/-2) is
 REJECTED; use them on the FEATURE axis (dim -1). A numeric guard also rejects any graph where a future
 token changes an earlier position's output. Innovate freely — you cannot build something that sees the future.
