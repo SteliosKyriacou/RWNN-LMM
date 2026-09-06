@@ -57,6 +57,11 @@ PRIMS = {
     "mean_reduce":     {"dim": -1},
     "dropout":         {"dropout": 0.1},
     "scan":            {"d_model": DMODEL},
+    "conv1d":          {"d_model": DMODEL, "kernel": 4},
+    "square":          {},
+    "sqrt":            {},
+    "divide":          {},
+    "subtract":        {},
 }
 
 # One-line docs per primitive. The prompt's "Primitive vocabulary" block is GENERATED from PRIMS
@@ -64,7 +69,7 @@ PRIMS = {
 PRIM_DOC = {
     "linear":          "affine map; the compiler AUTO-PROJECTS mismatched dims, so wiring is forgiving",
     "layer_norm":      "normalize over the feature dim",
-    "activation":      "pointwise nonlinearity (act_type: gelu|silu|relu)",
+    "activation":      "pointwise nonlinearity (act_type: gelu|silu|relu|sigmoid|tanh|sin|cos); sigmoid/tanh=bounded gates, sin/cos=periodic",
     "softmax":         "over dim; a router linear(d_out=E)->softmax; over tokens (dim:1) it is a CAUSAL prefix softmax",
     "slice":           "take channels [start:end] of the last dim (extract one gate: slice(i,i+1))",
     "top_k":           "keep the k largest gate weights (others 0), renormalized -> sparse routing",
@@ -80,6 +85,11 @@ PRIM_DOC = {
     "mean_reduce":     "mean over dim; over the token axis (dim:1) it is a CAUSAL prefix mean (tokens <= t)",
     "dropout":         "stochastic feature zeroing (regularization)",
     "scan":            "CAUSAL gated running STATE (SSM/linear-attn/Mamba): h_t=f_t*h_{t-1}+(1-f_t)*x_t; a 2nd input = data-dependent SELECTIVE gate",
+    "conv1d":          "CAUSAL depthwise conv over tokens (local mixer; the Hyena/Mamba short conv); mixes the last `kernel` tokens <= t",
+    "square":          "elementwise x^2 (per-position)",
+    "sqrt":            "elementwise sqrt(x+eps) (per-position; for norms/magnitudes)",
+    "divide":          "elementwise inputs[0]/inputs[1] (per-position)",
+    "subtract":        "elementwise inputs[0]-inputs[1] (per-position)",
 }
 
 def _fmt_kwargs(kw):
@@ -592,10 +602,11 @@ current head-feeding node (`tail`), its final layer-norm id (`ln_f`), and its re
 
 ## CAUSALITY (hard invariant, enforced): this is an autoregressive LM — position t may depend ONLY on
 tokens <= t. Ops that ACT on the token axis are causal-by-construction and free to use there:
-`causal_attention` (masked), `mean_reduce` (causal prefix mean, tokens <= t), `softmax` (causal prefix
-softmax), and `scan` (a causal gated running STATE: h_t=f_t*h_{t-1}+(1-f_t)*x_t, tokens <= t; give it a
-2nd data-dependent input as a SELECTIVE gate to get an SSM/linear-attention/Mamba-style recurrence).
-Everything else is per-position. But `concat`/`gather`/`scatter_add` RESTRUCTURE the token
+`causal_attention` (masked, global), `mean_reduce` (causal prefix mean, tokens <= t), `softmax` (causal
+prefix softmax), `scan` (a causal gated running STATE: h_t=f_t*h_{t-1}+(1-f_t)*x_t, tokens <= t; give it
+a 2nd data-dependent input as a SELECTIVE gate to get an SSM/linear-attention/Mamba-style recurrence),
+and `conv1d` (a causal depthwise LOCAL mixer over the last `kernel` tokens). Tip: `conv1d` -> selective
+`scan` -> gate is a Mamba-style block. Everything else is per-position. But `concat`/`gather`/`scatter_add` RESTRUCTURE the token
 axis (stack/permute it), which breaks "index == time" — pointing them at the token axis (dim 1/-2) is
 REJECTED; use them on the FEATURE axis (dim -1). A numeric guard also rejects any graph where a future
 token changes an earlier position's output. Innovate freely — you cannot build something that sees the future.

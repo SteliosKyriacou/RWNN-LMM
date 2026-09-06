@@ -8,7 +8,7 @@ from rwnn.nodes import (
     MeanReduceNode, SquareNode, SubtractNode, DivideNode,
     SqrtNode, ScaleShiftNode, MatMulNode, AddBiasNode,
     TransposeNode, ReshapeNode, CausalBatchMatMulNode, SoftmaxNode, SliceNode, TopKNode, GatherNode, ScatterAddNode,
-    ScanNode
+    ScanNode, CausalConv1dNode
 )
 
 class EdgeConnection(nn.Module):
@@ -134,6 +134,8 @@ class RWNNGraph(nn.Module):
             return ScatterAddNode(n_id, **kwargs)
         elif n_type == 'scan':
             return ScanNode(n_id, **kwargs)
+        elif n_type == 'conv1d':
+            return CausalConv1dNode(n_id, **kwargs)
         else:
             raise ValueError(f"Unknown node type: {n_type}")
 
@@ -237,6 +239,8 @@ class RWNNGraph(nn.Module):
                 pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model
                 self.node_out_dims[u] = pred_dim if pred_dim is not None else self.global_d_model
             elif isinstance(node, ScanNode):
+                self.node_out_dims[u] = node.d_model
+            elif isinstance(node, CausalConv1dNode):
                 self.node_out_dims[u] = node.d_model
             elif isinstance(node, MeanReduceNode):
                 pred_dim = self.node_out_dims[predecessors[0]] if predecessors else self.global_d_model

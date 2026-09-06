@@ -161,6 +161,14 @@ class ActivationNode(RWNNNode):
             return F.silu(x)
         elif self.act_type == "relu":
             return F.relu(x)
+        elif self.act_type == "sigmoid":            # bounded (0,1) -> clean gates (GLU/GRU/highway)
+            return torch.sigmoid(x)
+        elif self.act_type == "tanh":               # bounded (-1,1)
+            return torch.tanh(x)
+        elif self.act_type == "sin":                # periodic (RoPE-flavored / Fourier features)
+            return torch.sin(x)
+        elif self.act_type == "cos":
+            return torch.cos(x)
         else:
             return x
 
@@ -441,4 +449,25 @@ class ScanNode(RWNNNode):
             h = f[:, t] * h + i[:, t] * x[:, t]
             outs.append(h)
         return torch.stack(outs, dim=1)                       # [B, T, D]
+
+
+class CausalConv1dNode(RWNNNode):
+    """Causal depthwise 1D convolution over the token axis — a LOCAL causal token-mixer (the short conv
+    in Hyena / Mamba blocks). Each channel mixes only the last `kernel` tokens (<= t) via left-padding,
+    so it is causal by construction. Cheap and parallel (unlike scan). Complements attention (global)
+    and scan (recurrent) as the third kind of token mixing."""
+    def __init__(self, node_id, d_model=768, kernel=4):
+        super().__init__(node_id, "conv1d")
+        self.d_model = d_model
+        self.kernel = int(kernel)
+        self.conv = nn.Conv1d(d_model, d_model, self.kernel, groups=d_model, bias=True)
+
+    def expected_input_dim(self, input_index=0):
+        return self.d_model
+
+    def forward(self, inputs):
+        x = inputs[0].transpose(1, 2)                         # [B,D,T]
+        x = F.pad(x, (self.kernel - 1, 0))                   # left-pad only -> causal
+        x = self.conv(x)                                     # [B,D,T]
+        return x.transpose(1, 2)                             # [B,T,D]
 
