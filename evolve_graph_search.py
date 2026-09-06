@@ -695,6 +695,9 @@ def build_context(gen, front, hist):
                          f"[{gi+1}] ({fsorted[gi+1]['flops']/1e9:.3f}G) -> a FILL-GAP target ({g/1e9:.3f}G wide).")
     if hist:
         lines.append("\nBest loss per generation: " + ", ".join(f"{h:.3f}" for h in hist[-8:]))
+    guidance = os.environ.get("METIS_GUIDANCE")            # optional operator steer (injected every generation)
+    if guidance:
+        lines.append("\n" + guidance.strip())
     lines.append(f"\nEmit a graph-edit program producing exactly {POP} children that EXPAND this front "
                  f"(dominate / extend-loss / extend-flops / fill-gap / diversify). Use `graft` to combine "
                  f"features from DIFFERENT elites, not just mutate one. Give each child a goal + a rationale.")
@@ -844,6 +847,8 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
     os.makedirs(CKPT, exist_ok=True)
     state_path = f"{CKPT}/search_state.json"
     resume = os.path.exists(state_path)
+    novelty_only = os.environ.get("METIS_NOVELTY_ONLY") == "1"   # novelty-only phase (see METIS_GUIDANCE)
+    graft_pool = []                                              # extra graft donors kept from a cleared front
 
     # Seeds are always built (cheap): needed for gen-0 and as the random-parent fallback.
     seed_graphs, seed_info = _build_seed_population(pop_size)
@@ -865,8 +870,14 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
         start_gen = int(st["gen"]) + 1
         _b = min((a["loss"] for a in front), default=float("nan"))
         pending_novel = []                                # resume cleanly: no injected notes or candidates
-        print(f"=== RESUMING GRAPH SEARCH at generation {start_gen+1}/{generations} "
-              f"(front {len(front)}, best loss {_b:.4f}, {len(sig2state)} weight sets restored) ===", flush=True)
+        if novelty_only:                                  # start a fresh novelty front; keep old elites as graft material
+            graft_pool = [copy.deepcopy(a["graph"]) for a in front]
+            front, sig2state = [], {}
+            print(f"=== RESUMING (NOVELTY-ONLY) at generation {start_gen+1}/{generations}: incumbent front "
+                  f"cleared so novelty competes among itself; kept {len(graft_pool)} graphs as graft donors ===", flush=True)
+        else:
+            print(f"=== RESUMING GRAPH SEARCH at generation {start_gen+1}/{generations} "
+                  f"(front {len(front)}, best loss {_b:.4f}, {len(sig2state)} weight sets restored) ===", flush=True)
     else:                                                 # fresh run
         if os.path.exists(CKPT): shutil.rmtree(CKPT)
         os.makedirs(CKPT, exist_ok=True)
@@ -884,7 +895,7 @@ def run_graph_search(generations=100, pop_size=20, eval_steps=57860):
             children = [(dict(g), None, "seed (initial population)") for g in seed_graphs]
         else:
             fsorted = sorted(front, key=lambda z: z["flops"])
-            donors = [e["graph"] for e in fsorted]     # crossover donors (graft op indexes into this)
+            donors = [e["graph"] for e in fsorted] + graft_pool   # crossover donors (front + kept elites)
             prog = ask_edits(gen, front, best_hist, msgs)
             children = []
             if prog is None:
